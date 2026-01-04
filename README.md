@@ -198,7 +198,7 @@ Config is stored at `~/.leetcode/config.json`:
 
 ## Requirements
 
-- Node.js >= 18.0.0
+- Node.js >= 20.0.0
 
 ## License
 
