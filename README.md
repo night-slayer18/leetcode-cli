@@ -19,6 +19,10 @@ A modern, feature-rich LeetCode CLI built with TypeScript.
 - ⚙️ **Configurable** - Set language, editor, and working directory
 - 📂 **Smart file discovery** - Use problem ID, filename, or full path
 
+## 📚 Documentation
+
+**[View Full Documentation →](https://night-slayer18.github.io/leetcode-cli/)**
+
 ## Installation
 
 ```bash
@@ -117,6 +121,9 @@ leetcode submit 20.valid-parentheses.java
 
 # Using full path
 leetcode test ./Easy/String/20.valid-parentheses.java
+
+# With custom test case
+leetcode test 20 -c "[1,2,3]\n4"
 ```
 
 ### Random Problem
