@@ -131,3 +131,11 @@ export const SUBMISSION_LIST_QUERY = `
     }
   }
 `;
+
+export const RANDOM_PROBLEM_QUERY = `
+  query randomQuestion($categorySlug: String, $filters: QuestionListFilterInput) {
+    randomQuestion(categorySlug: $categorySlug, filters: $filters) {
+      titleSlug
+    }
+  }
+`;

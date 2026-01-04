@@ -12,6 +12,7 @@ import type {
 import {
   PROBLEM_LIST_QUERY,
   PROBLEM_DETAIL_QUERY,
+  RANDOM_PROBLEM_QUERY,
   USER_STATUS_QUERY,
   USER_PROFILE_QUERY,
   DAILY_CHALLENGE_QUERY,
@@ -127,6 +128,26 @@ export class LeetCodeClient {
       activeDailyCodingChallengeQuestion: DailyChallenge;
     }>(DAILY_CHALLENGE_QUERY);
     return data.activeDailyCodingChallengeQuestion;
+  }
+
+  async getRandomProblem(filters: ProblemListFilters = {}): Promise<string> {
+    const variables: Record<string, unknown> = {
+      categorySlug: '',
+      filters: {},
+    };
+
+    if (filters.difficulty) {
+      (variables.filters as Record<string, unknown>).difficulty = filters.difficulty;
+    }
+    if (filters.tags?.length) {
+      (variables.filters as Record<string, unknown>).tags = filters.tags;
+    }
+
+    const data = await this.graphql<{
+      randomQuestion: { titleSlug: string };
+    }>(RANDOM_PROBLEM_QUERY, variables);
+
+    return data.randomQuestion.titleSlug;
   }
 
   async getUserProfile(username: string): Promise<{

@@ -12,6 +12,7 @@ import { testCommand } from './commands/test.js';
 import { submitCommand } from './commands/submit.js';
 import { statCommand } from './commands/stat.js';
 import { dailyCommand } from './commands/daily.js';
+import { randomCommand } from './commands/random.js';
 import { configCommand, configInteractiveCommand } from './commands/config.js';
 
 const program = new Command();
@@ -35,6 +36,7 @@ program
 ${chalk.yellow('Examples:')}
   ${chalk.cyan('$ leetcode login')}             Login to LeetCode
   ${chalk.cyan('$ leetcode list -d easy')}      List easy problems
+  ${chalk.cyan('$ leetcode random -d medium')}   Get random medium problem
   ${chalk.cyan('$ leetcode pick 1')}            Start solving "Two Sum"
   ${chalk.cyan('$ leetcode test 1')}            Test your solution
   ${chalk.cyan('$ leetcode submit 1')}          Submit your solution
@@ -80,6 +82,15 @@ program
   .alias('d')
   .description('Show today\'s daily challenge')
   .action(dailyCommand);
+
+program
+  .command('random')
+  .alias('r')
+  .description('Get a random problem')
+  .option('-d, --difficulty <level>', 'Filter by difficulty (easy/medium/hard)')
+  .option('-t, --tag <tag>', 'Filter by topic tag')
+  .option('--pick', 'Auto-generate solution file')
+  .action(randomCommand);
 
 // === Solution Workflow ===
 program
