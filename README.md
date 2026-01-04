@@ -1,4 +1,4 @@
-# @night-slayer18/leetcode-cli
+# leetcode-cli
 
 A modern, feature-rich LeetCode CLI built with TypeScript.
 
