@@ -119,6 +119,39 @@ leetcode submit 20.valid-parentheses.java
 leetcode test ./Easy/String/20.valid-parentheses.java
 ```
 
+### Random Problem
+
+Fetch and solve a random problem.
+
+```bash
+# Get random problem
+leetcode random
+
+# Filter by difficulty
+leetcode random -d hard
+
+# Filter by topic tag
+leetcode random -t dp
+
+# Pick immediately
+leetcode random -d medium --pick
+```
+
+### View & Download Submissions
+
+View past submissions and download code.
+
+```bash
+# List last 20 submissions
+leetcode submissions 1
+
+# View details of last accepted submission
+leetcode submissions 1 --last
+
+# Download last accepted solution
+leetcode submissions 1 --download
+```
+
 ### Configuration
 
 ```bash
@@ -199,6 +232,44 @@ Config is stored at `~/.leetcode/config.json`:
 ## Requirements
 
 - Node.js >= 20.0.0
+
+## Docker Usage
+
+You can run the CLI using Docker without installing Node.js.
+
+### Method 1: Pre-built Image (Recommended)
+
+1. **Pull the image**:
+   ```bash
+   docker pull nightslayer/leetcode-cli:latest
+   ```
+
+2. **Setup Alias** (Add to your `~/.zshrc` or `~/.bashrc`):
+   ```bash
+   alias leetcode="docker run -it --rm -v \$(pwd)/leetcode:/root/leetcode -v ~/.leetcode:/root/.leetcode nightslayer/leetcode-cli:latest"
+   ```
+
+3. **Usage**:
+   ```bash
+   leetcode list
+   ```
+
+### Method 2: Build Locally
+
+1. **Build the image**:
+    ```bash
+    docker build -t leetcode-cli .
+    ```
+
+2. **Run commands**:
+    ```bash
+    # Run 'list' command
+    docker run -it --rm \
+      -v $(pwd)/leetcode:/root/leetcode \
+      -v ~/.leetcode:/root/.leetcode \
+      leetcode-cli list
+    ```
+    *Note: We mount `~/.leetcode` to persist login credentials and `leetcode` folder to save solution files.*
 
 ## License
 

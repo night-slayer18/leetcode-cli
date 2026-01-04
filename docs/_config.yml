@@ -1,0 +1,5 @@
+title: LeetCode CLI
+description: A modern, feature-rich LeetCode CLI built with TypeScript.
+theme: jekyll-theme-minimal
+logo: /assets/logo.png # Optional if you add one later
+show_downloads: false

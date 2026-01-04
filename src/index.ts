@@ -1,9 +1,7 @@
-#!/usr/bin/env node
-// LeetCode CLI - Main Entry Point
 import { Command } from 'commander';
 import chalk from 'chalk';
 
-// Commands
+
 import { loginCommand, logoutCommand, whoamiCommand } from './commands/login.js';
 import { listCommand } from './commands/list.js';
 import { showCommand } from './commands/show.js';
@@ -18,7 +16,7 @@ import { configCommand, configInteractiveCommand } from './commands/config.js';
 
 const program = new Command();
 
-// Customize help output
+
 program.configureHelp({
   sortSubcommands: true,
   subcommandTerm: (cmd) => chalk.cyan(cmd.name()) + (cmd.alias() ? chalk.gray(`|${cmd.alias()}`) : ''),
@@ -31,7 +29,7 @@ program
   .name('leetcode')
   .usage('[command] [options]')
   .description(chalk.bold.cyan('🔥 A modern LeetCode CLI built with TypeScript'))
-  .version('1.0.1', '-v, --version', 'Output the version number')
+  .version('1.1.0', '-v, --version', 'Output the version number')
   .helpOption('-h, --help', 'Display help for command')
   .addHelpText('after', `
 ${chalk.yellow('Examples:')}
@@ -43,7 +41,7 @@ ${chalk.yellow('Examples:')}
   ${chalk.cyan('$ leetcode submit 1')}          Submit your solution
 `);
 
-// === Authentication ===
+
 program
   .command('login')
   .description('Login to LeetCode with browser cookies')
@@ -59,7 +57,7 @@ program
   .description('Check current login status')
   .action(whoamiCommand);
 
-// === Problem Discovery ===
+
 program
   .command('list')
   .alias('l')
@@ -91,9 +89,10 @@ program
   .option('-d, --difficulty <level>', 'Filter by difficulty (easy/medium/hard)')
   .option('-t, --tag <tag>', 'Filter by topic tag')
   .option('--pick', 'Auto-generate solution file')
+  .option('--no-open', 'Do not open file in editor')
   .action(randomCommand);
 
-// === Solution Workflow ===
+
 program
   .command('pick <id>')
   .alias('p')
@@ -123,13 +122,13 @@ program
   .option('--download', 'Download the last accepted submission code')
   .action(submissionsCommand);
 
-// === Statistics ===
+
 program
   .command('stat [username]')
   .description('Show user statistics')
   .action(statCommand);
 
-// === Configuration ===
+
 program
   .command('config')
   .description('View or set configuration')
@@ -145,13 +144,13 @@ program
     }
   });
 
-// Error handling
+
 program.showHelpAfterError('(add --help for additional information)');
 
-// Parse arguments
+
 program.parse();
 
-// If no command provided, show help
+
 if (!process.argv.slice(2).length) {
   console.log();
   console.log(chalk.bold.cyan('  🔥 LeetCode CLI'));

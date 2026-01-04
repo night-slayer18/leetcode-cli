@@ -1,4 +1,4 @@
-// Submissions command - view and download past submissions
+
 import { writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import { join } from 'path';
@@ -28,7 +28,6 @@ export async function submissionsCommand(idOrSlug: string, options: SubmissionsO
   const spinner = ora('Fetching problem info...').start();
 
   try {
-    // 1. Resolve Problem to get Slug (and details for file path)
     let problem;
     if (/^\d+$/.test(idOrSlug)) {
       problem = await leetcodeClient.getProblemById(idOrSlug);
@@ -44,7 +43,7 @@ export async function submissionsCommand(idOrSlug: string, options: SubmissionsO
     const slug = problem.titleSlug;
     spinner.text = 'Fetching submissions...';
 
-    // 2. Fetch Submissions
+
     const limit = options.limit ? parseInt(options.limit, 10) : 20;
     const submissions = await leetcodeClient.getSubmissionList(slug, limit);
     
@@ -55,7 +54,7 @@ export async function submissionsCommand(idOrSlug: string, options: SubmissionsO
       return;
     }
 
-    // 3. Handle --last (Filter view)
+
     if (options.last) {
       const lastAC = submissions.find(s => s.statusDisplay === 'Accepted');
       if (lastAC) {
@@ -68,7 +67,7 @@ export async function submissionsCommand(idOrSlug: string, options: SubmissionsO
       displaySubmissionsList(submissions);
     }
 
-    // 4. Handle --download
+
     if (options.download) {
       const downloadSpinner = ora('Downloading submission...').start();
       
@@ -78,10 +77,10 @@ export async function submissionsCommand(idOrSlug: string, options: SubmissionsO
         return;
       }
 
-      // Fetch code
+
       const details = await leetcodeClient.getSubmissionDetails(parseInt(lastAC.id, 10));
       
-      // Determine File Path
+
       const workDir = config.getWorkDir();
       const difficulty = problem.difficulty;
       const category = problem.topicTags.length > 0 
@@ -93,18 +92,12 @@ export async function submissionsCommand(idOrSlug: string, options: SubmissionsO
         await mkdir(targetDir, { recursive: true });
       }
 
-      // Map language to extension
-      // details.lang.name is internal slug like 'cpp'
       const langSlug = details.lang.name;
       const supportedLang = LANG_SLUG_MAP[langSlug] ?? 'txt';
       const ext = LANGUAGE_EXTENSIONS[supportedLang as SupportedLanguage] ?? langSlug;
       
       const fileName = `${problem.questionFrontendId}.${problem.titleSlug}.submission-${lastAC.id}.${ext}`;
       const filePath = join(targetDir, fileName);
-
-      // Verify if file exists?
-      // Since specific submission ID is in name, overwriting is unlikely unless re-downloading same one.
-      // Overwrite is fine.
 
       await writeFile(filePath, details.code, 'utf-8');
       

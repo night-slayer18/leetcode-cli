@@ -1,4 +1,4 @@
-// Random command - get a random LeetCode problem
+
 import ora from 'ora';
 import chalk from 'chalk';
 import { leetcodeClient } from '../api/client.js';
@@ -11,6 +11,7 @@ interface RandomOptions {
   difficulty?: string;
   tag?: string;
   pick?: boolean;
+  open?: boolean;
 }
 
 export async function randomCommand(options: RandomOptions): Promise<void> {
@@ -47,7 +48,6 @@ export async function randomCommand(options: RandomOptions): Promise<void> {
       filters.tags = [options.tag];
     }
 
-    // Pass categorySlug logic if needed, but defaulting to empty string in Client
     const titleSlug = await leetcodeClient.getRandomProblem(filters);
     
     spinner.succeed('Found random problem!');
@@ -55,7 +55,7 @@ export async function randomCommand(options: RandomOptions): Promise<void> {
 
     if (options.pick) {
       // Forward to pick command
-      await pickCommand(titleSlug, { open: true });
+      await pickCommand(titleSlug, { open: options.open ?? true });
     } else {
       // Forward to show command
       await showCommand(titleSlug);

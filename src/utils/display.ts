@@ -1,4 +1,4 @@
-// Display utilities for terminal output
+
 import chalk from 'chalk';
 import Table from 'cli-table3';
 import type { Problem, ProblemDetail, SubmissionResult, TestResult, Submission } from '../types.js';
@@ -53,7 +53,7 @@ export function displayProblemDetail(problem: ProblemDetail): void {
   console.log(chalk.gray('─'.repeat(60)));
   console.log();
 
-  // Simple HTML to text conversion
+
   let content = problem.content;
 
   if (!content) {
@@ -63,37 +63,36 @@ export function displayProblemDetail(problem: ProblemDetail): void {
     return;
   }
   
-  // Convert superscripts to ^
+
   content = content.replace(/<sup>(.*?)<\/sup>/gi, '^$1');
   
-  // Mark examples for coloring (before stripping tags)
   content = content.replace(/<strong class="example">Example (\d+):<\/strong>/gi, '§EXAMPLE§$1§');
   
-  // Mark Input/Output/Explanation
+
   content = content.replace(/Input:/gi, '§INPUT§');
   content = content.replace(/Output:/gi, '§OUTPUT§');
   content = content.replace(/Explanation:/gi, '§EXPLAIN§');
   
-  // Mark Constraints
+
   content = content.replace(/<strong>Constraints:<\/strong>/gi, '§CONSTRAINTS§');
   content = content.replace(/Constraints:/gi, '§CONSTRAINTS§');
   
-  // Mark Follow-up
+
   content = content.replace(/<strong>Follow-up:/gi, '§FOLLOWUP§');
   content = content.replace(/Follow-up:/gi, '§FOLLOWUP§');
   
-  // Convert list items to bullets
+
   content = content.replace(/<li>/gi, '  • ');
   content = content.replace(/<\/li>/gi, '\n');
   
-  // Convert paragraphs to newlines
+
   content = content.replace(/<\/p>/gi, '\n\n');
   content = content.replace(/<br\s*\/?>/gi, '\n');
   
-  // Remove all remaining HTML tags
+
   content = content.replace(/<[^>]+>/g, '');
   
-  // Decode HTML entities
+
   content = content
     .replace(/&nbsp;/g, ' ')
     .replace(/&lt;/g, '<')
@@ -105,10 +104,10 @@ export function displayProblemDetail(problem: ProblemDetail): void {
     .replace(/&ge;/g, '≥')
     .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(parseInt(code, 10)));
   
-  // Clean up whitespace
+
   content = content.replace(/\n{3,}/g, '\n\n').trim();
   
-  // Apply colors to marked sections
+
   content = content.replace(/§EXAMPLE§(\d+)§/g, (_, num) => chalk.green.bold(`📌 Example ${num}:`));
   content = content.replace(/§INPUT§/g, chalk.yellow('Input:'));
   content = content.replace(/§OUTPUT§/g, chalk.yellow('Output:'));
@@ -298,7 +297,7 @@ export function displaySubmissionsList(submissions: Submission[]): void {
 
   for (const s of submissions) {
     const isAC = s.statusDisplay === 'Accepted';
-    // Timestamp is unix seconds
+
     const cleanTime = new Date(parseInt(s.timestamp) * 1000).toLocaleString();
     
     table.push([

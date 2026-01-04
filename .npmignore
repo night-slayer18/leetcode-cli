@@ -14,3 +14,8 @@ coverage/
 # Tests
 *.test.ts
 __tests__/
+
+# Exclude Docs and Docker
+docs/
+Dockerfile
+.dockerignore
