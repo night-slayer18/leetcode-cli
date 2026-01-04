@@ -13,6 +13,7 @@ import { submitCommand } from './commands/submit.js';
 import { statCommand } from './commands/stat.js';
 import { dailyCommand } from './commands/daily.js';
 import { randomCommand } from './commands/random.js';
+import { submissionsCommand } from './commands/submissions.js';
 import { configCommand, configInteractiveCommand } from './commands/config.js';
 
 const program = new Command();
@@ -113,6 +114,14 @@ program
   .alias('x')
   .description('Submit solution to LeetCode')
   .action(submitCommand);
+
+program
+  .command('submissions <id>')
+  .description('View past submissions')
+  .option('-n, --limit <number>', 'Number of submissions to show', '20')
+  .option('--last', 'Show details of the last accepted submission')
+  .option('--download', 'Download the last accepted submission code')
+  .action(submissionsCommand);
 
 // === Statistics ===
 program

@@ -8,6 +8,8 @@ import type {
   DailyChallenge,
   SubmissionResult,
   TestResult,
+  Submission,
+  SubmissionDetails,
 } from '../types.js';
 import {
   PROBLEM_LIST_QUERY,
@@ -16,6 +18,8 @@ import {
   USER_STATUS_QUERY,
   USER_PROFILE_QUERY,
   DAILY_CHALLENGE_QUERY,
+  SUBMISSION_LIST_QUERY,
+  SUBMISSION_DETAILS_QUERY,
 } from './queries.js';
 
 const LEETCODE_BASE_URL = 'https://leetcode.com';
@@ -178,6 +182,22 @@ export class LeetCodeClient {
       streak: user.userCalendar.streak,
       totalActiveDays: user.userCalendar.totalActiveDays,
     };
+  }
+
+  async getSubmissionList(slug: string, limit: number = 20, offset: number = 0): Promise<Submission[]> {
+    const data = await this.graphql<{
+      questionSubmissionList: { submissions: Submission[] };
+    }>(SUBMISSION_LIST_QUERY, { questionSlug: slug, limit, offset });
+
+    return data.questionSubmissionList.submissions;
+  }
+
+  async getSubmissionDetails(submissionId: number): Promise<SubmissionDetails> {
+    const data = await this.graphql<{
+      submissionDetails: SubmissionDetails;
+    }>(SUBMISSION_DETAILS_QUERY, { submissionId });
+
+    return data.submissionDetails;
   }
 
   async testSolution(

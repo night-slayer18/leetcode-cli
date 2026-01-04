@@ -106,6 +106,22 @@ export interface TestResult {
   runtime_error?: string;
 }
 
+export interface Submission {
+  id: string;
+  statusDisplay: string;
+  lang: string;
+  runtime: string;
+  timestamp: string;
+  memory: string;
+}
+
+export interface SubmissionDetails {
+  code: string;
+  lang: {
+    name: string;
+  };
+}
+
 export interface ProblemListFilters {
   difficulty?: 'EASY' | 'MEDIUM' | 'HARD';
   status?: 'NOT_STARTED' | 'AC' | 'TRIED';

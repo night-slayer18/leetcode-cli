@@ -1,7 +1,7 @@
 // Display utilities for terminal output
 import chalk from 'chalk';
 import Table from 'cli-table3';
-import type { Problem, ProblemDetail, SubmissionResult, TestResult } from '../types.js';
+import type { Problem, ProblemDetail, SubmissionResult, TestResult, Submission } from '../types.js';
 
 
 export function displayProblemList(problems: Problem[], total: number): void {
@@ -280,4 +280,35 @@ function formatStatus(status: string | null): string {
     default:
       return chalk.gray('-');
   }
+}
+
+export function displaySubmissionsList(submissions: Submission[]): void {
+  const table = new Table({
+    head: [
+      chalk.cyan('ID'),
+      chalk.cyan('Status'),
+      chalk.cyan('Lang'),
+      chalk.cyan('Runtime'),
+      chalk.cyan('Memory'),
+      chalk.cyan('Date'),
+    ],
+    colWidths: [12, 18, 15, 12, 12, 25],
+    style: { head: [], border: [] },
+  });
+
+  for (const s of submissions) {
+    const isAC = s.statusDisplay === 'Accepted';
+    // Timestamp is unix seconds
+    const cleanTime = new Date(parseInt(s.timestamp) * 1000).toLocaleString();
+    
+    table.push([
+      s.id,
+      isAC ? chalk.green(s.statusDisplay) : chalk.red(s.statusDisplay),
+      s.lang,
+      s.runtime,
+      s.memory,
+      cleanTime,
+    ]);
+  }
+  console.log(table.toString());
 }

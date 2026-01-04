@@ -139,3 +139,14 @@ export const RANDOM_PROBLEM_QUERY = `
     }
   }
 `;
+
+export const SUBMISSION_DETAILS_QUERY = `
+  query submissionDetails($submissionId: Int!) {
+    submissionDetails(submissionId: $submissionId) {
+      code
+      lang {
+        name
+      }
+    }
+  }
+`;
