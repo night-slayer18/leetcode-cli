@@ -16,10 +16,29 @@ import { configCommand, configInteractiveCommand } from './commands/config.js';
 
 const program = new Command();
 
+// Customize help output
+program.configureHelp({
+  sortSubcommands: true,
+  subcommandTerm: (cmd) => chalk.cyan(cmd.name()) + (cmd.alias() ? chalk.gray(`|${cmd.alias()}`) : ''),
+  subcommandDescription: (cmd) => chalk.white(cmd.description()),
+  optionTerm: (option) => chalk.yellow(option.flags),
+  optionDescription: (option) => chalk.white(option.description),
+});
+
 program
   .name('leetcode')
-  .description('A modern LeetCode CLI built with TypeScript')
-  .version('1.0.0');
+  .usage('[command] [options]')
+  .description(chalk.bold.cyan('🔥 A modern LeetCode CLI built with TypeScript'))
+  .version('1.0.0', '-v, --version', 'Output the version number')
+  .helpOption('-h, --help', 'Display help for command')
+  .addHelpText('after', `
+${chalk.yellow('Examples:')}
+  ${chalk.cyan('$ leetcode login')}             Login to LeetCode
+  ${chalk.cyan('$ leetcode list -d easy')}      List easy problems
+  ${chalk.cyan('$ leetcode pick 1')}            Start solving "Two Sum"
+  ${chalk.cyan('$ leetcode test 1')}            Test your solution
+  ${chalk.cyan('$ leetcode submit 1')}          Submit your solution
+`);
 
 // === Authentication ===
 program
