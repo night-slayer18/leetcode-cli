@@ -1,0 +1,52 @@
+{
+  "name": "@night-slayer18/leetcode-cli",
+  "version": "1.0.0",
+  "description": "A modern LeetCode CLI built with TypeScript",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "leetcode": "dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/night-slayer18/leetcode-cli.git"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean",
+    "dev": "tsup src/index.ts --format esm --watch",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "leetcode",
+    "cli",
+    "algorithm",
+    "competitive-programming"
+  ],
+  "author": "night-slayer18",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "cli-table3": "^0.6.5",
+    "commander": "^12.1.0",
+    "conf": "^13.0.1",
+    "got": "^14.4.4",
+    "inquirer": "^12.1.0",
+    "marked": "^15.0.4",
+    "marked-terminal": "^7.2.1",
+    "ora": "^8.1.1"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^9.0.7",
+    "@types/node": "^22.10.2",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "vitest": "^4.0.16"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
