@@ -3,7 +3,7 @@
 A modern, feature-rich LeetCode CLI built with TypeScript.
 
 [![CI](https://github.com/night-slayer18/leetcode-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/night-slayer18/leetcode-cli/actions/workflows/ci.yml)
-[![npm version](https://badge.fury.io/js/%40night-slayer18%2Fleetcode-cli.svg)](https://www.npmjs.com/package/@night-slayer18/leetcode-cli)
+[![npm version](https://img.shields.io/npm/v/@night-slayer18/leetcode-cli.svg)](https://www.npmjs.com/package/@night-slayer18/leetcode-cli)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ## Features
