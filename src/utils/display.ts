@@ -18,9 +18,14 @@ export function displayProblemList(problems: Problem[], total: number): void {
   });
 
   for (const problem of problems) {
+    let title = problem.title;
+    if (problem.isPaidOnly) {
+      title = `🔒 ${title}`;
+    }
+
     table.push([
       problem.questionFrontendId,
-      problem.title.length > 42 ? problem.title.slice(0, 39) + '...' : problem.title,
+      title.length > 42 ? title.slice(0, 39) + '...' : title,
       colorDifficulty(problem.difficulty),
       `${problem.acRate.toFixed(1)}%`,
       formatStatus(problem.status),
@@ -33,7 +38,8 @@ export function displayProblemList(problems: Problem[], total: number): void {
 
 export function displayProblemDetail(problem: ProblemDetail): void {
   console.log();
-  console.log(chalk.bold.cyan(`  ${problem.questionFrontendId}. ${problem.title}`));
+  const titlePrefix = problem.isPaidOnly ? '🔒 ' : '';
+  console.log(chalk.bold.cyan(`  ${problem.questionFrontendId}. ${titlePrefix}${problem.title}`));
   console.log(`  ${colorDifficulty(problem.difficulty)}`);
   console.log(chalk.gray(`  https://leetcode.com/problems/${problem.titleSlug}/`));
   console.log();
@@ -49,6 +55,13 @@ export function displayProblemDetail(problem: ProblemDetail): void {
 
   // Simple HTML to text conversion
   let content = problem.content;
+
+  if (!content) {
+    console.log(chalk.yellow('🔒 Premium Problem'));
+    console.log(chalk.gray('Content is not available directly. Please visit the URL below.'));
+    console.log();
+    return;
+  }
   
   // Convert superscripts to ^
   content = content.replace(/<sup>(.*?)<\/sup>/gi, '^$1');

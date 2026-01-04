@@ -24,6 +24,11 @@ export async function showCommand(idOrSlug: string): Promise<void> {
       problem = await leetcodeClient.getProblem(idOrSlug);
     }
 
+    if (!problem) {
+      spinner.fail(`Problem "${idOrSlug}" not found`);
+      return;
+    }
+
     spinner.stop();
     displayProblemDetail(problem);
   } catch (error) {

@@ -39,6 +39,11 @@ export async function pickCommand(idOrSlug: string, options: PickOptions): Promi
       problem = await leetcodeClient.getProblem(idOrSlug);
     }
 
+    if (!problem) {
+      spinner.fail(`Problem "${idOrSlug}" not found`);
+      return;
+    }
+
     spinner.text = 'Generating solution file...';
 
     // Determine language
@@ -46,12 +51,20 @@ export async function pickCommand(idOrSlug: string, options: PickOptions): Promi
     const language: SupportedLanguage = (LANG_SLUG_MAP[langInput] ?? langInput) as SupportedLanguage;
 
     // Get code template
-    const template = getCodeTemplate(problem.codeSnippets, language);
+    // Handle Premium problems without snippets
+    const snippets = problem.codeSnippets ?? [];
+    const template = getCodeTemplate(snippets, language);
     
-    if (!template) {
+    // If no template found and no snippets exist, likely Premium
+    if (!template && snippets.length === 0) {
+      spinner.warn(chalk.yellow('Premium Problem (No code snippets available)'));
+      console.log(chalk.gray('Generating plain file with problem info...'));
+    } else if (!template) {
       spinner.fail(`No code template available for ${language}`);
       return;
     }
+
+    const code = template?.code ?? `// 🔒 Premium Problem - ${problem.title}\n// Solution stub not available`;
 
     // Generate solution file content
     const content = generateSolutionFile(
@@ -59,7 +72,7 @@ export async function pickCommand(idOrSlug: string, options: PickOptions): Promi
       problem.titleSlug,
       problem.title,
       problem.difficulty,
-      template.code,
+      code,
       language,
       problem.content
     );
