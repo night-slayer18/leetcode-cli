@@ -151,13 +151,13 @@ export function displayTestResult(result: TestResult): void {
 
   console.log();
   console.log(chalk.gray('Your Output:'));
-  for (const output of result.code_answer) {
+  for (const output of result.code_answer ?? []) {
     console.log(chalk.white(`  ${output}`));
   }
 
   console.log();
   console.log(chalk.gray('Expected Output:'));
-  for (const output of result.expected_code_answer) {
+  for (const output of result.expected_code_answer ?? []) {
     console.log(chalk.white(`  ${output}`));
   }
 

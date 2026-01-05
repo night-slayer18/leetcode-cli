@@ -98,10 +98,10 @@ export interface TestResult {
   status_msg: string;
   state: string;
   run_success: boolean;
-  code_answer: string[];
-  expected_code_answer: string[];
-  correct_answer: boolean;
-  std_output_list: string[];
+  code_answer?: string[];
+  expected_code_answer?: string[];
+  correct_answer?: boolean;
+  std_output_list?: string[];
   compile_error?: string;
   runtime_error?: string;
 }
