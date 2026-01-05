@@ -1,76 +1,46 @@
 // Submit command - submit solution to LeetCode
-import { readFile, readdir } from 'fs/promises';
+import { readFile } from 'fs/promises';
 import { existsSync } from 'fs';
-import { basename, join } from 'path';
+import { basename } from 'path';
 import ora from 'ora';
 import chalk from 'chalk';
 import { leetcodeClient } from '../api/client.js';
 import { config } from '../storage/config.js';
 import { displaySubmissionResult } from '../utils/display.js';
+import { findSolutionFile, findFileByName, getLangSlugFromExtension } from '../utils/fileUtils.js';
+import { isProblemId, isFileName } from '../utils/validation.js';
 
-// Recursively find a file matching the problem ID
-async function findSolutionFile(dir: string, problemId: string): Promise<string | null> {
-  if (!existsSync(dir)) return null;
-  
-  const entries = await readdir(dir, { withFileTypes: true });
-  
-  for (const entry of entries) {
-    const fullPath = join(dir, entry.name);
-    if (entry.isDirectory()) {
-      const found = await findSolutionFile(fullPath, problemId);
-      if (found) return found;
-    } else if (entry.name.startsWith(`${problemId}.`)) {
-      return fullPath;
-    }
-  }
-  return null;
-}
-
-// Recursively find a file by exact filename
-async function findFileByName(dir: string, fileName: string): Promise<string | null> {
-  if (!existsSync(dir)) return null;
-  
-  const entries = await readdir(dir, { withFileTypes: true });
-  
-  for (const entry of entries) {
-    const fullPath = join(dir, entry.name);
-    if (entry.isDirectory()) {
-      const found = await findFileByName(fullPath, fileName);
-      if (found) return found;
-    } else if (entry.name === fileName) {
-      return fullPath;
-    }
-  }
-  return null;
-}
-
+/**
+ * Submit command - submit solution to LeetCode
+ * @param fileOrId - Problem ID, filename, or file path
+ */
 export async function submitCommand(fileOrId: string): Promise<void> {
   const credentials = config.getCredentials();
-  
+
   if (!credentials) {
-    console.log(chalk.yellow('Please login first: leetcode login'));
+    console.log(chalk.yellow('⚠️  Please login first: leetcode login'));
     return;
   }
 
   leetcodeClient.setCredentials(credentials);
 
   let filePath = fileOrId;
-  
-  // If input looks like a problem ID (just numbers), find the file by ID
-  if (/^\d+$/.test(fileOrId)) {
+
+  // Resolve file path based on input type
+  if (isProblemId(fileOrId)) {
+    // Input is a problem ID - find by ID
     const workDir = config.getWorkDir();
     const found = await findSolutionFile(workDir, fileOrId);
     if (!found) {
       console.log(chalk.red(`No solution file found for problem ${fileOrId}`));
       console.log(chalk.gray(`Looking in: ${workDir}`));
-      console.log(chalk.gray('Run "leetcode pick ' + fileOrId + '" first to create a solution file.'));
+      console.log(chalk.gray(`Run "leetcode pick ${fileOrId}" first to create a solution file.`));
       return;
     }
     filePath = found;
     console.log(chalk.gray(`Found: ${filePath}`));
-  } 
-  // If input looks like a filename (has dots but no slashes), find by filename
-  else if (!fileOrId.includes('/') && !fileOrId.includes('\\') && fileOrId.includes('.')) {
+  } else if (isFileName(fileOrId)) {
+    // Input is a filename - find by name
     const workDir = config.getWorkDir();
     const found = await findFileByName(workDir, fileOrId);
     if (!found) {
@@ -88,13 +58,13 @@ export async function submitCommand(fileOrId: string): Promise<void> {
     return;
   }
 
-  const spinner = ora('Reading solution file...').start();
+  const spinner = ora({ text: 'Reading solution file...', spinner: 'dots' }).start();
 
   try {
     // Parse filename to get problem info
     const fileName = basename(filePath);
     const match = fileName.match(/^(\d+)\.([^.]+)\./);
-    
+
     if (!match) {
       spinner.fail('Invalid filename format');
       console.log(chalk.gray('Expected format: {id}.{title-slug}.{ext}'));
@@ -104,23 +74,9 @@ export async function submitCommand(fileOrId: string): Promise<void> {
 
     const [, problemId, titleSlug] = match;
     const ext = fileName.split('.').pop()!;
-    
-    // Map extension to LeetCode language slug
-    const langMap: Record<string, string> = {
-      ts: 'typescript',
-      js: 'javascript',
-      py: 'python3',
-      java: 'java',
-      cpp: 'cpp',
-      c: 'c',
-      cs: 'csharp',
-      go: 'golang',
-      rs: 'rust',
-      kt: 'kotlin',
-      swift: 'swift',
-    };
 
-    const lang = langMap[ext];
+    // Get language slug from extension
+    const lang = getLangSlugFromExtension(ext);
     if (!lang) {
       spinner.fail(`Unsupported file extension: .${ext}`);
       return;

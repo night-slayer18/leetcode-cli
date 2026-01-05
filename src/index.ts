@@ -5,7 +5,7 @@ import chalk from 'chalk';
 import { loginCommand, logoutCommand, whoamiCommand } from './commands/login.js';
 import { listCommand } from './commands/list.js';
 import { showCommand } from './commands/show.js';
-import { pickCommand } from './commands/pick.js';
+import { pickCommand, batchPickCommand } from './commands/pick.js';
 import { testCommand } from './commands/test.js';
 import { submitCommand } from './commands/submit.js';
 import { statCommand } from './commands/stat.js';
@@ -13,6 +13,9 @@ import { dailyCommand } from './commands/daily.js';
 import { randomCommand } from './commands/random.js';
 import { submissionsCommand } from './commands/submissions.js';
 import { configCommand, configInteractiveCommand } from './commands/config.js';
+import { bookmarkCommand } from './commands/bookmark.js';
+import { notesCommand } from './commands/notes.js';
+import { todayCommand } from './commands/today.js';
 
 const program = new Command();
 
@@ -29,7 +32,7 @@ program
   .name('leetcode')
   .usage('[command] [options]')
   .description(chalk.bold.cyan('🔥 A modern LeetCode CLI built with TypeScript'))
-  .version('1.2.0', '-v, --version', 'Output the version number')
+  .version('1.3.0', '-v, --version', 'Output the version number')
   .helpOption('-h, --help', 'Display help for command')
   .addHelpText('after', `
 ${chalk.yellow('Examples:')}
@@ -148,6 +151,17 @@ ${chalk.gray('Files are organized by: workDir/Difficulty/Category/')}
   .action(pickCommand);
 
 program
+  .command('pick-batch <ids...>')
+  .description('Generate solution files for multiple problems')
+  .option('-l, --lang <language>', 'Programming language for the solutions')
+  .addHelpText('after', `
+${chalk.yellow('Examples:')}
+  ${chalk.cyan('$ leetcode pick-batch 1 2 3')}        Pick problems 1, 2, and 3
+  ${chalk.cyan('$ leetcode pick-batch 1 2 3 -l py')}  Pick with Python
+`)
+  .action(batchPickCommand);
+
+program
   .command('test <file>')
   .alias('t')
   .description('Test solution against sample test cases')
@@ -202,6 +216,47 @@ ${chalk.yellow('Examples:')}
   ${chalk.cyan('$ leetcode stat lee215')}             Show another user's stats
 `)
   .action(statCommand);
+
+program
+  .command('today')
+  .description('Show today\'s progress summary')
+  .addHelpText('after', `
+${chalk.yellow('Examples:')}
+  ${chalk.cyan('$ leetcode today')}                   Show streak, solved, and daily challenge
+`)
+  .action(todayCommand);
+
+program
+  .command('bookmark <action> [id]')
+  .description('Manage problem bookmarks')
+  .addHelpText('after', `
+${chalk.yellow('Actions:')}
+  ${chalk.cyan('add <id>')}      Bookmark a problem
+  ${chalk.cyan('remove <id>')}   Remove a bookmark
+  ${chalk.cyan('list')}          List all bookmarks
+  ${chalk.cyan('clear')}         Clear all bookmarks
+
+${chalk.yellow('Examples:')}
+  ${chalk.cyan('$ leetcode bookmark add 1')}          Bookmark problem 1
+  ${chalk.cyan('$ leetcode bookmark remove 1')}       Remove bookmark
+  ${chalk.cyan('$ leetcode bookmark list')}           List all bookmarks
+`)
+  .action(bookmarkCommand);
+
+program
+  .command('note <id> [action]')
+  .description('View or edit notes for a problem')
+  .addHelpText('after', `
+${chalk.yellow('Actions:')}
+  ${chalk.cyan('edit')}   Open notes in editor (default)
+  ${chalk.cyan('view')}   Display notes in terminal
+
+${chalk.yellow('Examples:')}
+  ${chalk.cyan('$ leetcode note 1')}                  Edit notes for problem 1
+  ${chalk.cyan('$ leetcode note 1 edit')}             Edit notes (explicit)
+  ${chalk.cyan('$ leetcode note 1 view')}             View notes in terminal
+`)
+  .action(notesCommand);
 
 
 program

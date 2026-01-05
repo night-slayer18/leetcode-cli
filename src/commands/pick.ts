@@ -15,7 +15,7 @@ import {
 import { openInEditor } from '../utils/editor.js';
 import type { SupportedLanguage } from '../types.js';
 
-interface PickOptions {
+export interface PickOptions {
   lang?: string;
   open?: boolean;
 }
@@ -27,7 +27,7 @@ export async function pickCommand(idOrSlug: string, options: PickOptions): Promi
     leetcodeClient.setCredentials(credentials);
   }
 
-  const spinner = ora('Fetching problem...').start();
+  const spinner = ora({ text: 'Fetching problem details...', spinner: 'dots' }).start();
 
   try {
     let problem;
@@ -124,4 +124,46 @@ export async function pickCommand(idOrSlug: string, options: PickOptions): Promi
       console.log(chalk.red(error.message));
     }
   }
+}
+
+export async function batchPickCommand(ids: string[], options: PickOptions): Promise<void> {
+  if (ids.length === 0) {
+    console.log(chalk.yellow('Please provide at least one problem ID'));
+    return;
+  }
+
+  const credentials = config.getCredentials();
+  if (credentials) {
+    leetcodeClient.setCredentials(credentials);
+  }
+
+  console.log(chalk.cyan(`📦 Picking ${ids.length} problem${ids.length !== 1 ? 's' : ''}...`));
+  console.log();
+  console.log();
+
+  let succeeded = 0;
+  let failed = 0;
+
+  for (const id of ids) {
+    try {
+      // Don't open files in batch mode
+      await pickCommand(id, { ...options, open: false });
+      succeeded++;
+    } catch (error) {
+      console.log(chalk.red(`✗ Failed to pick problem ${id}`));
+      if (error instanceof Error) {
+        console.log(chalk.gray(`  ${error.message}`));
+      }
+      failed++;
+    }
+    console.log(); // Add spacing between problems
+  }
+
+  // Summary
+  console.log(chalk.gray('─'.repeat(50)));
+  console.log(
+    chalk.bold(
+      `Done! ${chalk.green(`${succeeded} succeeded`)}${failed > 0 ? `, ${chalk.red(`${failed} failed`)}` : ''}`
+    )
+  );
 }
