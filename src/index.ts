@@ -148,7 +148,9 @@ ${chalk.yellow('Examples:')}
 
 ${chalk.gray('Files are organized by: workDir/Difficulty/Category/')}
 `)
-  .action(pickCommand);
+  .action(async (id, options) => {
+    await pickCommand(id, options);
+  });
 
 program
   .command('pick-batch <ids...>')

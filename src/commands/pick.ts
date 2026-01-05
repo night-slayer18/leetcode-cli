@@ -20,7 +20,7 @@ export interface PickOptions {
   open?: boolean;
 }
 
-export async function pickCommand(idOrSlug: string, options: PickOptions): Promise<void> {
+export async function pickCommand(idOrSlug: string, options: PickOptions): Promise<boolean> {
   const credentials = config.getCredentials();
   
   if (credentials) {
@@ -41,7 +41,7 @@ export async function pickCommand(idOrSlug: string, options: PickOptions): Promi
 
     if (!problem) {
       spinner.fail(`Problem "${idOrSlug}" not found`);
-      return;
+      return false;
     }
 
     spinner.text = 'Generating solution file...';
@@ -61,7 +61,7 @@ export async function pickCommand(idOrSlug: string, options: PickOptions): Promi
       console.log(chalk.gray('Generating plain file with problem info...'));
     } else if (!template) {
       spinner.fail(`No code template available for ${language}`);
-      return;
+      return false;
     }
 
     const code = template?.code ?? `// 🔒 Premium Problem - ${problem.title}\n// Solution stub not available`;
@@ -103,7 +103,7 @@ export async function pickCommand(idOrSlug: string, options: PickOptions): Promi
       if (options.open !== false) {
         await openInEditor(filePath);
       }
-      return;
+      return true;
     }
 
     await writeFile(filePath, content, 'utf-8');
@@ -118,11 +118,28 @@ export async function pickCommand(idOrSlug: string, options: PickOptions): Promi
     if (options.open !== false) {
       await openInEditor(filePath);
     }
+    return true;
   } catch (error) {
-    spinner.fail('Failed to create solution file');
+    spinner.fail('Failed to fetch problem');
+    
     if (error instanceof Error) {
-      console.log(chalk.red(error.message));
+      // Clean up Zod error messages
+      if (error.message.includes('expected object, received null')) {
+         console.log(chalk.red(`Problem "${idOrSlug}" not found`));
+      } else {
+         try {
+           const zodError = JSON.parse(error.message);
+           if (Array.isArray(zodError)) {
+             console.log(chalk.red('API Response Validation Failed'));
+           } else {
+             console.log(chalk.red(error.message));
+           }
+         } catch {
+           console.log(chalk.red(error.message));
+         }
+      }
     }
+    return false;
   }
 }
 
@@ -145,15 +162,11 @@ export async function batchPickCommand(ids: string[], options: PickOptions): Pro
   let failed = 0;
 
   for (const id of ids) {
-    try {
-      // Don't open files in batch mode
-      await pickCommand(id, { ...options, open: false });
+    // Don't open files in batch mode
+    const success = await pickCommand(id, { ...options, open: false });
+    if (success) {
       succeeded++;
-    } catch (error) {
-      console.log(chalk.red(`✗ Failed to pick problem ${id}`));
-      if (error instanceof Error) {
-        console.log(chalk.gray(`  ${error.message}`));
-      }
+    } else {
       failed++;
     }
     console.log(); // Add spacing between problems

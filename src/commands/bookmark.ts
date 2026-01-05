@@ -5,6 +5,7 @@ import ora from 'ora';
 import { bookmarks } from '../storage/bookmarks.js';
 import { leetcodeClient } from '../api/client.js';
 import { config } from '../storage/config.js';
+import { validateProblemId } from '../utils/validation.js';
 
 type BookmarkAction = 'add' | 'remove' | 'list' | 'clear';
 
@@ -21,6 +22,11 @@ export async function bookmarkCommand(action: string, id?: string): Promise<void
     case 'add':
       if (!id) {
         console.log(chalk.red('Please provide a problem ID to bookmark'));
+        return;
+      }
+      if (!validateProblemId(id)) {
+        console.log(chalk.red(`Invalid problem ID: ${id}`));
+        console.log(chalk.gray('Problem ID must be a positive integer'));
         return;
       }
       if (bookmarks.add(id)) {

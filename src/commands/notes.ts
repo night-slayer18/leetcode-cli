@@ -6,10 +6,17 @@ import chalk from 'chalk';
 import { config } from '../storage/config.js';
 import { openInEditor } from '../utils/editor.js';
 import { leetcodeClient } from '../api/client.js';
+import { validateProblemId } from '../utils/validation.js';
 
 type NoteAction = 'view' | 'edit';
 
 export async function notesCommand(problemId: string, action?: string): Promise<void> {
+  if (!validateProblemId(problemId)) {
+    console.log(chalk.red(`Invalid problem ID: ${problemId}`));
+    console.log(chalk.gray('Problem ID must be a positive integer'));
+    return;
+  }
+
   const noteAction: NoteAction = action === 'view' ? 'view' : 'edit';
   
   const notesDir = join(config.getWorkDir(), '.notes');
