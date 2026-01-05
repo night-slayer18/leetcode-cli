@@ -4,6 +4,7 @@ import { join } from 'path';
 import { existsSync } from 'fs';
 import chalk from 'chalk';
 import { config } from '../storage/config.js';
+import { requireAuth } from '../utils/auth.js';
 import { openInEditor } from '../utils/editor.js';
 import { leetcodeClient } from '../api/client.js';
 import { validateProblemId } from '../utils/validation.js';
@@ -69,10 +70,9 @@ async function editNote(notePath: string, problemId: string): Promise<void> {
 async function generateNoteTemplate(problemId: string): Promise<string> {
   let header = `# Problem ${problemId} Notes\n\n`;
   
-  const credentials = config.getCredentials();
-  if (credentials) {
+  const { authorized } = await requireAuth();
+  if (authorized) {
     try {
-      leetcodeClient.setCredentials(credentials);
       const problem = await leetcodeClient.getProblemById(problemId);
       if (problem) {
         header = `# ${problemId}. ${problem.title}\n\n`;

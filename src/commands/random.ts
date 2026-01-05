@@ -2,6 +2,7 @@
 import ora from 'ora';
 import chalk from 'chalk';
 import { leetcodeClient } from '../api/client.js';
+import { requireAuth } from '../utils/auth.js';
 import { config } from '../storage/config.js';
 import { ProblemListFilters } from '../types.js';
 import { showCommand } from './show.js';
@@ -15,11 +16,8 @@ interface RandomOptions {
 }
 
 export async function randomCommand(options: RandomOptions): Promise<void> {
-  const credentials = config.getCredentials();
-  
-  if (credentials) {
-    leetcodeClient.setCredentials(credentials);
-  }
+  const { authorized } = await requireAuth();
+  if (!authorized) return;
 
   const spinner = ora('Fetching random problem...').start();
 

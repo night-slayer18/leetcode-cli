@@ -16,27 +16,27 @@ export async function validateSession(): Promise<boolean> {
   }
 }
 
-export async function requireAuth(): Promise<boolean> {
+export async function requireAuth(): Promise<{ authorized: boolean; username?: string }> {
   const credentials = config.getCredentials();
   
   if (!credentials) {
     console.log(chalk.yellow('⚠️  Please login first: leetcode login'));
-    return false;
+    return { authorized: false };
   }
 
   try {
     leetcodeClient.setCredentials(credentials);
-    const { isSignedIn } = await leetcodeClient.checkAuth();
+    const { isSignedIn, username } = await leetcodeClient.checkAuth();
     
     if (!isSignedIn) {
       console.log(chalk.yellow('⚠️  Session expired. Please run: leetcode login'));
-      return false;
+      return { authorized: false };
     }
     
-    return true;
+    return { authorized: true, username: username ?? undefined };
   } catch {
     console.log(chalk.yellow('⚠️  Session validation failed. Please run: leetcode login'));
-    return false;
+    return { authorized: false };
   }
 }
 

@@ -5,6 +5,7 @@ import { join } from 'path';
 import ora from 'ora';
 import chalk from 'chalk';
 import { leetcodeClient } from '../api/client.js';
+import { requireAuth } from '../utils/auth.js';
 import { config } from '../storage/config.js';
 import { displaySubmissionsList } from '../utils/display.js';
 import { LANG_SLUG_MAP, LANGUAGE_EXTENSIONS } from '../utils/templates.js';
@@ -17,13 +18,8 @@ interface SubmissionsOptions {
 }
 
 export async function submissionsCommand(idOrSlug: string, options: SubmissionsOptions): Promise<void> {
-  const credentials = config.getCredentials();
-  
-  if (!credentials) {
-    console.log(chalk.red('Please login first to view submissions.'));
-    return;
-  }
-  leetcodeClient.setCredentials(credentials);
+  const { authorized } = await requireAuth();
+  if (!authorized) return;
 
   const spinner = ora('Fetching problem info...').start();
 

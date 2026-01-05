@@ -4,6 +4,7 @@ import Table from 'cli-table3';
 import ora from 'ora';
 import { bookmarks } from '../storage/bookmarks.js';
 import { leetcodeClient } from '../api/client.js';
+import { requireAuth } from '../utils/auth.js';
 import { config } from '../storage/config.js';
 import { validateProblemId } from '../utils/validation.js';
 
@@ -77,9 +78,8 @@ async function listBookmarks(): Promise<void> {
   console.log(chalk.bold.cyan(`📌 Bookmarked Problems (${bookmarkList.length})`));
   console.log();
 
-  const credentials = config.getCredentials();
-  if (credentials) {
-    leetcodeClient.setCredentials(credentials);
+  const { authorized } = await requireAuth();
+  if (authorized) {
     
     const spinner = ora({ text: 'Fetching problem details...', spinner: 'dots' }).start();
     

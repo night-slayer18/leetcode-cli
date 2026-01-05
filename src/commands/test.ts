@@ -5,6 +5,7 @@ import { basename } from 'path';
 import ora from 'ora';
 import chalk from 'chalk';
 import { leetcodeClient } from '../api/client.js';
+import { requireAuth } from '../utils/auth.js';
 import { config } from '../storage/config.js';
 import { displayTestResult } from '../utils/display.js';
 import { findSolutionFile, findFileByName, getLangSlugFromExtension } from '../utils/fileUtils.js';
@@ -15,14 +16,8 @@ interface TestOptions {
 }
 
 export async function testCommand(fileOrId: string, options: TestOptions): Promise<void> {
-  const credentials = config.getCredentials();
-
-  if (!credentials) {
-    console.log(chalk.yellow('⚠️  Please login first: leetcode login'));
-    return;
-  }
-
-  leetcodeClient.setCredentials(credentials);
+  const { authorized } = await requireAuth();
+  if (!authorized) return;
 
   let filePath = fileOrId;
 

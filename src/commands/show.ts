@@ -2,15 +2,13 @@
 import ora from 'ora';
 import chalk from 'chalk';
 import { leetcodeClient } from '../api/client.js';
+import { requireAuth } from '../utils/auth.js';
 import { config } from '../storage/config.js';
 import { displayProblemDetail } from '../utils/display.js';
 
 export async function showCommand(idOrSlug: string): Promise<void> {
-  const credentials = config.getCredentials();
-  
-  if (credentials) {
-    leetcodeClient.setCredentials(credentials);
-  }
+  const { authorized } = await requireAuth();
+  if (!authorized) return;
 
   const spinner = ora('Fetching problem...').start();
 

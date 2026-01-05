@@ -13,6 +13,7 @@ import {
   LANG_SLUG_MAP,
 } from '../utils/templates.js';
 import { openInEditor } from '../utils/editor.js';
+import { requireAuth } from '../utils/auth.js';
 import type { SupportedLanguage } from '../types.js';
 
 export interface PickOptions {
@@ -21,11 +22,8 @@ export interface PickOptions {
 }
 
 export async function pickCommand(idOrSlug: string, options: PickOptions): Promise<boolean> {
-  const credentials = config.getCredentials();
-  
-  if (credentials) {
-    leetcodeClient.setCredentials(credentials);
-  }
+  const { authorized } = await requireAuth();
+  if (!authorized) return false;
 
   const spinner = ora({ text: 'Fetching problem details...', spinner: 'dots' }).start();
 
@@ -149,10 +147,8 @@ export async function batchPickCommand(ids: string[], options: PickOptions): Pro
     return;
   }
 
-  const credentials = config.getCredentials();
-  if (credentials) {
-    leetcodeClient.setCredentials(credentials);
-  }
+  const { authorized } = await requireAuth();
+  if (!authorized) return;
 
   console.log(chalk.cyan(`📦 Picking ${ids.length} problem${ids.length !== 1 ? 's' : ''}...`));
   console.log();

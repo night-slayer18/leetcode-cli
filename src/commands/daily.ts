@@ -2,6 +2,7 @@
 import ora from 'ora';
 import chalk from 'chalk';
 import { leetcodeClient } from '../api/client.js';
+import { requireAuth } from '../utils/auth.js';
 import { config } from '../storage/config.js';
 import { displayDailyChallenge } from '../utils/display.js';
 
@@ -10,12 +11,9 @@ interface DailyOptions {
   lang?: string;
 }
 
-export async function dailyCommand(options: DailyOptions): Promise<void> {
-  const credentials = config.getCredentials();
-  
-  if (credentials) {
-    leetcodeClient.setCredentials(credentials);
-  }
+export async function dailyCommand(): Promise<void> {
+  const { authorized } = await requireAuth();
+  if (!authorized) return;
 
   const spinner = ora('Fetching daily challenge...').start();
 

@@ -2,28 +2,18 @@
 import chalk from 'chalk';
 import ora from 'ora';
 import { leetcodeClient } from '../api/client.js';
-import { config } from '../storage/config.js';
+import { requireAuth } from '../utils/auth.js';
 
 export async function todayCommand(): Promise<void> {
-  const credentials = config.getCredentials();
+  const { authorized, username } = await requireAuth();
 
-  if (!credentials) {
-    console.log(chalk.yellow('⚠️  Please login first: leetcode login'));
+  if (!authorized || !username) {
     return;
   }
-
-  leetcodeClient.setCredentials(credentials);
 
   const spinner = ora({ text: 'Fetching your progress...', spinner: 'dots' }).start();
 
   try {
-    const { isSignedIn, username } = await leetcodeClient.checkAuth();
-    
-    if (!isSignedIn || !username) {
-      spinner.fail('Session expired');
-      console.log(chalk.yellow('Please run "leetcode login" to re-authenticate.'));
-      return;
-    }
 
     const [profile, daily] = await Promise.all([
       leetcodeClient.getUserProfile(username),
