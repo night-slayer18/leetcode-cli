@@ -44,6 +44,14 @@ export function displayProblemDetail(problem: ProblemDetail): void {
   console.log(chalk.gray(`  https://leetcode.com/problems/${problem.titleSlug}/`));
   console.log();
 
+  // Show premium notice prominently if applicable
+  if (problem.isPaidOnly) {
+    console.log(chalk.yellow('  ⚠️  Premium Problem'));
+    console.log(chalk.gray('     This problem requires a LeetCode Premium subscription.'));
+    console.log(chalk.gray(`     Visit the URL above to view on LeetCode.`));
+    console.log();
+  }
+
   if (problem.topicTags.length) {
     const tags = problem.topicTags.map(t => chalk.bgBlue.white(` ${t.name} `)).join(' ');
     console.log(`  ${tags}`);
@@ -57,8 +65,9 @@ export function displayProblemDetail(problem: ProblemDetail): void {
   let content = problem.content;
 
   if (!content) {
-    console.log(chalk.yellow('🔒 Premium Problem'));
-    console.log(chalk.gray('Content is not available directly. Please visit the URL below.'));
+    console.log(chalk.yellow('  🔒 Premium Content'));
+    console.log(chalk.gray('  Problem description is not available directly.'));
+    console.log(chalk.gray('  Please visit the URL above to view on LeetCode.'));
     console.log();
     return;
   }
