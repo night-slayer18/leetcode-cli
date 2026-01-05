@@ -2,7 +2,6 @@
 import { writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import { join } from 'path';
-import { spawn } from 'child_process';
 import ora from 'ora';
 import chalk from 'chalk';
 import { leetcodeClient } from '../api/client.js';
@@ -13,6 +12,7 @@ import {
   getSolutionFileName,
   LANG_SLUG_MAP,
 } from '../utils/templates.js';
+import { openInEditor } from '../utils/editor.js';
 import type { SupportedLanguage } from '../types.js';
 
 interface PickOptions {
@@ -101,7 +101,7 @@ export async function pickCommand(idOrSlug: string, options: PickOptions): Promi
       
       // Optionally open existing file
       if (options.open !== false) {
-        openInEditor(filePath);
+        await openInEditor(filePath);
       }
       return;
     }
@@ -116,7 +116,7 @@ export async function pickCommand(idOrSlug: string, options: PickOptions): Promi
 
     // Open in editor
     if (options.open !== false) {
-      openInEditor(filePath);
+      await openInEditor(filePath);
     }
   } catch (error) {
     spinner.fail('Failed to create solution file');
@@ -125,38 +125,3 @@ export async function pickCommand(idOrSlug: string, options: PickOptions): Promi
     }
   }
 }
-
-function openInEditor(filePath: string): void {
-  const editor = config.getEditor() ?? process.env.EDITOR ?? 'code';
-  const workDir = config.getWorkDir();
-  
-  // Terminal editors need to run in foreground - skip auto-open
-  const terminalEditors = ['vim', 'nvim', 'vi', 'nano', 'emacs', 'micro'];
-  if (terminalEditors.includes(editor)) {
-    console.log();
-    console.log(chalk.gray(`Open with: ${editor} ${filePath}`));
-    return;
-  }
-  
-  try {
-    // For VS Code family, open the folder and go to the file
-    // -r = reuse existing window, -g = go to file
-    if (editor === 'code' || editor === 'code-insiders' || editor === 'cursor') {
-      const child = spawn(editor, ['-r', workDir, '-g', filePath], {
-        detached: true,
-        stdio: 'ignore',
-      });
-      child.unref();
-    } else {
-      // For other GUI editors, just open the file
-      const child = spawn(editor, [filePath], {
-        detached: true,
-        stdio: 'ignore',
-      });
-      child.unref();
-    }
-  } catch {
-    // Silently fail if editor cannot be opened
-  }
-}
-

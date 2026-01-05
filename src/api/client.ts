@@ -1,5 +1,6 @@
 // LeetCode API Client
-import got, { Got, Options } from 'got';
+import got, { Got } from 'got';
+import { z } from 'zod';
 import type {
   LeetCodeCredentials,
   Problem,
@@ -11,6 +12,17 @@ import type {
   Submission,
   SubmissionDetails,
 } from '../types.js';
+import {
+  ProblemSchema,
+  ProblemDetailSchema,
+  DailyChallengeSchema,
+  SubmissionSchema,
+  SubmissionDetailsSchema,
+  SubmissionResultSchema,
+  TestResultSchema,
+  UserStatusSchema,
+  UserProfileSchema,
+} from '../schemas/api.js';
 import {
   PROBLEM_LIST_QUERY,
   PROBLEM_DETAIL_QUERY,
@@ -73,7 +85,9 @@ export class LeetCodeClient {
     const data = await this.graphql<{
       userStatus: { isSignedIn: boolean; username: string | null };
     }>(USER_STATUS_QUERY);
-    return data.userStatus;
+    
+    const validated = UserStatusSchema.parse(data.userStatus);
+    return validated;
   }
 
   async getProblems(filters: ProblemListFilters = {}): Promise<{ total: number; problems: Problem[] }> {
@@ -101,9 +115,11 @@ export class LeetCodeClient {
       problemsetQuestionList: { total: number; questions: Problem[] };
     }>(PROBLEM_LIST_QUERY, variables);
 
+    const validatedProblems = z.array(ProblemSchema).parse(data.problemsetQuestionList.questions);
+    
     return {
       total: data.problemsetQuestionList.total,
-      problems: data.problemsetQuestionList.questions,
+      problems: validatedProblems,
     };
   }
 
@@ -112,7 +128,9 @@ export class LeetCodeClient {
       PROBLEM_DETAIL_QUERY,
       { titleSlug }
     );
-    return data.question;
+    
+    const validated = ProblemDetailSchema.parse(data.question);
+    return validated as ProblemDetail;
   }
 
   async getProblemById(id: string): Promise<ProblemDetail> {
@@ -131,7 +149,9 @@ export class LeetCodeClient {
     const data = await this.graphql<{
       activeDailyCodingChallengeQuestion: DailyChallenge;
     }>(DAILY_CHALLENGE_QUERY);
-    return data.activeDailyCodingChallengeQuestion;
+    
+    const validated = DailyChallengeSchema.parse(data.activeDailyCodingChallengeQuestion);
+    return validated as DailyChallenge;
   }
 
   async getRandomProblem(filters: ProblemListFilters = {}): Promise<string> {
@@ -151,7 +171,8 @@ export class LeetCodeClient {
       randomQuestion: { titleSlug: string };
     }>(RANDOM_PROBLEM_QUERY, variables);
 
-    return data.randomQuestion.titleSlug;
+    const validated = z.object({ titleSlug: z.string() }).parse(data.randomQuestion);
+    return validated.titleSlug;
   }
 
   async getUserProfile(username: string): Promise<{
@@ -174,13 +195,15 @@ export class LeetCodeClient {
     }>(USER_PROFILE_QUERY, { username });
 
     const user = data.matchedUser;
+    const validated = UserProfileSchema.parse(user);
+    
     return {
-      username: user.username,
-      realName: user.profile.realName,
-      ranking: user.profile.ranking,
-      acSubmissionNum: user.submitStatsGlobal.acSubmissionNum,
-      streak: user.userCalendar.streak,
-      totalActiveDays: user.userCalendar.totalActiveDays,
+      username: validated.username,
+      realName: validated.profile.realName,
+      ranking: validated.profile.ranking,
+      acSubmissionNum: validated.submitStatsGlobal.acSubmissionNum,
+      streak: validated.userCalendar.streak,
+      totalActiveDays: validated.userCalendar.totalActiveDays,
     };
   }
 
@@ -189,7 +212,8 @@ export class LeetCodeClient {
       questionSubmissionList: { submissions: Submission[] };
     }>(SUBMISSION_LIST_QUERY, { questionSlug: slug, limit, offset });
 
-    return data.questionSubmissionList.submissions;
+    const validated = z.array(SubmissionSchema).parse(data.questionSubmissionList.submissions);
+    return validated;
   }
 
   async getSubmissionDetails(submissionId: number): Promise<SubmissionDetails> {
@@ -197,7 +221,8 @@ export class LeetCodeClient {
       submissionDetails: SubmissionDetails;
     }>(SUBMISSION_DETAILS_QUERY, { submissionId });
 
-    return data.submissionDetails;
+    const validated = SubmissionDetailsSchema.parse(data.submissionDetails);
+    return validated;
   }
 
   async testSolution(
@@ -218,7 +243,7 @@ export class LeetCodeClient {
     }).json<{ interpret_id: string }>();
 
     // Poll for results
-    return this.pollSubmission<TestResult>(response.interpret_id, 'interpret');
+    return this.pollSubmission<TestResult>(response.interpret_id, 'interpret', TestResultSchema);
   }
 
   async submitSolution(
@@ -236,10 +261,10 @@ export class LeetCodeClient {
     }).json<{ submission_id: number }>();
 
     // Poll for results
-    return this.pollSubmission<SubmissionResult>(response.submission_id.toString(), 'submission');
+    return this.pollSubmission<SubmissionResult>(response.submission_id.toString(), 'submission', SubmissionResultSchema);
   }
 
-  private async pollSubmission<T>(id: string, type: 'interpret' | 'submission'): Promise<T> {
+  private async pollSubmission<T>(id: string, type: 'interpret' | 'submission', schema: z.ZodSchema<T>): Promise<T> {
     const endpoint = type === 'interpret' 
       ? `submissions/detail/${id}/check/`
       : `submissions/detail/${id}/check/`;
@@ -251,7 +276,7 @@ export class LeetCodeClient {
       const result = await this.client.get(endpoint).json<T & { state: string }>();
 
       if (result.state === 'SUCCESS' || result.state === 'FAILURE') {
-        return result;
+        return schema.parse(result);
       }
 
       await new Promise(resolve => setTimeout(resolve, delay));
