@@ -1,6 +1,30 @@
 # Release Notes
 
-## v1.1.0 (Current)
+## v1.2.0 (Current)
+
+> **Release Date**: 2026-01-05
+> **Focus**: Developer Experience & Type Safety.
+
+### 🔧 Improvements
+
+#### Dynamic Help Text
+- Each command now shows contextual examples with `--help`.
+- Login shows step-by-step cookie instructions.
+- Commands show ID vs. slug usage, custom testcase syntax, etc.
+
+#### Editor Utility Refactor
+- Moved `openInEditor` to dedicated `src/utils/editor.ts` utility.
+- Uses `open` npm package for robust cross-platform file opening.
+- Better support for VS Code family, terminal editors, and GUI editors.
+
+#### Type Safety: Zod Validation
+- Added Zod schemas in `src/schemas/api.ts` for all LeetCode API responses.
+- Validates data at the API "edge" to catch issues early.
+- Prevents "undefined" errors deep in application logic.
+
+---
+
+## v1.1.0
 
 > **Release Date**: 2026-01-04
 > **Focus**: Feature Completion and Docker.
