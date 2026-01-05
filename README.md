@@ -57,12 +57,18 @@ leetcode submit 1
 | `login` | Login with LeetCode browser cookies |
 | `logout` | Clear stored credentials |
 | `whoami` | Check login status |
+| `today` | Show daily progress & challenge |
 | `list` | List problems with filters |
 | `show <id>` | Display problem description |
-| `daily` | Show today's challenge |
 | `pick <id>` | Generate solution file |
+| `pick-batch <ids>` | Pick multiple problems |
+| `bookmark <action>` | Manage problem bookmarks |
+| `note <id>` | Manage problem notes |
+| `daily` | Show today's challenge |
+| `random` | Get a random problem |
 | `test <id\|file>` | Test solution against sample cases |
 | `submit <id\|file>` | Submit solution to LeetCode |
+| `submissions <id>` | View past submissions |
 | `stat [username]` | Show user statistics |
 | `config` | View or set configuration |
 
@@ -159,7 +165,24 @@ leetcode submissions 1 --last
 leetcode submissions 1 --download
 ```
 
-### Configuration
+### Productivity Features
+ 
+ ```bash
+ # Show today's progress & challenge
+ leetcode today
+ 
+ # Pick multiple problems at once
+ leetcode pick-batch 1 2 3 -l python3
+ 
+ # Bookmark problems
+ leetcode bookmark add 1
+ leetcode bookmark list
+ 
+ # Keep personal notes
+ leetcode note 1 edit
+ ```
+ 
+ ### Configuration
 
 ```bash
 # View current config

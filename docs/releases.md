@@ -1,6 +1,31 @@
 # Release Notes
 
-## v1.2.0 (Current)
+## v1.3.0 (current)
+
+> **Release Date**: 2026-01-06
+> **Focus**: Productivity & Code Quality.
+
+### 🚀 New Features
+
+#### Productivity Boosters
+- **Today's Progress**: New `today` command shows streak, daily challenge, and solved stats.
+- **Bookmarks**: Save interesting problems with `bookmark add/list/remove`.
+- **Problem Notes**: Keep personal notes for problems using `note <id>`.
+- **Batch Pick**: Pick multiple problems at once with `pick-batch`.
+
+### 🔧 Improvements
+
+#### Code Quality & Robustness
+- **Validation**: Strict input validation for problem IDs in `bookmark` and `note` commands.
+- **Error Handling**: Improved error reporting for batch operations and API failures.
+- **Refactored Utilities**: Extracted shared logic for file finding and validation.
+- **Better UX**: Improved spinner messages and premium problem feedback.
+- **Resilience**: Added session auto-validation to detect expired cookies.
+- **Security**: Enforced global authentication checks across all commands.
+
+---
+
+## v1.2.0
 
 > **Release Date**: 2026-01-05
 > **Focus**: Developer Experience & Type Safety.
