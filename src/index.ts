@@ -45,6 +45,14 @@ ${chalk.yellow('Examples:')}
 program
   .command('login')
   .description('Login to LeetCode with browser cookies')
+  .addHelpText('after', `
+${chalk.yellow('How to login:')}
+  1. Open ${chalk.cyan('https://leetcode.com')} in your browser
+  2. Login to your account
+  3. Open Developer Tools (F12) → Application → Cookies
+  4. Copy values of ${chalk.green('LEETCODE_SESSION')} and ${chalk.green('csrftoken')}
+  5. Paste when prompted by this command
+`)
   .action(loginCommand);
 
 program
@@ -68,18 +76,38 @@ program
   .option('-q, --search <keywords>', 'Search by keywords')
   .option('-n, --limit <number>', 'Number of problems to show', '20')
   .option('-p, --page <number>', 'Page number', '1')
+  .addHelpText('after', `
+${chalk.yellow('Examples:')}
+  ${chalk.cyan('$ leetcode list')}                    List first 20 problems
+  ${chalk.cyan('$ leetcode list -d easy')}            List easy problems only
+  ${chalk.cyan('$ leetcode list -s solved')}          List your solved problems
+  ${chalk.cyan('$ leetcode list -t array -t string')} Filter by multiple tags
+  ${chalk.cyan('$ leetcode list -q "two sum"')}       Search by keywords
+  ${chalk.cyan('$ leetcode list -n 50 -p 2')}         Show 50 problems, page 2
+`)
   .action(listCommand);
 
 program
   .command('show <id>')
   .alias('s')
   .description('Show problem description')
+  .addHelpText('after', `
+${chalk.yellow('Examples:')}
+  ${chalk.cyan('$ leetcode show 1')}                  Show by problem ID
+  ${chalk.cyan('$ leetcode show two-sum')}            Show by problem slug
+  ${chalk.cyan('$ leetcode s 412')}                   Short alias
+`)
   .action(showCommand);
 
 program
   .command('daily')
   .alias('d')
   .description('Show today\'s daily challenge')
+  .addHelpText('after', `
+${chalk.yellow('Examples:')}
+  ${chalk.cyan('$ leetcode daily')}                   Show today's challenge
+  ${chalk.cyan('$ leetcode d')}                       Short alias
+`)
   .action(dailyCommand);
 
 program
@@ -90,6 +118,14 @@ program
   .option('-t, --tag <tag>', 'Filter by topic tag')
   .option('--pick', 'Auto-generate solution file')
   .option('--no-open', 'Do not open file in editor')
+  .addHelpText('after', `
+${chalk.yellow('Examples:')}
+  ${chalk.cyan('$ leetcode random')}                  Get any random problem
+  ${chalk.cyan('$ leetcode random -d medium')}        Random medium problem
+  ${chalk.cyan('$ leetcode random -t array')}         Random array problem
+  ${chalk.cyan('$ leetcode random --pick')}           Random + create file
+  ${chalk.cyan('$ leetcode r -d easy --pick')}        Random easy + file
+`)
   .action(randomCommand);
 
 
@@ -99,6 +135,16 @@ program
   .description('Generate solution file for a problem')
   .option('-l, --lang <language>', 'Programming language for the solution')
   .option('--no-open', 'Do not open file in editor')
+  .addHelpText('after', `
+${chalk.yellow('Examples:')}
+  ${chalk.cyan('$ leetcode pick 1')}                  Pick by problem ID
+  ${chalk.cyan('$ leetcode pick two-sum')}            Pick by problem slug
+  ${chalk.cyan('$ leetcode pick 1 -l python3')}       Pick with specific language
+  ${chalk.cyan('$ leetcode pick 1 --no-open')}        Create file without opening
+  ${chalk.cyan('$ leetcode p 412')}                   Short alias
+
+${chalk.gray('Files are organized by: workDir/Difficulty/Category/')}
+`)
   .action(pickCommand);
 
 program
@@ -106,12 +152,29 @@ program
   .alias('t')
   .description('Test solution against sample test cases')
   .option('-c, --testcase <testcase>', 'Custom test case')
+  .addHelpText('after', `
+${chalk.yellow('Examples:')}
+  ${chalk.cyan('$ leetcode test 1')}                  Test by problem ID
+  ${chalk.cyan('$ leetcode test two-sum')}            Test by problem slug
+  ${chalk.cyan('$ leetcode test ./path/to/file.py')} Test by file path
+  ${chalk.cyan('$ leetcode test 1 -c "[1,2]\\n3"')}   Test with custom case
+  ${chalk.cyan('$ leetcode t 412')}                   Short alias
+
+${chalk.gray('Testcases use \\n to separate multiple inputs.')}
+`)
   .action(testCommand);
 
 program
   .command('submit <file>')
   .alias('x')
   .description('Submit solution to LeetCode')
+  .addHelpText('after', `
+${chalk.yellow('Examples:')}
+  ${chalk.cyan('$ leetcode submit 1')}                Submit by problem ID
+  ${chalk.cyan('$ leetcode submit two-sum')}          Submit by problem slug
+  ${chalk.cyan('$ leetcode submit ./path/to/file.py')} Submit by file path
+  ${chalk.cyan('$ leetcode x 412')}                   Short alias
+`)
   .action(submitCommand);
 
 program
@@ -120,12 +183,24 @@ program
   .option('-n, --limit <number>', 'Number of submissions to show', '20')
   .option('--last', 'Show details of the last accepted submission')
   .option('--download', 'Download the last accepted submission code')
+  .addHelpText('after', `
+${chalk.yellow('Examples:')}
+  ${chalk.cyan('$ leetcode submissions 1')}           View submissions for problem
+  ${chalk.cyan('$ leetcode submissions 1 -n 5')}      Show last 5 submissions
+  ${chalk.cyan('$ leetcode submissions 1 --last')}    Show last accepted submission
+  ${chalk.cyan('$ leetcode submissions 1 --download')} Download last accepted code
+`)
   .action(submissionsCommand);
 
 
 program
   .command('stat [username]')
   .description('Show user statistics')
+  .addHelpText('after', `
+${chalk.yellow('Examples:')}
+  ${chalk.cyan('$ leetcode stat')}                    Show your statistics
+  ${chalk.cyan('$ leetcode stat lee215')}             Show another user's stats
+`)
   .action(statCommand);
 
 
@@ -136,6 +211,16 @@ program
   .option('-e, --editor <editor>', 'Set editor command')
   .option('-w, --workdir <path>', 'Set working directory for solutions')
   .option('-i, --interactive', 'Interactive configuration')
+  .addHelpText('after', `
+${chalk.yellow('Examples:')}
+  ${chalk.cyan('$ leetcode config')}                  View current config
+  ${chalk.cyan('$ leetcode config -l python3')}       Set language to Python
+  ${chalk.cyan('$ leetcode config -e "code"')}        Set editor to VS Code
+  ${chalk.cyan('$ leetcode config -w ~/leetcode')}    Set solutions folder
+  ${chalk.cyan('$ leetcode config -i')}               Interactive setup
+
+${chalk.gray('Supported languages: typescript, javascript, python3, java, cpp, c, csharp, go, rust, kotlin, swift')}
+`)
   .action(async (options) => {
     if (options.interactive) {
       await configInteractiveCommand();
