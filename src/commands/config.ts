@@ -33,12 +33,14 @@ export async function configCommand(options: ConfigOptions): Promise<void> {
 
   // Set options
   if (options.lang) {
-    const lang = options.lang.toLowerCase() as SupportedLanguage;
-    if (!SUPPORTED_LANGUAGES.includes(lang)) {
+    const langInput = options.lang.toLowerCase();
+    if (!SUPPORTED_LANGUAGES.includes(langInput as SupportedLanguage)) {
       console.log(chalk.red(`Unsupported language: ${options.lang}`));
       console.log(chalk.gray(`Supported: ${SUPPORTED_LANGUAGES.join(', ')}`));
       return;
     }
+    // Safe to cast after validation
+    const lang = langInput as SupportedLanguage;
     config.setLanguage(lang);
     console.log(chalk.green(`✓ Default language set to ${lang}`));
   }
