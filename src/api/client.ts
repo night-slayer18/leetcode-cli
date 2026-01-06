@@ -264,10 +264,8 @@ export class LeetCodeClient {
     return this.pollSubmission<SubmissionResult>(response.submission_id.toString(), 'submission', SubmissionResultSchema);
   }
 
-  private async pollSubmission<T>(id: string, type: 'interpret' | 'submission', schema: z.ZodSchema<T>): Promise<T> {
-    const endpoint = type === 'interpret' 
-      ? `submissions/detail/${id}/check/`
-      : `submissions/detail/${id}/check/`;
+  private async pollSubmission<T>(id: string, _type: 'interpret' | 'submission', schema: z.ZodSchema<T>): Promise<T> {
+    const endpoint = `submissions/detail/${id}/check/`;
 
     const maxAttempts = 30;
     const delay = 1000;
