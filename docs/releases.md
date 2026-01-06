@@ -1,9 +1,20 @@
 # Release Notes
 
-## v1.3.1 (current)
+## v1.3.2 (current)
+
+> **Release Date**: 2026-01-06
+> **Focus**: Critical Hotfix.
+
+### 🐛 Bug Fixes
+- **CLI Execution**: Fixed missing shebang (`#!/usr/bin/env node`) that prevented global CLI execution on Unix-like systems.
+
+---
+
+## v1.3.1
 
 > **Release Date**: 2026-01-06
 > **Focus**: Bug Fixes & Code Quality.
+> **Warning**: This release has a broken binary on Unix/Linux/macOS due to missing shebang.
 
 ### 🐛 Bug Fixes
 
