@@ -274,14 +274,45 @@ You can run the CLI using Docker without installing Node.js.
    docker pull nightslayer/leetcode-cli:latest
    ```
 
-2. **Setup Alias** (Add to your `~/.zshrc` or `~/.bashrc`):
+2. **Setup Shell Function** (Add to your shell config):
+
+   **Bash/Zsh** (`~/.bashrc` or `~/.zshrc`):
    ```bash
-   alias leetcode="docker run -it --rm -v \$(pwd)/leetcode:/root/leetcode -v ~/.leetcode:/root/.leetcode nightslayer/leetcode-cli:latest"
+   leetcode() {
+     docker run -it --rm \
+       -w /root/leetcode \
+       -v "$(pwd)/leetcode:/root/leetcode" \
+       -v "$HOME/.leetcode:/root/.leetcode" \
+       nightslayer/leetcode-cli:latest "$@"
+   }
+   ```
+
+   **Fish** (`~/.config/fish/config.fish`):
+   ```fish
+   function leetcode
+       docker run -it --rm \
+           -w /root/leetcode \
+           -v (pwd)/leetcode:/root/leetcode \
+           -v $HOME/.leetcode:/root/.leetcode \
+           nightslayer/leetcode-cli:latest $argv
+   end
+   ```
+
+   **PowerShell** (`$PROFILE`):
+   ```powershell
+   function leetcode {
+     docker run -it --rm `
+       -w /root/leetcode `
+       -v "${PWD}/leetcode:/root/leetcode" `
+       -v "$env:USERPROFILE/.leetcode:/root/.leetcode" `
+       nightslayer/leetcode-cli:latest $args
+   }
    ```
 
 3. **Usage**:
    ```bash
    leetcode list
+   leetcode pick 1
    ```
 
 ### Method 2: Build Locally
@@ -293,10 +324,10 @@ You can run the CLI using Docker without installing Node.js.
 
 2. **Run commands**:
     ```bash
-    # Run 'list' command
     docker run -it --rm \
-      -v $(pwd)/leetcode:/root/leetcode \
-      -v ~/.leetcode:/root/.leetcode \
+      -w /root/leetcode \
+      -v "$(pwd)/leetcode:/root/leetcode" \
+      -v "$HOME/.leetcode:/root/.leetcode" \
       leetcode-cli list
     ```
     *Note: We mount `~/.leetcode` to persist login credentials and `leetcode` folder to save solution files.*
