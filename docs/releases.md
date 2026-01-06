@@ -1,6 +1,37 @@
 # Release Notes
 
-## v1.3.0 (current)
+## v1.3.1 (current)
+
+> **Release Date**: 2026-01-06
+> **Focus**: Bug Fixes & Code Quality.
+
+### 🐛 Bug Fixes
+
+#### API & Polling
+- Fixed redundant conditional in `pollSubmission()` - both branches were identical.
+
+#### Premium Problem Handling
+- Refactored `pick.ts` premium problem flow for clearer control with explicit branches.
+- Now shows helpful message when language not available in code snippets.
+
+#### File Search Safety
+- Added depth limiting (max 5 levels) to recursive file searches to prevent runaway traversal.
+
+#### Type Safety
+- Fixed nullable types in `ProblemDetail` interface to match Zod schema validation.
+- Fixed type assertion order in `config.ts` - now validates before casting.
+- Added parseInt validation in `submissions.ts` before API calls.
+
+#### Code Cleanup
+- Consolidated duplicate `isProblemId`/`validateProblemId` functions.
+- Removed unused `config` imports from `daily.ts` and `show.ts`.
+
+#### Documentation
+- Updated Docker alias commands with shell-specific variations (Bash/Zsh, Fish, PowerShell).
+
+---
+
+## v1.3.0
 
 > **Release Date**: 2026-01-06
 > **Focus**: Productivity & Code Quality.
