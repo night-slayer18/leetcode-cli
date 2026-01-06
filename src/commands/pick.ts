@@ -49,20 +49,26 @@ export async function pickCommand(idOrSlug: string, options: PickOptions): Promi
     const language: SupportedLanguage = (LANG_SLUG_MAP[langInput] ?? langInput) as SupportedLanguage;
 
     // Get code template
-    // Handle Premium problems without snippets
     const snippets = problem.codeSnippets ?? [];
     const template = getCodeTemplate(snippets, language);
     
-    // If no template found and no snippets exist, likely Premium
-    if (!template && snippets.length === 0) {
+    // Determine the code to use based on template availability
+    let code: string;
+    
+    if (snippets.length === 0) {
+      // Premium problem - no code snippets available from API
       spinner.warn(chalk.yellow('Premium Problem (No code snippets available)'));
-      console.log(chalk.gray('Generating plain file with problem info...'));
+      console.log(chalk.gray('Generating placeholder file with problem info...'));
+      code = `// 🔒 Premium Problem - ${problem.title}\n// Solution stub not available - visit LeetCode to view`;
     } else if (!template) {
+      // Snippets exist but not for the selected language
       spinner.fail(`No code template available for ${language}`);
+      console.log(chalk.gray(`Available languages: ${snippets.map(s => s.langSlug).join(', ')}`));
       return false;
+    } else {
+      // Normal case - use the template code
+      code = template.code;
     }
-
-    const code = template?.code ?? `// 🔒 Premium Problem - ${problem.title}\n// Solution stub not available`;
 
     // Generate solution file content
     const content = generateSolutionFile(
@@ -72,7 +78,7 @@ export async function pickCommand(idOrSlug: string, options: PickOptions): Promi
       problem.difficulty,
       code,
       language,
-      problem.content
+      problem.content ?? undefined
     );
 
     // Build folder path: workDir/Difficulty/Category/
