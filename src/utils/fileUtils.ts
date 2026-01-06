@@ -5,18 +5,23 @@ import { join } from 'path';
 import type { SupportedLanguage } from '../types.js';
 import { LANGUAGE_EXTENSIONS } from './templates.js';
 
+// Max recursion depth for file searches (workDir/Difficulty/Category/file = 3 levels)
+const MAX_SEARCH_DEPTH = 5;
+
 export async function findSolutionFile(
   dir: string,
-  problemId: string
+  problemId: string,
+  currentDepth: number = 0
 ): Promise<string | null> {
   if (!existsSync(dir)) return null;
+  if (currentDepth >= MAX_SEARCH_DEPTH) return null;
 
   const entries = await readdir(dir, { withFileTypes: true });
 
   for (const entry of entries) {
     const fullPath = join(dir, entry.name);
     if (entry.isDirectory()) {
-      const found = await findSolutionFile(fullPath, problemId);
+      const found = await findSolutionFile(fullPath, problemId, currentDepth + 1);
       if (found) return found;
     } else if (entry.name.startsWith(`${problemId}.`)) {
       return fullPath;
@@ -27,16 +32,18 @@ export async function findSolutionFile(
 
 export async function findFileByName(
   dir: string,
-  fileName: string
+  fileName: string,
+  currentDepth: number = 0
 ): Promise<string | null> {
   if (!existsSync(dir)) return null;
+  if (currentDepth >= MAX_SEARCH_DEPTH) return null;
 
   const entries = await readdir(dir, { withFileTypes: true });
 
   for (const entry of entries) {
     const fullPath = join(dir, entry.name);
     if (entry.isDirectory()) {
-      const found = await findFileByName(fullPath, fileName);
+      const found = await findFileByName(fullPath, fileName, currentDepth + 1);
       if (found) return found;
     } else if (entry.name === fileName) {
       return fullPath;
