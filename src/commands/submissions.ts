@@ -73,8 +73,13 @@ export async function submissionsCommand(idOrSlug: string, options: SubmissionsO
         return;
       }
 
+      const submissionId = parseInt(lastAC.id, 10);
+      if (isNaN(submissionId)) {
+        downloadSpinner.fail('Invalid submission ID format');
+        return;
+      }
 
-      const details = await leetcodeClient.getSubmissionDetails(parseInt(lastAC.id, 10));
+      const details = await leetcodeClient.getSubmissionDetails(submissionId);
       
 
       const workDir = config.getWorkDir();
