@@ -7,12 +7,12 @@ import { config } from '../storage/config.js';
 import { requireAuth } from '../utils/auth.js';
 import { openInEditor } from '../utils/editor.js';
 import { leetcodeClient } from '../api/client.js';
-import { validateProblemId } from '../utils/validation.js';
+import { isProblemId } from '../utils/validation.js';
 
 type NoteAction = 'view' | 'edit';
 
 export async function notesCommand(problemId: string, action?: string): Promise<void> {
-  if (!validateProblemId(problemId)) {
+  if (!isProblemId(problemId)) {
     console.log(chalk.red(`Invalid problem ID: ${problemId}`));
     console.log(chalk.gray('Problem ID must be a positive integer'));
     return;

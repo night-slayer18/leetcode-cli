@@ -6,7 +6,7 @@ import { bookmarks } from '../storage/bookmarks.js';
 import { leetcodeClient } from '../api/client.js';
 import { requireAuth } from '../utils/auth.js';
 import { config } from '../storage/config.js';
-import { validateProblemId } from '../utils/validation.js';
+import { isProblemId } from '../utils/validation.js';
 
 type BookmarkAction = 'add' | 'remove' | 'list' | 'clear';
 
@@ -25,7 +25,7 @@ export async function bookmarkCommand(action: string, id?: string): Promise<void
         console.log(chalk.red('Please provide a problem ID to bookmark'));
         return;
       }
-      if (!validateProblemId(id)) {
+      if (!isProblemId(id)) {
         console.log(chalk.red(`Invalid problem ID: ${id}`));
         console.log(chalk.gray('Problem ID must be a positive integer'));
         return;
