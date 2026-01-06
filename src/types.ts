@@ -23,12 +23,12 @@ export interface TopicTag {
 }
 
 export interface ProblemDetail extends Problem {
-  content: string;
-  codeSnippets: CodeSnippet[];
+  content: string | null;
+  codeSnippets: CodeSnippet[] | null;
   sampleTestCase: string;
   exampleTestcases: string;
   hints: string[];
-  companyTags: CompanyTag[];
+  companyTags: CompanyTag[] | null;
   stats: string;
 }
 
