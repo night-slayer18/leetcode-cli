@@ -284,6 +284,24 @@ leetcode stat john_doe
 
 ---
 
+## Git Integration
+
+### `leetcode sync`
+Sync all solutions to your configured Git repository.
+
+**Features**:
+- Automatically handles `git init` if the working directory is not a git repo.
+- Can create a private GitHub repository automatically if `gh` CLI is installed.
+- Commits changes with stats (e.g., "Sync: 5 solutions - 2026-01-07...").
+- Pushes to the configured remote.
+
+**Usage**:
+```bash
+leetcode sync
+```
+
+---
+
 ## Configuration
 
 ### `leetcode config`
@@ -293,6 +311,7 @@ View or set configuration.
 - `-l, --lang <language>` - Set default programming language
 - `-e, --editor <editor>` - Set editor command
 - `-w, --workdir <path>` - Set working directory for solutions
+- `-r, --repo <url>` - Set Git repository URL
 - `-i, --interactive` - Interactive configuration mode
 
 **Examples**:
@@ -311,6 +330,9 @@ leetcode config --editor vim
 # Set working directory
 leetcode config -w ~/leetcode
 leetcode config --workdir /Users/you/projects/leetcode
+
+# Set Git repository
+leetcode config -r https://github.com/user/repo.git
 
 # Interactive configuration
 leetcode config -i

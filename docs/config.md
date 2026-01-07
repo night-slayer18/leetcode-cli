@@ -24,6 +24,9 @@ leetcode config -l python3
 
 # Set default work directory
 leetcode config -w ~/Development/my-leetcode
+
+# Set Git repository
+leetcode config -r https://github.com/myuser/leetcode-solutions.git
 ```
 
 ## Settings
@@ -34,3 +37,4 @@ Config is stored in `~/.leetcode/config.json`.
 | `language` | Default language extension to use (java, python3, cpp, etc) |
 | `editor` | Command to open files (code, vim, nano) |
 | `workDir` | Directory where solution files are saved |
+| `repo` | Remote Git repository URL |
