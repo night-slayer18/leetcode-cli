@@ -85,6 +85,31 @@ export const USER_PROFILE_QUERY = `
       userCalendar {
         streak
         totalActiveDays
+        submissionCalendar
+      }
+    }
+  }
+`;
+
+export const SKILL_STATS_QUERY = `
+  query skillStats($username: String!) {
+    matchedUser(username: $username) {
+      tagProblemCounts {
+        fundamental {
+          tagName
+          tagSlug
+          problemsSolved
+        }
+        intermediate {
+          tagName
+          tagSlug
+          problemsSolved
+        }
+        advanced {
+          tagName
+          tagSlug
+          problemsSolved
+        }
       }
     }
   }

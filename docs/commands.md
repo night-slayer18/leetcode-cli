@@ -268,18 +268,41 @@ leetcode submissions 1 --last --download
 ## User Statistics
 
 ### `leetcode stat [username]`
-Show user statistics.
+Show user statistics and analytics.
 
 **Arguments**:
 - `[username]` - Optional username (defaults to logged-in user)
 
+**Options**:
+- `-c, --calendar` - Weekly activity summary for the last 12 weeks
+- `-s, --skills` - Skill breakdown by topic tags  
+- `-t, --trend` - Daily trend chart for the last 7 days
+
+**What each option shows**:
+
+| Option | Description |
+|--------|-------------|
+| (none) | Basic stats: problems solved by difficulty, rank, streak |
+| `-c` | Weekly table showing submissions count and active days per week for 12 weeks |
+| `-s` | Problems solved grouped by tags (Fundamental/Intermediate/Advanced) - helps identify strong & weak topics |
+| `-t` | Bar chart of daily submissions for the past 7 days with day labels |
+
 **Usage**:
 ```bash
-# Show your own stats
+# Show basic stats (solved count, rank, streak)
 leetcode stat
 
 # Show another user's stats
 leetcode stat john_doe
+
+# Weekly activity table (12 weeks)
+leetcode stat -c
+
+# Skill breakdown by topic
+leetcode stat -s
+
+# 7-day trend chart
+leetcode stat -t
 ```
 
 ---

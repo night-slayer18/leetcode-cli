@@ -185,6 +185,22 @@ leetcode submissions 1 --download
  leetcode note 1 edit
  ```
 
+### User Statistics
+
+```bash
+# Basic stats (solved count, rank, streak)
+leetcode stat
+
+# Weekly activity table (last 12 weeks)
+leetcode stat -c
+
+# Skill breakdown by topic tags
+leetcode stat -s
+
+# 7-day trend chart
+leetcode stat -t
+```
+
  ### Git Integration
 
  ```bash

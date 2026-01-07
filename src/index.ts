@@ -213,13 +213,30 @@ ${chalk.yellow('Examples:')}
 
 program
   .command('stat [username]')
-  .description('Show user statistics')
+  .description('Show user statistics and analytics')
+  .option('-c, --calendar', 'Weekly activity summary (submissions & active days for last 12 weeks)')
+  .option('-s, --skills', 'Skill breakdown (problems solved grouped by topic tags)')
+  .option('-t, --trend', 'Daily trend chart (bar graph of submissions for last 7 days)')
   .addHelpText('after', `
+${chalk.yellow('Options Explained:')}
+  ${chalk.cyan('-c, --calendar')}  Shows a table of your weekly submissions and active days
+                    for the past 12 weeks. Useful for tracking consistency.
+  
+  ${chalk.cyan('-s, --skills')}    Shows how many problems you solved per topic tag,
+                    grouped by difficulty (Fundamental/Intermediate/Advanced).
+                    Helps identify your strong and weak areas.
+  
+  ${chalk.cyan('-t, --trend')}     Shows a bar chart of daily submissions for the past week.
+                    Visualizes your recent coding activity day by day.
+
 ${chalk.yellow('Examples:')}
-  ${chalk.cyan('$ leetcode stat')}                    Show your statistics
+  ${chalk.cyan('$ leetcode stat')}                    Show basic stats (solved count, rank)
   ${chalk.cyan('$ leetcode stat lee215')}             Show another user's stats
+  ${chalk.cyan('$ leetcode stat -c')}                 Weekly activity table
+  ${chalk.cyan('$ leetcode stat -s')}                 Topic-wise breakdown
+  ${chalk.cyan('$ leetcode stat -t')}                 7-day trend chart
 `)
-  .action(statCommand);
+  .action((username, options) => statCommand(username, options));
 
 program
   .command('today')

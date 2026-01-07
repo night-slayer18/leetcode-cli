@@ -29,6 +29,7 @@ import {
   RANDOM_PROBLEM_QUERY,
   USER_STATUS_QUERY,
   USER_PROFILE_QUERY,
+  SKILL_STATS_QUERY,
   DAILY_CHALLENGE_QUERY,
   SUBMISSION_LIST_QUERY,
   SUBMISSION_DETAILS_QUERY,
@@ -182,6 +183,7 @@ export class LeetCodeClient {
     acSubmissionNum: Array<{ difficulty: string; count: number }>;
     streak: number;
     totalActiveDays: number;
+    submissionCalendar: string;
   }> {
     const data = await this.graphql<{
       matchedUser: {
@@ -190,7 +192,7 @@ export class LeetCodeClient {
         submitStatsGlobal: {
           acSubmissionNum: Array<{ difficulty: string; count: number }>;
         };
-        userCalendar: { streak: number; totalActiveDays: number };
+        userCalendar: { streak: number; totalActiveDays: number; submissionCalendar: string };
       };
     }>(USER_PROFILE_QUERY, { username });
 
@@ -204,7 +206,26 @@ export class LeetCodeClient {
       acSubmissionNum: validated.submitStatsGlobal.acSubmissionNum,
       streak: validated.userCalendar.streak,
       totalActiveDays: validated.userCalendar.totalActiveDays,
+      submissionCalendar: user.userCalendar.submissionCalendar,
     };
+  }
+
+  async getSkillStats(username: string): Promise<{
+    fundamental: Array<{ tagName: string; tagSlug: string; problemsSolved: number }>;
+    intermediate: Array<{ tagName: string; tagSlug: string; problemsSolved: number }>;
+    advanced: Array<{ tagName: string; tagSlug: string; problemsSolved: number }>;
+  }> {
+    const data = await this.graphql<{
+      matchedUser: {
+        tagProblemCounts: {
+          fundamental: Array<{ tagName: string; tagSlug: string; problemsSolved: number }>;
+          intermediate: Array<{ tagName: string; tagSlug: string; problemsSolved: number }>;
+          advanced: Array<{ tagName: string; tagSlug: string; problemsSolved: number }>;
+        };
+      };
+    }>(SKILL_STATS_QUERY, { username });
+
+    return data.matchedUser.tagProblemCounts;
   }
 
   async getSubmissionList(slug: string, limit: number = 20, offset: number = 0): Promise<Submission[]> {

@@ -118,6 +118,7 @@ export const UserProfileSchema = z.object({
   userCalendar: z.object({
     streak: z.number(),
     totalActiveDays: z.number(),
+    submissionCalendar: z.string().optional(),
   }),
 });
 

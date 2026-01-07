@@ -1,6 +1,30 @@
 # Release Notes
 
-## v1.3.2 (current)
+## v1.4.0 (current)
+
+> **Release Date**: 2026-01-08
+> **Focus**: Advanced Statistics & Git Sync
+
+### 🚀 New Features
+
+#### Advanced Statistics (`leetcode stat`)
+- **`-c, --calendar`**: Weekly activity summary showing submissions and active days for the last 12 weeks.
+- **`-s, --skills`**: Skill breakdown by topic tags (Fundamental/Intermediate/Advanced).
+- **`-t, --trend`**: Daily trend bar chart showing submissions for the last 7 days.
+
+#### Automated Git Sync (`leetcode sync`)
+- **One-Command Sync**: Automatically commit and push all your solutions to a Git repository.
+- **Smart Initialization**: Detects if your folder is a git repo; if not, handles `git init` for you.
+- **GitHub Integration**: If you have `gh` CLI installed, auto-creates private repositories on GitHub.
+- **Improved Commit Messages**: Commits include file count and a clean timestamp.
+
+### ⚙️ Configuration
+- **Repo URL**: New `-r, --repo <url>` option in `config` command.
+- **Unset Repo**: You can now clear the repo URL by leaving it blank in interactive mode or passing an empty string.
+
+---
+
+## v1.3.2
 
 > **Release Date**: 2026-01-06
 > **Focus**: Critical Hotfix.
