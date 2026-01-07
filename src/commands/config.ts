@@ -56,9 +56,14 @@ export async function configCommand(options: ConfigOptions): Promise<void> {
     console.log(chalk.green(`✓ Work directory set to ${options.workdir}`));
   }
 
-  if (options.repo) {
-    config.setRepo(options.repo);
-    console.log(chalk.green(`✓ Repository URL set to ${options.repo}`));
+  if (options.repo !== undefined) {
+    if (options.repo.trim() === '') {
+      config.deleteRepo();
+      console.log(chalk.green('✓ Repository URL cleared'));
+    } else {
+      config.setRepo(options.repo);
+      console.log(chalk.green(`✓ Repository URL set to ${options.repo}`));
+    }
   }
 }
 
@@ -98,6 +103,8 @@ export async function configInteractiveCommand(): Promise<void> {
   config.setWorkDir(answers.workDir);
   if (answers.repo) {
     config.setRepo(answers.repo);
+  } else {
+    config.deleteRepo();
   }
 
   console.log();

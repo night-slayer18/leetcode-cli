@@ -74,6 +74,10 @@ export const config = {
     configStore.set('config.repo', repo);
   },
 
+  deleteRepo(): void {
+    configStore.delete('config.repo');
+  },
+
   // Get specific config values
   getLanguage(): SupportedLanguage {
     return configStore.get('config.language') as SupportedLanguage;
