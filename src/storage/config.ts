@@ -24,6 +24,7 @@ const schema = {
       language: { type: 'string', default: 'typescript' },
       editor: { type: 'string' },
       workDir: { type: 'string', default: join(homedir(), 'leetcode') },
+      repo: { type: 'string' },
     },
     default: {
       language: 'typescript' as SupportedLanguage,
@@ -69,6 +70,10 @@ export const config = {
     configStore.set('config.workDir', workDir);
   },
 
+  setRepo(repo: string): void {
+    configStore.set('config.repo', repo);
+  },
+
   // Get specific config values
   getLanguage(): SupportedLanguage {
     return configStore.get('config.language') as SupportedLanguage;
@@ -80,6 +85,10 @@ export const config = {
 
   getWorkDir(): string {
     return configStore.get('config.workDir');
+  },
+
+  getRepo(): string | undefined {
+    return configStore.get('config.repo');
   },
 
   // Clear all config

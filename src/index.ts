@@ -17,6 +17,7 @@ import { configCommand, configInteractiveCommand } from './commands/config.js';
 import { bookmarkCommand } from './commands/bookmark.js';
 import { notesCommand } from './commands/notes.js';
 import { todayCommand } from './commands/today.js';
+import { syncCommand } from './commands/sync.js';
 
 const program = new Command();
 
@@ -261,6 +262,15 @@ ${chalk.yellow('Examples:')}
 `)
   .action(notesCommand);
 
+program
+  .command('sync')
+  .description('Sync solutions to Git repository')
+  .addHelpText('after', `
+${chalk.yellow('Examples:')}
+  ${chalk.cyan('$ leetcode sync')}                    Sync all solutions to remote
+`)
+  .action(syncCommand);
+
 
 program
   .command('config')
@@ -268,6 +278,7 @@ program
   .option('-l, --lang <language>', 'Set default programming language')
   .option('-e, --editor <editor>', 'Set editor command')
   .option('-w, --workdir <path>', 'Set working directory for solutions')
+  .option('-r, --repo <url>', 'Set Git repository URL')
   .option('-i, --interactive', 'Interactive configuration')
   .addHelpText('after', `
 ${chalk.yellow('Examples:')}
@@ -275,6 +286,7 @@ ${chalk.yellow('Examples:')}
   ${chalk.cyan('$ leetcode config -l python3')}       Set language to Python
   ${chalk.cyan('$ leetcode config -e "code"')}        Set editor to VS Code
   ${chalk.cyan('$ leetcode config -w ~/leetcode')}    Set solutions folder
+  ${chalk.cyan('$ leetcode config -r https://...')}   Set git repository
   ${chalk.cyan('$ leetcode config -i')}               Interactive setup
 
 ${chalk.gray('Supported languages: typescript, javascript, python3, java, cpp, c, csharp, go, rust, kotlin, swift')}

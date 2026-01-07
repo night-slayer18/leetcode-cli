@@ -148,4 +148,5 @@ export interface UserConfig {
   language: SupportedLanguage;
   editor?: string;
   workDir: string;
+  repo?: string;
 }

@@ -8,6 +8,7 @@ interface ConfigOptions {
   lang?: string;
   editor?: string;
   workdir?: string;
+  repo?: string;
 }
 
 const SUPPORTED_LANGUAGES: SupportedLanguage[] = [
@@ -54,6 +55,11 @@ export async function configCommand(options: ConfigOptions): Promise<void> {
     config.setWorkDir(options.workdir);
     console.log(chalk.green(`✓ Work directory set to ${options.workdir}`));
   }
+
+  if (options.repo) {
+    config.setRepo(options.repo);
+    console.log(chalk.green(`✓ Repository URL set to ${options.repo}`));
+  }
 }
 
 export async function configInteractiveCommand(): Promise<void> {
@@ -79,11 +85,20 @@ export async function configInteractiveCommand(): Promise<void> {
       message: 'Working directory for solution files:',
       default: currentConfig.workDir,
     },
+    {
+      type: 'input',
+      name: 'repo',
+      message: 'Git repository URL (optional):',
+      default: currentConfig.repo,
+    },
   ]);
 
   config.setLanguage(answers.language);
   config.setEditor(answers.editor);
   config.setWorkDir(answers.workDir);
+  if (answers.repo) {
+    config.setRepo(answers.repo);
+  }
 
   console.log();
   console.log(chalk.green('✓ Configuration saved'));
@@ -103,5 +118,6 @@ function showCurrentConfig(): void {
   console.log(chalk.gray('Language:    '), chalk.white(currentConfig.language));
   console.log(chalk.gray('Editor:      '), chalk.white(currentConfig.editor ?? '(not set)'));
   console.log(chalk.gray('Work Dir:    '), chalk.white(currentConfig.workDir));
+  console.log(chalk.gray('Repo URL:    '), chalk.white(currentConfig.repo ?? '(not set)'));
   console.log(chalk.gray('Logged in:   '), credentials ? chalk.green('Yes') : chalk.yellow('No'));
 }

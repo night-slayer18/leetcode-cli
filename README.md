@@ -18,6 +18,7 @@ A modern, feature-rich LeetCode CLI built with TypeScript.
 - 🎯 **Daily challenge** - Get today's problem
 - ⚙️ **Configurable** - Set language, editor, and working directory
 - 📂 **Smart file discovery** - Use problem ID, filename, or full path
+- 🔄 **Git Sync** - Auto-sync solutions to GitHub/GitLab
 
 ## 📚 Documentation
 
@@ -70,7 +71,9 @@ leetcode submit 1
 | `submit <id\|file>` | Submit solution to LeetCode |
 | `submissions <id>` | View past submissions |
 | `stat [username]` | Show user statistics |
+| `stat [username]` | Show user statistics |
 | `config` | View or set configuration |
+| `sync` | Sync solutions to Git repository |
 
 ## Usage Examples
 
@@ -181,6 +184,13 @@ leetcode submissions 1 --download
  # Keep personal notes
  leetcode note 1 edit
  ```
+
+ ### Git Integration
+
+ ```bash
+ # Sync all solutions to your configured git repo
+ leetcode sync
+ ```
  
  ### Configuration
 
@@ -195,6 +205,7 @@ leetcode config -i
 leetcode config --lang python3
 leetcode config --editor code
 leetcode config --workdir ~/leetcode
+leetcode config --repo https://github.com/username/leetcode-solutions.git
 ```
 
 ## Folder Structure
@@ -254,7 +265,8 @@ Config is stored at `~/.leetcode/config.json`:
   "config": {
     "language": "java",
     "editor": "code",
-    "workDir": "/path/to/leetcode"
+    "workDir": "/path/to/leetcode",
+    "repo": "https://github.com/username/leetcode-solutions.git"
   }
 }
 ```
