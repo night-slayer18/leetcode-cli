@@ -325,6 +325,39 @@ leetcode sync
 
 ---
 
+## Interview Timer
+
+### `leetcode timer [id]`
+Start interview mode with a countdown timer to simulate interview conditions.
+
+**How it works**:
+- Starts a timer and opens the problem in your editor
+- Default time limits: Easy (20 min), Medium (40 min), Hard (60 min)
+- When you submit successfully, your solve time is recorded
+- View your historical solve times with `--stats`
+
+**Options**:
+- `-m, --minutes <minutes>` - Custom time limit in minutes
+- `--stats` - Show solve time statistics
+- `--stop` - Stop active timer
+
+**Usage**:
+```bash
+# Start timer for problem 1 (uses default time based on difficulty)
+leetcode timer 1
+
+# Start with custom 30-minute limit
+leetcode timer 1 -m 30
+
+# View your solve time statistics
+leetcode timer --stats
+
+# Stop active timer (without recording)
+leetcode timer --stop
+```
+
+---
+
 ## Configuration
 
 ### `leetcode config`

@@ -1,6 +1,25 @@
 # Release Notes
 
-## v1.4.0 (current)
+## v1.5.0 (current)
+
+> **Release Date**: 2026-01-09
+> **Focus**: Interview Timer & Bug Fixes
+
+### 🚀 New Features
+
+#### Interview Timer (`leetcode timer`)
+- **Interview Mode**: Start problems with a countdown timer to simulate interview pressure.
+- **Default Limits**: Easy (20 min), Medium (40 min), Hard (60 min).
+- **Custom Time**: Use `-m <minutes>` for custom time limits.
+- **Time Tracking**: Records your solve time when you submit successfully.
+- **Statistics**: View your historical solve times with `--stats`.
+
+### 🐛 Bug Fixes
+- **File Search**: Fixed issue where `leetcode submit <id>` would find notes files instead of solution files. Now correctly skips hidden directories (`.notes`) and only matches valid code files.
+
+---
+
+## v1.4.0
 
 > **Release Date**: 2026-01-08
 > **Focus**: Advanced Statistics & Git Sync
