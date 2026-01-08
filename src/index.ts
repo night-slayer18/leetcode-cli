@@ -18,6 +18,7 @@ import { bookmarkCommand } from './commands/bookmark.js';
 import { notesCommand } from './commands/notes.js';
 import { todayCommand } from './commands/today.js';
 import { syncCommand } from './commands/sync.js';
+import { timerCommand } from './commands/timer.js';
 
 const program = new Command();
 
@@ -316,6 +317,26 @@ ${chalk.gray('Supported languages: typescript, javascript, python3, java, cpp, c
     }
   });
 
+
+program
+  .command('timer [id]')
+  .description('Start interview mode with timer')
+  .option('-m, --minutes <minutes>', 'Custom time limit in minutes')
+  .option('--stats', 'Show solve time statistics')
+  .option('--stop', 'Stop active timer')
+  .addHelpText('after', `
+${chalk.yellow('How it works:')}
+  Start a problem with a countdown timer to simulate interview conditions.
+  Default time limits: Easy (20 min), Medium (40 min), Hard (60 min).
+  Your solve times are recorded when you submit successfully.
+
+${chalk.yellow('Examples:')}
+  ${chalk.cyan('$ leetcode timer 1')}                  Start problem 1 with default time
+  ${chalk.cyan('$ leetcode timer 1 -m 30')}            Start with 30 minute limit
+  ${chalk.cyan('$ leetcode timer --stats')}            Show your solve time statistics
+  ${chalk.cyan('$ leetcode timer --stop')}             Stop active timer
+`)
+  .action((id, options) => timerCommand(id, options));
 
 program.showHelpAfterError('(add --help for additional information)');
 

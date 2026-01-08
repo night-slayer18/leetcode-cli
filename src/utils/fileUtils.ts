@@ -19,12 +19,19 @@ export async function findSolutionFile(
   const entries = await readdir(dir, { withFileTypes: true });
 
   for (const entry of entries) {
+    // Skip hidden directories (like .notes)
+    if (entry.name.startsWith('.')) continue;
+    
     const fullPath = join(dir, entry.name);
     if (entry.isDirectory()) {
       const found = await findSolutionFile(fullPath, problemId, currentDepth + 1);
       if (found) return found;
     } else if (entry.name.startsWith(`${problemId}.`)) {
-      return fullPath;
+      // Check it's a valid code file, not a markdown or other file
+      const ext = entry.name.split('.').pop()?.toLowerCase();
+      if (ext && ext in EXT_TO_LANG_MAP) {
+        return fullPath;
+      }
     }
   }
   return null;

@@ -7,6 +7,7 @@ import chalk from 'chalk';
 import { leetcodeClient } from '../api/client.js';
 import { requireAuth } from '../utils/auth.js';
 import { config } from '../storage/config.js';
+import { timerStorage } from '../storage/timer.js';
 import { displaySubmissionResult } from '../utils/display.js';
 import { findSolutionFile, findFileByName, getLangSlugFromExtension } from '../utils/fileUtils.js';
 import { isProblemId, isFileName } from '../utils/validation.js';
@@ -96,6 +97,40 @@ export async function submitCommand(fileOrId: string): Promise<void> {
 
     spinner.stop();
     displaySubmissionResult(result);
+
+    // Record timer if active and submission was accepted
+    if (result.status_msg === 'Accepted') {
+      const activeTimer = timerStorage.getActiveTimer();
+      if (activeTimer && activeTimer.problemId === problemId) {
+        const timerResult = timerStorage.stopTimer();
+        if (timerResult) {
+          timerStorage.recordSolveTime(
+            problemId,
+            problem.title,
+            problem.difficulty,
+            timerResult.durationSeconds,
+            activeTimer.durationMinutes
+          );
+          
+          const mins = Math.floor(timerResult.durationSeconds / 60);
+          const secs = timerResult.durationSeconds % 60;
+          const timeStr = `${mins}m ${secs}s`;
+          const withinLimit = timerResult.durationSeconds <= activeTimer.durationMinutes * 60;
+          
+          console.log();
+          console.log(chalk.bold('⏱️  Timer Result:'));
+          console.log(
+            `   Solved in ${withinLimit ? chalk.green(timeStr) : chalk.yellow(timeStr)}` +
+            ` (limit: ${activeTimer.durationMinutes}m)`
+          );
+          if (withinLimit) {
+            console.log(chalk.green('   ✓ Within time limit!'));
+          } else {
+            console.log(chalk.yellow('   ⚠ Exceeded time limit'));
+          }
+        }
+      }
+    }
   } catch (error) {
     spinner.fail('Submission failed');
     if (error instanceof Error) {

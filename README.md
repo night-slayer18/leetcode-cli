@@ -71,7 +71,7 @@ leetcode submit 1
 | `submit <id\|file>` | Submit solution to LeetCode |
 | `submissions <id>` | View past submissions |
 | `stat [username]` | Show user statistics |
-| `stat [username]` | Show user statistics |
+| `timer <id>` | Interview mode with timer |
 | `config` | View or set configuration |
 | `sync` | Sync solutions to Git repository |
 
@@ -207,6 +207,22 @@ leetcode stat -t
  # Sync all solutions to your configured git repo
  leetcode sync
  ```
+
+### Interview Timer
+
+```bash
+# Start timer for a problem (default: Easy=20m, Medium=40m, Hard=60m)
+leetcode timer 1
+
+# Custom time limit
+leetcode timer 1 -m 30
+
+# View your solve time stats
+leetcode timer --stats
+
+# Stop active timer
+leetcode timer --stop
+```
  
  ### Configuration
 
