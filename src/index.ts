@@ -19,6 +19,14 @@ import { notesCommand } from './commands/notes.js';
 import { todayCommand } from './commands/today.js';
 import { syncCommand } from './commands/sync.js';
 import { timerCommand } from './commands/timer.js';
+import {
+  collabHostCommand,
+  collabJoinCommand,
+  collabSyncCommand,
+  collabCompareCommand,
+  collabLeaveCommand,
+  collabStatusCommand,
+} from './commands/collab.js';
 
 const program = new Command();
 
@@ -35,7 +43,7 @@ program
   .name('leetcode')
   .usage('[command] [options]')
   .description(chalk.bold.cyan('🔥 A modern LeetCode CLI built with TypeScript'))
-  .version('1.5.0', '-v, --version', 'Output the version number')
+  .version('1.6.0', '-v, --version', 'Output the version number')
   .helpOption('-h, --help', 'Display help for command')
   .addHelpText('after', `
 ${chalk.yellow('Examples:')}
@@ -337,6 +345,56 @@ ${chalk.yellow('Examples:')}
   ${chalk.cyan('$ leetcode timer --stop')}             Stop active timer
 `)
   .action((id, options) => timerCommand(id, options));
+
+// Collaborative Coding
+const collabCmd = program
+  .command('collab')
+  .description('Collaborative coding with a partner')
+  .addHelpText('after', `
+${chalk.yellow('Subcommands:')}
+  ${chalk.cyan('host <id>')}      Create a room and get a code to share
+  ${chalk.cyan('join <code>')}    Join a room with the shared code
+  ${chalk.cyan('sync')}           Upload your solution to the room
+  ${chalk.cyan('compare')}        View both solutions side by side
+  ${chalk.cyan('status')}         Check room and sync status
+  ${chalk.cyan('leave')}          End the collaboration session
+
+${chalk.yellow('Examples:')}
+  ${chalk.gray('$ leetcode collab host 1')}       Start a session for Two Sum
+  ${chalk.gray('$ leetcode collab join ABC123')} Join your partner's session
+  ${chalk.gray('$ leetcode collab sync')}        Upload your code after solving
+  ${chalk.gray('$ leetcode collab compare')}     Compare solutions
+`);
+
+collabCmd
+  .command('host <problemId>')
+  .description('Host a collaboration session')
+  .action(collabHostCommand);
+
+collabCmd
+  .command('join <roomCode>')
+  .description('Join a collaboration session')
+  .action(collabJoinCommand);
+
+collabCmd
+  .command('sync')
+  .description('Sync your code with partner')
+  .action(collabSyncCommand);
+
+collabCmd
+  .command('compare')
+  .description('Compare your solution with partner')
+  .action(collabCompareCommand);
+
+collabCmd
+  .command('leave')
+  .description('Leave the collaboration session')
+  .action(collabLeaveCommand);
+
+collabCmd
+  .command('status')
+  .description('Show collaboration status')
+  .action(collabStatusCommand);
 
 program.showHelpAfterError('(add --help for additional information)');
 

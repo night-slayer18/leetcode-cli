@@ -1,106 +1,71 @@
-// Configuration management using 'conf' package
+// Configuration management - ONLY for config command settings
 import Conf from 'conf';
 import { homedir } from 'os';
 import { join } from 'path';
-import type { LeetCodeCredentials, SupportedLanguage, UserConfig } from '../types.js';
+import type { SupportedLanguage, UserConfig } from '../types.js';
 
 interface ConfigSchema {
-  credentials: LeetCodeCredentials | null;
-  config: UserConfig;
+  language: SupportedLanguage;
+  editor?: string;
+  workDir: string;
+  repo?: string;
 }
 
-const schema = {
-  credentials: {
-    type: 'object' as const,
-    nullable: true,
-    properties: {
-      csrfToken: { type: 'string' },
-      session: { type: 'string' },
-    },
-  },
-  config: {
-    type: 'object' as const,
-    properties: {
-      language: { type: 'string', default: 'typescript' },
-      editor: { type: 'string' },
-      workDir: { type: 'string', default: join(homedir(), 'leetcode') },
-      repo: { type: 'string' },
-    },
-    default: {
-      language: 'typescript' as SupportedLanguage,
-      workDir: join(homedir(), 'leetcode'),
-    },
-  },
-};
-
 const configStore = new Conf<ConfigSchema>({
-  projectName: 'leetcode-cli',
+  configName: 'config',
   cwd: join(homedir(), '.leetcode'),
-  schema,
+  defaults: {
+    language: 'typescript' as SupportedLanguage,
+    workDir: join(homedir(), 'leetcode'),
+  },
 });
 
 export const config = {
-  // Credentials
-  getCredentials(): LeetCodeCredentials | null {
-    return configStore.get('credentials') ?? null;
-  },
-
-  setCredentials(credentials: LeetCodeCredentials): void {
-    configStore.set('credentials', credentials);
-  },
-
-  clearCredentials(): void {
-    configStore.delete('credentials');
-  },
-
-  // User Config
   getConfig(): UserConfig {
-    return configStore.get('config');
+    return {
+      language: configStore.get('language'),
+      editor: configStore.get('editor'),
+      workDir: configStore.get('workDir'),
+      repo: configStore.get('repo'),
+    };
   },
 
   setLanguage(language: SupportedLanguage): void {
-    configStore.set('config.language', language);
+    configStore.set('language', language);
   },
 
   setEditor(editor: string): void {
-    configStore.set('config.editor', editor);
+    configStore.set('editor', editor);
   },
 
   setWorkDir(workDir: string): void {
-    configStore.set('config.workDir', workDir);
+    configStore.set('workDir', workDir);
   },
 
   setRepo(repo: string): void {
-    configStore.set('config.repo', repo);
+    configStore.set('repo', repo);
   },
 
   deleteRepo(): void {
-    configStore.delete('config.repo');
+    configStore.delete('repo');
   },
 
-  // Get specific config values
   getLanguage(): SupportedLanguage {
-    return configStore.get('config.language') as SupportedLanguage;
+    return configStore.get('language');
   },
 
   getEditor(): string | undefined {
-    return configStore.get('config.editor');
+    return configStore.get('editor');
   },
 
   getWorkDir(): string {
-    return configStore.get('config.workDir');
+    return configStore.get('workDir');
   },
 
   getRepo(): string | undefined {
-    return configStore.get('config.repo');
+    return configStore.get('repo');
   },
 
-  // Clear all config
-  clear(): void {
-    configStore.clear();
-  },
-
-  // Get config file path (for debugging)
   getPath(): string {
     return configStore.path;
   },

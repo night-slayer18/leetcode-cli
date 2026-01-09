@@ -24,7 +24,7 @@ interface TimerSchema {
 }
 
 const timerStore = new Conf<TimerSchema>({
-  projectName: 'leetcode-cli-timer',
+  configName: 'timer',
   cwd: join(homedir(), '.leetcode'),
   defaults: {
     solveTimes: {},

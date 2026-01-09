@@ -2,6 +2,7 @@
 import inquirer from 'inquirer';
 import chalk from 'chalk';
 import { config } from '../storage/config.js';
+import { credentials } from '../storage/credentials.js';
 import type { SupportedLanguage } from '../types.js';
 
 interface ConfigOptions {
@@ -114,7 +115,7 @@ export async function configInteractiveCommand(): Promise<void> {
 
 function showCurrentConfig(): void {
   const currentConfig = config.getConfig();
-  const credentials = config.getCredentials();
+  const creds = credentials.get();
 
   console.log();
   console.log(chalk.bold('LeetCode CLI Configuration'));
@@ -126,5 +127,5 @@ function showCurrentConfig(): void {
   console.log(chalk.gray('Editor:      '), chalk.white(currentConfig.editor ?? '(not set)'));
   console.log(chalk.gray('Work Dir:    '), chalk.white(currentConfig.workDir));
   console.log(chalk.gray('Repo URL:    '), chalk.white(currentConfig.repo ?? '(not set)'));
-  console.log(chalk.gray('Logged in:   '), credentials ? chalk.green('Yes') : chalk.yellow('No'));
+  console.log(chalk.gray('Logged in:   '), creds ? chalk.green('Yes') : chalk.yellow('No'));
 }
