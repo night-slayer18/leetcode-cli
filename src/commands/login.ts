@@ -3,7 +3,7 @@ import inquirer from 'inquirer';
 import ora from 'ora';
 import chalk from 'chalk';
 import { leetcodeClient } from '../api/client.js';
-import { config } from '../storage/config.js';
+import { credentials } from '../storage/credentials.js';
 import type { LeetCodeCredentials } from '../types.js';
 
 export async function loginCommand(): Promise<void> {
@@ -35,7 +35,7 @@ export async function loginCommand(): Promise<void> {
     },
   ]);
 
-  const credentials: LeetCodeCredentials = {
+  const creds: LeetCodeCredentials = {
     session: answers.session.trim(),
     csrfToken: answers.csrfToken.trim(),
   };
@@ -43,7 +43,7 @@ export async function loginCommand(): Promise<void> {
   const spinner = ora('Verifying credentials...').start();
 
   try {
-    leetcodeClient.setCredentials(credentials);
+    leetcodeClient.setCredentials(creds);
     const { isSignedIn, username } = await leetcodeClient.checkAuth();
 
     if (!isSignedIn || !username) {
@@ -53,11 +53,11 @@ export async function loginCommand(): Promise<void> {
     }
 
     // Save credentials
-    config.setCredentials(credentials);
+    credentials.set(creds);
     
     spinner.succeed(`Logged in as ${chalk.green(username)}`);
     console.log();
-    console.log(chalk.gray(`Credentials saved to ${config.getPath()}`));
+    console.log(chalk.gray(`Credentials saved to ${credentials.getPath()}`));
   } catch (error) {
     spinner.fail('Authentication failed');
     if (error instanceof Error) {
@@ -67,14 +67,14 @@ export async function loginCommand(): Promise<void> {
 }
 
 export async function logoutCommand(): Promise<void> {
-  config.clearCredentials();
+  credentials.clear();
   console.log(chalk.green('✓ Logged out successfully'));
 }
 
 export async function whoamiCommand(): Promise<void> {
-  const credentials = config.getCredentials();
+  const creds = credentials.get();
   
-  if (!credentials) {
+  if (!creds) {
     console.log(chalk.yellow('Not logged in. Run "leetcode login" to authenticate.'));
     return;
   }
@@ -82,7 +82,7 @@ export async function whoamiCommand(): Promise<void> {
   const spinner = ora('Checking session...').start();
 
   try {
-    leetcodeClient.setCredentials(credentials);
+    leetcodeClient.setCredentials(creds);
     const { isSignedIn, username } = await leetcodeClient.checkAuth();
 
     if (!isSignedIn || !username) {

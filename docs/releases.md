@@ -1,6 +1,25 @@
 # Release Notes
 
-## v1.5.0 (current)
+## v1.6.0 (current)
+
+> **Release Date**: 2026-01-10
+> **Focus**: Collaborative Coding & Storage Improvements
+
+### 🚀 New Features
+
+#### Collaborative Coding (`leetcode collab`)
+- **Pair Programming**: Solve problems together with a partner.
+- **Room System**: Host creates a room, partner joins with a 6-character code.
+- **Code Sync**: Upload solutions to the cloud for comparison.
+- **Solution Compare**: View both solutions with line numbers.
+- **Status Tracking**: See who has synced their code.
+
+### 🏗️ Architecture Improvements
+- **Separated Storage**: Config, credentials, collab, and timer data now stored in separate files (`~/.leetcode/`) for cleaner organization.
+
+---
+
+## v1.5.0
 
 > **Release Date**: 2026-01-09
 > **Focus**: Interview Timer & Bug Fixes
