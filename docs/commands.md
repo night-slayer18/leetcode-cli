@@ -400,6 +400,71 @@ leetcode config -l cpp -e code -w ~/leetcode
 
 ---
 
+## Collaborative Coding
+
+### `leetcode collab host <id>`
+Host a collaboration session for a problem.
+
+**Usage**: `leetcode collab host <problemId>`
+
+Creates a new collaboration room and generates a unique room code to share with your partner.
+
+**Examples**:
+```bash
+leetcode collab host 1
+# Output: Room Code: ABC123
+```
+
+---
+
+### `leetcode collab join <code>`
+Join an existing collaboration session.
+
+**Usage**: `leetcode collab join <roomCode>`
+
+**Examples**:
+```bash
+leetcode collab join ABC123
+```
+
+---
+
+### `leetcode collab sync`
+Upload your current solution to the collaboration room.
+
+**Usage**: `leetcode collab sync`
+
+Reads your local solution file and syncs it to the cloud so your partner can see it.
+
+---
+
+### `leetcode collab compare`
+Compare your solution with your partner's solution.
+
+**Usage**: `leetcode collab compare`
+
+Displays both solutions sequentially with line numbers for easy comparison.
+
+---
+
+### `leetcode collab status`
+Check the current collaboration session status.
+
+**Usage**: `leetcode collab status`
+
+Shows room code, problem ID, participants, and sync status.
+
+---
+
+### `leetcode collab leave`
+Leave the current collaboration session.
+
+**Usage**: `leetcode collab leave`
+
+If you're the host, the room will be deleted.
+
+---
+
 ## Global Options
 
 These work with any command:

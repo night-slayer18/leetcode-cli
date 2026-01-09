@@ -16,6 +16,8 @@ A modern, feature-rich LeetCode CLI built with TypeScript.
 - 📤 **Submit solutions** - Submit directly to LeetCode
 - 📊 **View statistics** - Track your progress
 - 🎯 **Daily challenge** - Get today's problem
+- ⏱️ **Interview timer** - Timed practice with solve time tracking
+- 👥 **Collaborative coding** - Solve problems with a partner
 - ⚙️ **Configurable** - Set language, editor, and working directory
 - 📂 **Smart file discovery** - Use problem ID, filename, or full path
 - 🔄 **Git Sync** - Auto-sync solutions to GitHub/GitLab
@@ -72,6 +74,7 @@ leetcode submit 1
 | `submissions <id>` | View past submissions |
 | `stat [username]` | Show user statistics |
 | `timer <id>` | Interview mode with timer |
+| `collab <cmd>` | Collaborative coding with a partner |
 | `config` | View or set configuration |
 | `sync` | Sync solutions to Git repository |
 
@@ -222,6 +225,29 @@ leetcode timer --stats
 
 # Stop active timer
 leetcode timer --stop
+```
+
+### Collaborative Coding
+
+```bash
+# Host a collaboration session
+leetcode collab host 1
+
+# Share the room code with your partner
+# Partner joins with:
+leetcode collab join ABC123
+
+# Both solve the problem, then sync
+leetcode collab sync
+
+# Compare solutions
+leetcode collab compare
+
+# Check session status
+leetcode collab status
+
+# Leave session
+leetcode collab leave
 ```
  
  ### Configuration
