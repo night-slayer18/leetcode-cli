@@ -197,6 +197,16 @@ describe('CLI Integration Tests', () => {
       expect(stdout).toContain('sync');
       expect(stdout).toContain('compare');
     });
+
+    it('should have snapshot command', () => {
+      const { stdout } = runCLI(['snapshot', '--help']);
+      expect(stdout).toContain('snapshot');
+      expect(stdout).toContain('save');
+      expect(stdout).toContain('list');
+      expect(stdout).toContain('restore');
+      expect(stdout).toContain('diff');
+      expect(stdout).toContain('delete');
+    });
   });
 
   describe('Collab Subcommands', () => {

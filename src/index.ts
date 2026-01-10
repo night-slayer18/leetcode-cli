@@ -27,13 +27,25 @@ import {
   collabLeaveCommand,
   collabStatusCommand,
 } from './commands/collab.js';
+import {
+  snapshotSaveCommand,
+  snapshotListCommand,
+  snapshotRestoreCommand,
+  snapshotDiffCommand,
+  snapshotDeleteCommand,
+} from './commands/snapshot.js';
 
 const program = new Command();
 
 
 program.configureHelp({
   sortSubcommands: true,
-  subcommandTerm: (cmd) => chalk.cyan(cmd.name()) + (cmd.alias() ? chalk.gray(`|${cmd.alias()}`) : ''),
+  subcommandTerm: (cmd) => {
+    const name = cmd.name();
+    const alias = cmd.alias();
+    const term = alias ? `${name}|${alias}` : name;
+    return chalk.cyan(term.padEnd(16));
+  },
   subcommandDescription: (cmd) => chalk.white(cmd.description()),
   optionTerm: (option) => chalk.yellow(option.flags),
   optionDescription: (option) => chalk.white(option.description),
@@ -395,6 +407,50 @@ collabCmd
   .command('status')
   .description('Show collaboration status')
   .action(collabStatusCommand);
+
+// Snapshot command
+const snapshotCmd = program
+  .command('snapshot')
+  .description('Save and restore solution versions')
+  .addHelpText('after', `
+${chalk.yellow('Subcommands:')}
+  ${chalk.cyan('save <id> [name]')}           Save current solution as a snapshot
+  ${chalk.cyan('list <id>')}                  List all snapshots for a problem
+  ${chalk.cyan('restore <id> <snapshot>')}   Restore a snapshot
+  ${chalk.cyan('diff <id> <s1> <s2>')}        Compare two snapshots
+  ${chalk.cyan('delete <id> <snapshot>')}    Delete a snapshot
+
+${chalk.yellow('Examples:')}
+  ${chalk.gray('$ leetcode snapshot save 1 "brute-force"')}     Save current solution
+  ${chalk.gray('$ leetcode snapshot list 1')}                   List snapshots
+  ${chalk.gray('$ leetcode snapshot restore 1 2')}              Restore snapshot #2
+  ${chalk.gray('$ leetcode snapshot diff 1 1 2')}               Compare snapshots
+`);
+
+snapshotCmd
+  .command('save <id> [name]')
+  .description('Save current solution as a snapshot')
+  .action(snapshotSaveCommand);
+
+snapshotCmd
+  .command('list <id>')
+  .description('List all snapshots for a problem')
+  .action(snapshotListCommand);
+
+snapshotCmd
+  .command('restore <id> <snapshot>')
+  .description('Restore a snapshot')
+  .action(snapshotRestoreCommand);
+
+snapshotCmd
+  .command('diff <id> <snap1> <snap2>')
+  .description('Compare two snapshots')
+  .action(snapshotDiffCommand);
+
+snapshotCmd
+  .command('delete <id> <snapshot>')
+  .description('Delete a snapshot')
+  .action(snapshotDeleteCommand);
 
 program.showHelpAfterError('(add --help for additional information)');
 
