@@ -333,6 +333,26 @@ Config is stored at `~/.leetcode/config.json`:
 
 - Node.js >= 20.0.0
 
+## Development
+
+```bash
+# Clone and install
+git clone https://github.com/night-slayer18/leetcode-cli.git
+cd leetcode-cli
+npm install
+
+# Build
+npm run build
+
+# Run tests
+npm test
+
+# Run with coverage
+npm test -- --coverage
+```
+
+See [docs/testing.md](docs/testing.md) for detailed testing documentation.
+
 ## Docker Usage
 
 You can run the CLI using Docker without installing Node.js.

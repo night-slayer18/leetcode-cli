@@ -10,6 +10,7 @@ A modern, feature-rich command-line interface for LeetCode, built with TypeScrip
 - [Configuration](config.md)
 - [Commands Reference](commands.md)
 - [Docker Usage](docker.md)
+- [Testing](testing.md)
 - [Release Notes](releases.md)
 
 ## Features
