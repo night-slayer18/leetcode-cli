@@ -4,5 +4,7 @@ dist
 .github
 coverage
 docs
+src/__tests__
+vitest.config.ts
 *.md
 *.log
