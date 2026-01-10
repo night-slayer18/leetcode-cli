@@ -465,6 +465,84 @@ If you're the host, the room will be deleted.
 
 ---
 
+## Solution Snapshots
+
+### `leetcode snapshot save <id> [name]`
+Save current solution as a snapshot.
+
+**Arguments**:
+- `<id>` - Problem ID
+- `[name]` - Optional snapshot name (defaults to `snapshot-N`)
+
+**Examples**:
+```bash
+leetcode snapshot save 1 "brute-force"
+leetcode snapshot save 1 "hash-map-approach"
+leetcode snapshot save 1  # auto-named "snapshot-1"
+```
+
+---
+
+### `leetcode snapshot list <id>`
+List all snapshots for a problem.
+
+**Arguments**:
+- `<id>` - Problem ID
+
+**Example**:
+```bash
+leetcode snapshot list 1
+#   1. brute-force         (15 lines, 5m ago)
+#   2. hash-map-approach   (10 lines, just now)
+```
+
+---
+
+### `leetcode snapshot restore <id> <snapshot>`
+Restore a previously saved snapshot. Auto-creates backup of current code.
+
+**Arguments**:
+- `<id>` - Problem ID  
+- `<snapshot>` - Snapshot ID or name
+
+**Examples**:
+```bash
+leetcode snapshot restore 1 1           # By ID
+leetcode snapshot restore 1 brute-force # By name
+```
+
+---
+
+### `leetcode snapshot diff <id> <snap1> <snap2>`
+Compare two snapshots with colored diff output.
+
+**Arguments**:
+- `<id>` - Problem ID
+- `<snap1>` - First snapshot ID or name
+- `<snap2>` - Second snapshot ID or name
+
+**Example**:
+```bash
+leetcode snapshot diff 1 1 2
+# Shows: + added lines, - removed lines, metrics
+```
+
+---
+
+### `leetcode snapshot delete <id> <snapshot>`
+Delete a snapshot.
+
+**Arguments**:
+- `<id>` - Problem ID
+- `<snapshot>` - Snapshot ID or name
+
+**Example**:
+```bash
+leetcode snapshot delete 1 brute-force
+```
+
+---
+
 ## Global Options
 
 These work with any command:

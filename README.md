@@ -17,7 +17,8 @@ A modern, feature-rich LeetCode CLI built with TypeScript.
 - 📊 **View statistics** - Track your progress
 - 🎯 **Daily challenge** - Get today's problem
 - ⏱️ **Interview timer** - Timed practice with solve time tracking
-- 👥 **Collaborative coding** - Solve problems with a partner
+- � **Solution snapshots** - Save, restore, and compare solution versions
+- �👥 **Collaborative coding** - Solve problems with a partner
 - ⚙️ **Configurable** - Set language, editor, and working directory
 - 📂 **Smart file discovery** - Use problem ID, filename, or full path
 - 🔄 **Git Sync** - Auto-sync solutions to GitHub/GitLab
@@ -74,6 +75,7 @@ leetcode submit 1
 | `submissions <id>` | View past submissions |
 | `stat [username]` | Show user statistics |
 | `timer <id>` | Interview mode with timer |
+| `snapshot <cmd>` | Save and restore solution versions |
 | `collab <cmd>` | Collaborative coding with a partner |
 | `config` | View or set configuration |
 | `sync` | Sync solutions to Git repository |
@@ -248,6 +250,25 @@ leetcode collab status
 
 # Leave session
 leetcode collab leave
+```
+
+### Solution Snapshots
+
+```bash
+# Save current approach
+leetcode snapshot save 1 "brute-force"
+
+# Try a new approach, then save
+leetcode snapshot save 1 "hash-map"
+
+# List all saved versions
+leetcode snapshot list 1
+
+# Compare approaches
+leetcode snapshot diff 1 1 2
+
+# Restore if needed
+leetcode snapshot restore 1 brute-force
 ```
  
  ### Configuration
