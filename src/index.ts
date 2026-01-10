@@ -34,6 +34,7 @@ import {
   snapshotDiffCommand,
   snapshotDeleteCommand,
 } from './commands/snapshot.js';
+import { diffCommand } from './commands/diff.js';
 
 const program = new Command();
 
@@ -215,6 +216,21 @@ ${chalk.yellow('Examples:')}
   ${chalk.cyan('$ leetcode x 412')}                   Short alias
 `)
   .action(submitCommand);
+
+program
+  .command('diff <id>')
+  .description('Compare solution with past submissions')
+  .option('-s, --submission <id>', 'Compare with specific submission ID')
+  .option('-f, --file <path>', 'Compare with a local file')
+  .option('-u, --unified', 'Show unified diff (line-by-line changes)')
+  .addHelpText('after', `
+${chalk.yellow('Examples:')}
+  ${chalk.cyan('$ leetcode diff 1')}                  Compare with last accepted
+  ${chalk.cyan('$ leetcode diff 1 -u')}               Show unified diff
+  ${chalk.cyan('$ leetcode diff 1 -s 12345')}         Compare with specific submission
+  ${chalk.cyan('$ leetcode diff 1 -f other.py')}      Compare with local file
+`)
+  .action(diffCommand);
 
 program
   .command('submissions <id>')

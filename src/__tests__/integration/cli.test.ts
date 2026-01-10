@@ -207,6 +207,13 @@ describe('CLI Integration Tests', () => {
       expect(stdout).toContain('diff');
       expect(stdout).toContain('delete');
     });
+
+    it('should have diff command', () => {
+      const { stdout } = runCLI(['diff', '--help']);
+      expect(stdout).toContain('diff');
+      expect(stdout).toContain('--submission');
+      expect(stdout).toContain('--file');
+    });
   });
 
   describe('Collab Subcommands', () => {
