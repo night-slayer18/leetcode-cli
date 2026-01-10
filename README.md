@@ -76,6 +76,7 @@ leetcode submit 1
 | `stat [username]` | Show user statistics |
 | `timer <id>` | Interview mode with timer |
 | `snapshot <cmd>` | Save and restore solution versions |
+| `diff <id>` | Compare solution with past submissions |
 | `collab <cmd>` | Collaborative coding with a partner |
 | `config` | View or set configuration |
 | `sync` | Sync solutions to Git repository |
@@ -269,6 +270,22 @@ leetcode snapshot diff 1 1 2
 
 # Restore if needed
 leetcode snapshot restore 1 brute-force
+```
+
+### Compare Solutions
+
+```bash
+# Compare with last accepted submission
+leetcode diff 1
+
+# Show unified diff (line-by-line changes)
+leetcode diff 1 --unified
+
+# Compare with specific submission
+leetcode diff 1 --submission 12345
+
+# Compare with local file
+leetcode diff 1 --file other-solution.py
 ```
  
  ### Configuration

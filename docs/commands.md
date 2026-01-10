@@ -543,6 +543,38 @@ leetcode snapshot delete 1 brute-force
 
 ---
 
+## Solution Diff
+
+### `leetcode diff <id>`
+Compare your current solution with past submissions or other files.
+
+**Arguments**:
+- `<id>` - Problem ID
+
+**Options**:
+- `-s, --submission <id>` - Compare with specific submission ID
+- `-f, --file <path>` - Compare with a local file
+- `-u, --unified` - Show unified diff (line-by-line changes)
+
+**Default**: Shows both solutions one below the other with line numbers and summary.
+
+**Examples**:
+```bash
+# Compare with last accepted submission
+leetcode diff 1
+
+# Show unified diff (like git diff)
+leetcode diff 1 --unified
+
+# Compare with specific submission
+leetcode diff 1 --submission 12345
+
+# Compare with local file
+leetcode diff 1 --file other-solution.py
+```
+
+---
+
 ## Global Options
 
 These work with any command:
