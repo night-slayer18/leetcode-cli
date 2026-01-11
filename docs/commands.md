@@ -575,6 +575,89 @@ leetcode diff 1 --file other-solution.py
 
 ---
 
+## Workspace Management
+
+### `leetcode workspace current`
+Show the currently active workspace and its configuration.
+
+**Usage**: `leetcode workspace current`
+
+---
+
+### `leetcode workspace list`
+List all available workspaces.
+
+**Usage**: `leetcode workspace list`
+
+Shows all workspaces with the active one marked. Each workspace displays its working directory.
+
+---
+
+### `leetcode workspace create <name>`
+Create a new workspace.
+
+**Options**:
+- `-w, --workdir <path>` - Set custom working directory (default: `~/leetcode/<name>`)
+
+**Examples**:
+```bash
+# Create workspace with default workdir
+leetcode workspace create interview
+
+# Create workspace with custom workdir
+leetcode workspace create contest -w ~/leetcode-contests
+```
+
+---
+
+### `leetcode workspace use <name>`
+Switch to a different workspace.
+
+**Usage**: `leetcode workspace use <name>`
+
+**Examples**:
+```bash
+# Switch to interview workspace
+leetcode workspace use interview
+
+# Switch back to default
+leetcode workspace use default
+```
+
+---
+
+### `leetcode workspace delete <name>`
+Delete a workspace.
+
+**Usage**: `leetcode workspace delete <name>`
+
+**Notes**:
+- Cannot delete the `default` workspace
+- Files in the workDir are NOT deleted (only the workspace config is removed)
+- If deleting the active workspace, switches to `default`
+
+**Examples**:
+```bash
+# Delete old workspace
+leetcode workspace delete old-project
+```
+
+---
+
+### Workspace Isolation
+
+Each workspace has its own:
+- **Config**: language, editor, workDir, syncRepo
+- **Timer history**: solve times and active timer
+- **Collab sessions**: active collaboration state
+- **Snapshots**: solution version history
+
+Shared across all workspaces:
+- **Credentials**: LeetCode login session
+- **Bookmarks**: problem bookmarks
+
+---
+
 ## Global Options
 
 These work with any command:

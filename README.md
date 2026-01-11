@@ -17,8 +17,9 @@ A modern, feature-rich LeetCode CLI built with TypeScript.
 - 📊 **View statistics** - Track your progress
 - 🎯 **Daily challenge** - Get today's problem
 - ⏱️ **Interview timer** - Timed practice with solve time tracking
-- � **Solution snapshots** - Save, restore, and compare solution versions
-- �👥 **Collaborative coding** - Solve problems with a partner
+- 📸 **Solution snapshots** - Save, restore, and compare solution versions
+- 👥 **Collaborative coding** - Solve problems with a partner
+- 📁 **Workspaces** - Isolate contexts (interview prep, study, contests)
 - ⚙️ **Configurable** - Set language, editor, and working directory
 - 📂 **Smart file discovery** - Use problem ID, filename, or full path
 - 🔄 **Git Sync** - Auto-sync solutions to GitHub/GitLab
@@ -78,6 +79,7 @@ leetcode submit 1
 | `snapshot <cmd>` | Save and restore solution versions |
 | `diff <id>` | Compare solution with past submissions |
 | `collab <cmd>` | Collaborative coding with a partner |
+| `workspace <cmd>` | Manage workspaces for different contexts |
 | `config` | View or set configuration |
 | `sync` | Sync solutions to Git repository |
 
@@ -287,6 +289,29 @@ leetcode diff 1 --submission 12345
 # Compare with local file
 leetcode diff 1 --file other-solution.py
 ```
+
+### Workspaces
+
+Isolate your problem-solving contexts (e.g., interview prep vs daily practice).
+
+```bash
+# Show current workspace
+leetcode workspace current
+
+# List all workspaces
+leetcode workspace list
+
+# Create new workspace
+leetcode workspace create interview -w ~/leetcode-interview
+
+# Switch workspace
+leetcode workspace use interview
+
+# Delete workspace (files not deleted)
+leetcode workspace delete old-workspace
+```
+
+Each workspace has its own config, timer history, and solution snapshots.
  
  ### Configuration
 

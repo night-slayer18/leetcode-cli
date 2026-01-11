@@ -30,11 +30,27 @@ leetcode config -r https://github.com/myuser/leetcode-solutions.git
 ```
 
 ## Settings
-Config is stored in `~/.leetcode/config.json`.
+
+Config is stored per-workspace in `~/.leetcode/workspaces/<name>/config.json`.
 
 | Key | Description |
 |-----|-------------|
-| `language` | Default language extension to use (java, python3, cpp, etc) |
+| `lang` | Default language extension (java, python3, cpp, etc) |
 | `editor` | Command to open files (code, vim, nano) |
 | `workDir` | Directory where solution files are saved |
-| `repo` | Remote Git repository URL |
+| `syncRepo` | Remote Git repository URL |
+
+## Workspace-Aware Storage
+
+Settings are now stored per-workspace for isolation:
+
+| Data | Storage Location | Scope |
+|------|-----------------|-------|
+| Config | `~/.leetcode/workspaces/<name>/config.json` | Per-workspace |
+| Timer | `~/.leetcode/workspaces/<name>/timer.json` | Per-workspace |
+| Collab | `~/.leetcode/workspaces/<name>/collab.json` | Per-workspace |
+| Snapshots | `~/.leetcode/workspaces/<name>/snapshots/` | Per-workspace |
+| Credentials | `~/.leetcode/credentials.json` | Shared |
+| Bookmarks | `~/.leetcode/bookmarks.json` | Shared |
+
+Use `leetcode workspace current` to see which workspace is active.
