@@ -141,6 +141,9 @@ leetcode test ./Easy/String/20.valid-parentheses.java
 
 # With custom test case
 leetcode test 20 -c "[1,2,3]\n4"
+
+# Visual debugging (ASCII visualization for arrays, trees, etc.)
+leetcode test 1 --visualize
 ```
 
 ### Random Problem

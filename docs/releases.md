@@ -3,7 +3,7 @@
 ## v2.0.0 (Upcoming)
 
 > **Release Date**: 2026-01-11
-> **Focus**: Workspaces - A New Architecture
+> **Focus**: Workspaces, Visual Debugging, Snapshots & Diff
 
 ### ⚠️ Breaking Change
 
@@ -25,16 +25,24 @@ Save, restore, and compare different versions of your solutions. Supports save/l
 #### Solution Diff (`leetcode diff`)
 Compare your current solution with past submissions or files. Shows both solutions with line numbers, or use `--unified` for line-by-line diff.
 
+#### Visual Debugging (`leetcode test --visualize`)
+ASCII visualization for test outputs based on problem tags.
+- Supports: Array, Linked List, Tree, Binary Tree, Graph, Matrix, String, Stack, Queue, Heap
+- Highlights mismatches in red
+- Auto-detects 2D arrays as matrices
+
 ### 🏗️ Architecture Improvements
 - **Workspace-aware storage**: Config, timer, collab, and snapshots are now isolated per-workspace
 
 ### 🧪 Testing Improvements
-- Comprehensive test suite with 178 tests
+- Comprehensive test suite with 194 tests
 - Integration tests for CLI binary verification
 - Multi-workspace isolation tests
+- Visual debugging unit tests
 
 ### 🐛 Bug Fixes
 - Fixed command help text alignment
+- Fixed empty stdout display
 
 ---
 
