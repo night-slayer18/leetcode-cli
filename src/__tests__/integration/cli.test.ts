@@ -214,6 +214,16 @@ describe('CLI Integration Tests', () => {
       expect(stdout).toContain('--submission');
       expect(stdout).toContain('--file');
     });
+
+    it('should have workspace command', () => {
+      const { stdout } = runCLI(['workspace', '--help']);
+      expect(stdout).toContain('workspace');
+      expect(stdout).toContain('create');
+      expect(stdout).toContain('list');
+      expect(stdout).toContain('use');
+      expect(stdout).toContain('current');
+      expect(stdout).toContain('delete');
+    });
   });
 
   describe('Collab Subcommands', () => {

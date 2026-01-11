@@ -20,6 +20,7 @@ vi.mock('../../storage/config.js', () => ({
     setEditor: vi.fn(),
     setRepo: vi.fn(),
     getPath: vi.fn(() => '/tmp/.leetcode/config.json'),
+    getActiveWorkspace: vi.fn(() => 'default'),
   },
 }));
 
@@ -53,7 +54,7 @@ describe('Config Command', () => {
       await configCommand({});
 
       expect(config.getConfig).toHaveBeenCalled();
-      expect(outputContains('Configuration')).toBe(true);
+      expect(outputContains('Config file:')).toBe(true);
     });
   });
 

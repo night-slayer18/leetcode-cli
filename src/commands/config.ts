@@ -70,6 +70,11 @@ export async function configCommand(options: ConfigOptions): Promise<void> {
 
 export async function configInteractiveCommand(): Promise<void> {
   const currentConfig = config.getConfig();
+  const workspace = config.getActiveWorkspace();
+
+  console.log();
+  console.log(chalk.bold.cyan(`📁 Configuring workspace: ${workspace}`));
+  console.log(chalk.gray('─'.repeat(40)));
 
   const answers = await inquirer.prompt([
     {
@@ -116,9 +121,10 @@ export async function configInteractiveCommand(): Promise<void> {
 function showCurrentConfig(): void {
   const currentConfig = config.getConfig();
   const creds = credentials.get();
+  const workspace = config.getActiveWorkspace();
 
   console.log();
-  console.log(chalk.bold('LeetCode CLI Configuration'));
+  console.log(chalk.bold.cyan(`📁 Workspace: ${workspace}`));
   console.log(chalk.gray('─'.repeat(40)));
   console.log();
   console.log(chalk.gray('Config file:'), config.getPath());
