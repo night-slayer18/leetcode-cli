@@ -35,6 +35,13 @@ import {
   snapshotDeleteCommand,
 } from './commands/snapshot.js';
 import { diffCommand } from './commands/diff.js';
+import {
+  workspaceCurrentCommand,
+  workspaceListCommand,
+  workspaceCreateCommand,
+  workspaceUseCommand,
+  workspaceDeleteCommand,
+} from './commands/workspace.js';
 
 const program = new Command();
 
@@ -373,6 +380,37 @@ ${chalk.yellow('Examples:')}
   ${chalk.cyan('$ leetcode timer --stop')}             Stop active timer
 `)
   .action((id, options) => timerCommand(id, options));
+
+// Workspace Management
+const workspaceCmd = program
+  .command('workspace')
+  .description('Manage workspaces for different contexts');
+
+workspaceCmd
+  .command('current')
+  .description('Show current workspace')
+  .action(workspaceCurrentCommand);
+
+workspaceCmd
+  .command('list')
+  .description('List all workspaces')
+  .action(workspaceListCommand);
+
+workspaceCmd
+  .command('create <name>')
+  .description('Create a new workspace')
+  .option('-w, --workdir <path>', 'Set working directory for this workspace')
+  .action(workspaceCreateCommand);
+
+workspaceCmd
+  .command('use <name>')
+  .description('Switch to a workspace')
+  .action(workspaceUseCommand);
+
+workspaceCmd
+  .command('delete <name>')
+  .description('Delete a workspace')
+  .action(workspaceDeleteCommand);
 
 // Collaborative Coding
 const collabCmd = program
