@@ -199,12 +199,14 @@ program
   .alias('t')
   .description('Test solution against sample test cases')
   .option('-c, --testcase <testcase>', 'Custom test case')
+  .option('-V, --visualize', 'Visual output for data structures (arrays, trees, etc.)')
   .addHelpText('after', `
 ${chalk.yellow('Examples:')}
   ${chalk.cyan('$ leetcode test 1')}                  Test by problem ID
   ${chalk.cyan('$ leetcode test two-sum')}            Test by problem slug
   ${chalk.cyan('$ leetcode test ./path/to/file.py')} Test by file path
   ${chalk.cyan('$ leetcode test 1 -c "[1,2]\\n3"')}   Test with custom case
+  ${chalk.cyan('$ leetcode test 1 --visualize')}     Visual mode for debugging
   ${chalk.cyan('$ leetcode t 412')}                   Short alias
 
 ${chalk.gray('Testcases use \\n to separate multiple inputs.')}
