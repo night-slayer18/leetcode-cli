@@ -1,7 +1,8 @@
 
 import chalk from 'chalk';
 import Table from 'cli-table3';
-import type { Problem, ProblemDetail, SubmissionResult, TestResult, Submission } from '../types.js';
+import type { Problem, ProblemDetail, SubmissionResult, TestResult, Submission, TopicTag } from '../types.js';
+import { visualizeTestOutput } from './visualize.js';
 
 
 export function displayProblemList(problems: Problem[], total: number): void {
@@ -128,7 +129,7 @@ export function displayProblemDetail(problem: ProblemDetail): void {
   console.log();
 }
 
-export function displayTestResult(result: TestResult): void {
+export function displayTestResult(result: TestResult, topicTags?: TopicTag[]): void {
   console.log();
   
   if (result.compile_error) {
@@ -149,23 +150,63 @@ export function displayTestResult(result: TestResult): void {
     console.log(chalk.yellow.bold('✗ Some test cases failed'));
   }
 
-  console.log();
-  console.log(chalk.gray('Your Output:'));
-  for (const output of result.code_answer ?? []) {
-    console.log(chalk.white(`  ${output}`));
+  const outputs = result.code_answer ?? [];
+  const expected = result.expected_code_answer ?? [];
+
+  // Visual mode with topic tags
+  if (topicTags && outputs.length > 0) {
+    console.log();
+    console.log(chalk.gray.bold('─'.repeat(50)));
+    
+    // Filter out empty entries
+    const validCases = outputs
+      .map((out, i) => ({ out, exp: expected[i] ?? '' }))
+      .filter(({ out, exp }) => out !== '' || exp !== '');
+    
+    for (let i = 0; i < validCases.length; i++) {
+      const { out, exp } = validCases[i];
+      const { outputVis, expectedVis, matches, unsupported } = visualizeTestOutput(out, exp, topicTags);
+
+      console.log();
+      console.log(chalk.gray(`Test Case ${i + 1}:`));
+      
+      if (unsupported) {
+        console.log(chalk.yellow('  ⚠ No visualization available for this problem type'));
+        console.log(chalk.gray(`  Tags: ${topicTags.map(t => t.name).join(', ')}`));
+      }
+      
+      console.log();
+      console.log(chalk.cyan('  Your Output:'));
+      outputVis.split('\n').forEach(line => console.log(`    ${line}`));
+      console.log();
+      console.log(chalk.cyan('  Expected:'));
+      expectedVis.split('\n').forEach(line => console.log(`    ${line}`));
+      console.log();
+      console.log(matches ? chalk.green('  ✓ Match') : chalk.red('  ✗ Mismatch'));
+    }
+    
+    console.log(chalk.gray.bold('─'.repeat(50)));
+  } else {
+    // Standard mode
+    console.log();
+    console.log(chalk.gray('Your Output:'));
+    for (const output of outputs) {
+      console.log(chalk.white(`  ${output}`));
+    }
+
+    console.log();
+    console.log(chalk.gray('Expected Output:'));
+    for (const output of expected) {
+      console.log(chalk.white(`  ${output}`));
+    }
   }
 
-  console.log();
-  console.log(chalk.gray('Expected Output:'));
-  for (const output of result.expected_code_answer ?? []) {
-    console.log(chalk.white(`  ${output}`));
-  }
-
-  if (result.std_output_list?.length) {
+  const stdoutEntries = (result.std_output_list ?? []).filter(s => s);
+  if (stdoutEntries.length > 0) {
     console.log();
     console.log(chalk.gray('Stdout:'));
-    for (const output of result.std_output_list) {
-      if (output) console.log(chalk.gray(`  ${output}`));
+    for (const output of stdoutEntries) {
+      console.log(chalk.gray(`  ${output}`));
     }
   }
 }

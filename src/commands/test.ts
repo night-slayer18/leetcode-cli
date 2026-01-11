@@ -13,6 +13,7 @@ import { isProblemId, isFileName } from '../utils/validation.js';
 
 interface TestOptions {
   testcase?: string;
+  visualize?: boolean;
 }
 
 export async function testCommand(fileOrId: string, options: TestOptions): Promise<void> {
@@ -84,7 +85,7 @@ export async function testCommand(fileOrId: string, options: TestOptions): Promi
     const result = await leetcodeClient.testSolution(titleSlug, code, lang, testcases, problem.questionId);
 
     spinner.stop();
-    displayTestResult(result);
+    displayTestResult(result, options.visualize ? problem.topicTags : undefined);
   } catch (error) {
     spinner.fail('Test failed');
     if (error instanceof Error) {

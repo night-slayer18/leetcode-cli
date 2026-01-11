@@ -179,6 +179,7 @@ Test solution against sample test cases.
 
 **Options**:
 - `-c, --testcase <testcase>` - Custom test case input
+- `-V, --visualize` - Visual output for data structures
 
 **Three Ways to Test**:
 ```bash
@@ -199,6 +200,26 @@ leetcode t ../problems/1.two-sum.cpp
 # With custom test case
 leetcode test 1 -c "[1,2,3]\n4"
 leetcode test 1 --testcase "[1,2,3]\n4"
+
+# Visual debugging mode
+leetcode test 1 --visualize
+```
+
+**Visual Mode Support**:
+
+Supported tags: `Array`, `Linked List`, `Tree`, `Binary Tree`, `Graph`, `Matrix`, `String`, `Stack`, `Queue`, `Heap`
+
+```
+Test Case 1:
+  Your Output:
+     [0] [1] [2]
+       1   2   3
+
+  Expected:
+     [0] [1] [2]
+       1   2   3
+
+  ✓ Match
 ```
 
 ---
