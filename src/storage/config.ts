@@ -1,72 +1,63 @@
-// Configuration management - ONLY for config command settings
-import Conf from 'conf';
-import { homedir } from 'os';
+// Configuration management - delegates to workspace storage
 import { join } from 'path';
 import type { SupportedLanguage, UserConfig } from '../types.js';
-
-interface ConfigSchema {
-  language: SupportedLanguage;
-  editor?: string;
-  workDir: string;
-  repo?: string;
-}
-
-const configStore = new Conf<ConfigSchema>({
-  configName: 'config',
-  cwd: join(homedir(), '.leetcode'),
-  defaults: {
-    language: 'typescript' as SupportedLanguage,
-    workDir: join(homedir(), 'leetcode'),
-  },
-});
+import { workspaceStorage } from './workspaces.js';
 
 export const config = {
   getConfig(): UserConfig {
+    const wsConfig = workspaceStorage.getConfig();
     return {
-      language: configStore.get('language'),
-      editor: configStore.get('editor'),
-      workDir: configStore.get('workDir'),
-      repo: configStore.get('repo'),
+      language: wsConfig.lang as SupportedLanguage,
+      editor: wsConfig.editor,
+      workDir: wsConfig.workDir,
+      repo: wsConfig.syncRepo,
     };
   },
 
   setLanguage(language: SupportedLanguage): void {
-    configStore.set('language', language);
+    workspaceStorage.setConfig({ lang: language });
   },
 
   setEditor(editor: string): void {
-    configStore.set('editor', editor);
+    workspaceStorage.setConfig({ editor });
   },
 
   setWorkDir(workDir: string): void {
-    configStore.set('workDir', workDir);
+    workspaceStorage.setConfig({ workDir });
   },
 
   setRepo(repo: string): void {
-    configStore.set('repo', repo);
+    workspaceStorage.setConfig({ syncRepo: repo });
   },
 
   deleteRepo(): void {
-    configStore.delete('repo');
+    const wsConfig = workspaceStorage.getConfig();
+    delete wsConfig.syncRepo;
+    workspaceStorage.setConfig(wsConfig);
   },
 
   getLanguage(): SupportedLanguage {
-    return configStore.get('language');
+    return workspaceStorage.getConfig().lang as SupportedLanguage;
   },
 
   getEditor(): string | undefined {
-    return configStore.get('editor');
+    return workspaceStorage.getConfig().editor;
   },
 
   getWorkDir(): string {
-    return configStore.get('workDir');
+    return workspaceStorage.getConfig().workDir;
   },
 
   getRepo(): string | undefined {
-    return configStore.get('repo');
+    return workspaceStorage.getConfig().syncRepo;
   },
 
   getPath(): string {
-    return configStore.path;
+    return join(workspaceStorage.getWorkspaceDir(), 'config.json');
+  },
+
+  // New workspace-aware methods
+  getActiveWorkspace(): string {
+    return workspaceStorage.getActive();
   },
 };

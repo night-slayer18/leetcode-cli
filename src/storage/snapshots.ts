@@ -1,9 +1,9 @@
-// Snapshot storage - save/restore solution file versions
+// Snapshot storage - save/restore solution file versions - workspace-aware
 import { existsSync, mkdirSync, readFileSync, writeFileSync, unlinkSync } from 'fs';
 import { join } from 'path';
-import { homedir } from 'os';
 import { LANGUAGE_EXTENSIONS } from '../utils/templates.js';
 import type { SupportedLanguage } from '../types.js';
+import { workspaceStorage } from './workspaces.js';
 
 export interface Snapshot {
   id: number;
@@ -20,10 +20,12 @@ export interface SnapshotMeta {
   snapshots: Snapshot[];
 }
 
-const SNAPSHOTS_DIR = join(homedir(), '.leetcode', 'snapshots');
+function getSnapshotsDir(): string {
+  return workspaceStorage.getSnapshotsDir();
+}
 
 function getSnapshotDir(problemId: string): string {
-  return join(SNAPSHOTS_DIR, problemId);
+  return join(getSnapshotsDir(), problemId);
 }
 
 function getMetaPath(problemId: string): string {

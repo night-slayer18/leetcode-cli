@@ -1,7 +1,7 @@
-// Collab storage - collaboration session
-import Conf from 'conf';
-import { homedir } from 'os';
-import { join } from 'path';
+// Collab storage - collaboration session - workspace-aware
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
+import { dirname } from 'path';
+import { workspaceStorage } from './workspaces.js';
 
 export interface CollabSession {
   roomCode: string;
@@ -14,28 +14,37 @@ interface CollabSchema {
   session: CollabSession | null;
 }
 
-const collabStore = new Conf<CollabSchema>({
-  configName: 'collab',
-  cwd: join(homedir(), '.leetcode'),
-  defaults: {
-    session: null,
-  },
-});
+function getCollabPath(): string {
+  return workspaceStorage.getCollabPath();
+}
+
+function loadCollab(): CollabSchema {
+  const path = getCollabPath();
+  if (existsSync(path)) {
+    return JSON.parse(readFileSync(path, 'utf-8'));
+  }
+  return { session: null };
+}
+
+function saveCollab(data: CollabSchema): void {
+  const collabPath = getCollabPath();
+  const dir = dirname(collabPath);
+  if (!existsSync(dir)) {
+    mkdirSync(dir, { recursive: true });
+  }
+  writeFileSync(collabPath, JSON.stringify(data, null, 2));
+}
 
 export const collabStorage = {
   getSession(): CollabSession | null {
-    return collabStore.get('session');
+    return loadCollab().session;
   },
 
   setSession(session: CollabSession | null): void {
-    if (session) {
-      collabStore.set('session', session);
-    } else {
-      collabStore.delete('session');
-    }
+    saveCollab({ session });
   },
 
   getPath(): string {
-    return collabStore.path;
+    return getCollabPath();
   },
 };

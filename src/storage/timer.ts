@@ -1,7 +1,7 @@
-// Timer storage for tracking solve times
-import Conf from 'conf';
-import { homedir } from 'os';
-import { join } from 'path';
+// Timer storage for tracking solve times - workspace-aware
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
+import { dirname } from 'path';
+import { workspaceStorage } from './workspaces.js';
 
 interface SolveTimeEntry {
   problemId: string;
@@ -23,39 +23,55 @@ interface TimerSchema {
   } | null;
 }
 
-const timerStore = new Conf<TimerSchema>({
-  configName: 'timer',
-  cwd: join(homedir(), '.leetcode'),
-  defaults: {
-    solveTimes: {},
-    activeTimer: null,
-  },
-});
+function getTimerPath(): string {
+  return workspaceStorage.getTimerPath();
+}
+
+function loadTimer(): TimerSchema {
+  const path = getTimerPath();
+  if (existsSync(path)) {
+    return JSON.parse(readFileSync(path, 'utf-8'));
+  }
+  return { solveTimes: {}, activeTimer: null };
+}
+
+function saveTimer(data: TimerSchema): void {
+  const timerPath = getTimerPath();
+  const dir = dirname(timerPath);
+  if (!existsSync(dir)) {
+    mkdirSync(dir, { recursive: true });
+  }
+  writeFileSync(timerPath, JSON.stringify(data, null, 2));
+}
 
 export const timerStorage = {
   startTimer(problemId: string, title: string, difficulty: string, durationMinutes: number): void {
-    timerStore.set('activeTimer', {
+    const data = loadTimer();
+    data.activeTimer = {
       problemId,
       title,
       difficulty,
       startedAt: new Date().toISOString(),
       durationMinutes,
-    });
+    };
+    saveTimer(data);
   },
 
   getActiveTimer() {
-    return timerStore.get('activeTimer');
+    return loadTimer().activeTimer;
   },
 
   stopTimer(): { durationSeconds: number } | null {
-    const active = timerStore.get('activeTimer');
+    const data = loadTimer();
+    const active = data.activeTimer;
     if (!active) return null;
 
     const startedAt = new Date(active.startedAt);
     const now = new Date();
     const durationSeconds = Math.floor((now.getTime() - startedAt.getTime()) / 1000);
 
-    timerStore.set('activeTimer', null);
+    data.activeTimer = null;
+    saveTimer(data);
 
     return { durationSeconds };
   },
@@ -67,13 +83,13 @@ export const timerStorage = {
     durationSeconds: number,
     timerMinutes: number
   ): void {
-    const solveTimes = timerStore.get('solveTimes') ?? {};
+    const data = loadTimer();
     
-    if (!solveTimes[problemId]) {
-      solveTimes[problemId] = [];
+    if (!data.solveTimes[problemId]) {
+      data.solveTimes[problemId] = [];
     }
 
-    solveTimes[problemId].push({
+    data.solveTimes[problemId].push({
       problemId,
       title,
       difficulty,
@@ -82,20 +98,20 @@ export const timerStorage = {
       timerMinutes,
     });
 
-    timerStore.set('solveTimes', solveTimes);
+    saveTimer(data);
   },
 
   getSolveTimes(problemId: string): SolveTimeEntry[] {
-    const solveTimes = timerStore.get('solveTimes') ?? {};
-    return solveTimes[problemId] ?? [];
+    const data = loadTimer();
+    return data.solveTimes[problemId] ?? [];
   },
 
   getAllSolveTimes(): Record<string, SolveTimeEntry[]> {
-    return timerStore.get('solveTimes') ?? {};
+    return loadTimer().solveTimes ?? {};
   },
 
   getStats(): { totalProblems: number; totalTime: number; avgTime: number } {
-    const solveTimes = timerStore.get('solveTimes') ?? {};
+    const solveTimes = loadTimer().solveTimes ?? {};
     let totalProblems = 0;
     let totalTime = 0;
 
