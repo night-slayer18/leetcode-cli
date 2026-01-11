@@ -1,6 +1,44 @@
 # Release Notes
 
-## v1.6.0 (current)
+## v2.0.0 (Upcoming)
+
+> **Release Date**: 2026-01-11
+> **Focus**: Workspaces - A New Architecture
+
+### ⚠️ Breaking Change
+
+This release introduces workspace-aware storage. Existing data in `~/.leetcode/` will not be automatically migrated. Delete the folder to start fresh with the new workspace system or manually move the data to the new workspace directory.
+
+### 🚀 New Features
+
+#### Workspaces (`leetcode workspace`)
+Isolate your problem-solving contexts with separate config, timer history, and snapshots.
+- `workspace current` - Show active workspace
+- `workspace list` - List all workspaces  
+- `workspace create <name>` - Create new workspace
+- `workspace use <name>` - Switch workspaces
+- `workspace delete <name>` - Delete workspace
+
+#### Solution Snapshots (`leetcode snapshot`)
+Save, restore, and compare different versions of your solutions. Supports save/list/restore/diff/delete operations with auto-backup on restore.
+
+#### Solution Diff (`leetcode diff`)
+Compare your current solution with past submissions or files. Shows both solutions with line numbers, or use `--unified` for line-by-line diff.
+
+### 🏗️ Architecture Improvements
+- **Workspace-aware storage**: Config, timer, collab, and snapshots are now isolated per-workspace
+
+### 🧪 Testing Improvements
+- Comprehensive test suite with 178 tests
+- Integration tests for CLI binary verification
+- Multi-workspace isolation tests
+
+### 🐛 Bug Fixes
+- Fixed command help text alignment
+
+---
+
+## v1.6.0
 
 > **Release Date**: 2026-01-10
 > **Focus**: Collaborative Coding & Storage Improvements
