@@ -1,6 +1,16 @@
 # Release Notes
 
-## v2.0.0 (Upcoming)
+## v2.0.1
+
+> **Release Date**: 2026-01-12
+> **Focus**: Security Hotfix
+
+### 🔒 Security Fixes
+- **Path Traversal Prevention**: Fixed vulnerability where `test` and `submit` commands accepted file paths outside the configured workspace. Now validates that files are inside `workDir` before reading/submitting, preventing potential malicious code execution from downloaded solutions.
+
+---
+
+## v2.0.0
 
 > **Release Date**: 2026-01-11
 > **Focus**: Workspaces, Visual Debugging, Snapshots & Diff

@@ -26,27 +26,34 @@ src/__tests__/
 ├── commands/                # Unit tests for each command
 │   ├── auth.test.ts        # login, logout, whoami
 │   ├── browse.test.ts      # list, show, daily, random
-│   ├── solve.test.ts       # pick, test, submit
+│   ├── solve.test.ts       # pick, test, submit (+ security tests)
 │   ├── progress.test.ts    # stat, submissions, today
 │   ├── timer.test.ts       # timer
 │   ├── config.test.ts      # config
 │   ├── notes.test.ts       # notes, bookmark
 │   ├── collab.test.ts      # collab host/join/sync/compare/leave/status
-│   └── sync.test.ts        # sync
+│   ├── sync.test.ts        # sync
+│   ├── snapshot.test.ts    # snapshot save/list/restore/diff/delete
+│   └── diff.test.ts        # diff command
+├── storage/
+│   └── workspace-integration.test.ts  # Multi-workspace isolation
+├── utils/
+│   └── visualizer.test.ts  # Visual debugging output
 └── integration/
     └── cli.test.ts         # Integration tests (runs actual CLI binary)
 ```
 
 ## Test Categories
 
-### Unit Tests (~90 tests)
+### Unit Tests (~150 tests)
 
 Test individual command logic with mocked dependencies:
 - API client is mocked to avoid network calls
 - Storage modules are mocked to avoid file system access
 - All command options and input variations are tested
+- **Security tests**: Path traversal prevention in test/submit
 
-### Integration Tests (~40 tests)
+### Integration Tests (~45 tests)
 
 Run the actual compiled CLI binary to catch:
 - Missing shebang in `dist/index.js`
