@@ -9,7 +9,7 @@ import { requireAuth } from '../utils/auth.js';
 import { config } from '../storage/config.js';
 import { displayTestResult } from '../utils/display.js';
 import { findSolutionFile, findFileByName, getLangSlugFromExtension } from '../utils/fileUtils.js';
-import { isProblemId, isFileName } from '../utils/validation.js';
+import { isProblemId, isFileName, isPathInsideWorkDir } from '../utils/validation.js';
 
 interface TestOptions {
   testcase?: string;
@@ -21,9 +21,9 @@ export async function testCommand(fileOrId: string, options: TestOptions): Promi
   if (!authorized) return;
 
   let filePath = fileOrId;
+  const workDir = config.getWorkDir();
 
   if (isProblemId(fileOrId)) {
-    const workDir = config.getWorkDir();
     const found = await findSolutionFile(workDir, fileOrId);
     if (!found) {
       console.log(chalk.red(`No solution file found for problem ${fileOrId}`));
@@ -34,7 +34,6 @@ export async function testCommand(fileOrId: string, options: TestOptions): Promi
     filePath = found;
     console.log(chalk.gray(`Found: ${filePath}`));
   } else if (isFileName(fileOrId)) {
-    const workDir = config.getWorkDir();
     const found = await findFileByName(workDir, fileOrId);
     if (!found) {
       console.log(chalk.red(`File not found: ${fileOrId}`));
@@ -47,6 +46,16 @@ export async function testCommand(fileOrId: string, options: TestOptions): Promi
 
   if (!existsSync(filePath)) {
     console.log(chalk.red(`File not found: ${filePath}`));
+    return;
+  }
+
+  // Security check: Ensure file is inside workDir to prevent path traversal attacks
+  if (!isPathInsideWorkDir(filePath, workDir)) {
+    console.log(chalk.red('⚠️  Security Error: File path is outside the configured workspace'));
+    console.log(chalk.gray(`File: ${filePath}`));
+    console.log(chalk.gray(`Workspace: ${workDir}`));
+    console.log(chalk.yellow('\nFor security reasons, you can only test files from within your workspace.'));
+    console.log(chalk.gray('Use "leetcode config workdir <path>" to change your workspace.'));
     return;
   }
 

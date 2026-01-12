@@ -10,7 +10,7 @@ import { config } from '../storage/config.js';
 import { timerStorage } from '../storage/timer.js';
 import { displaySubmissionResult } from '../utils/display.js';
 import { findSolutionFile, findFileByName, getLangSlugFromExtension } from '../utils/fileUtils.js';
-import { isProblemId, isFileName } from '../utils/validation.js';
+import { isProblemId, isFileName, isPathInsideWorkDir } from '../utils/validation.js';
 
 /**
  * Submit command - submit solution to LeetCode
@@ -21,11 +21,11 @@ export async function submitCommand(fileOrId: string): Promise<void> {
   if (!authorized) return;
 
   let filePath = fileOrId;
+  const workDir = config.getWorkDir();
 
   // Resolve file path based on input type
   if (isProblemId(fileOrId)) {
     // Input is a problem ID - find by ID
-    const workDir = config.getWorkDir();
     const found = await findSolutionFile(workDir, fileOrId);
     if (!found) {
       console.log(chalk.red(`No solution file found for problem ${fileOrId}`));
@@ -37,7 +37,6 @@ export async function submitCommand(fileOrId: string): Promise<void> {
     console.log(chalk.gray(`Found: ${filePath}`));
   } else if (isFileName(fileOrId)) {
     // Input is a filename - find by name
-    const workDir = config.getWorkDir();
     const found = await findFileByName(workDir, fileOrId);
     if (!found) {
       console.log(chalk.red(`File not found: ${fileOrId}`));
@@ -51,6 +50,16 @@ export async function submitCommand(fileOrId: string): Promise<void> {
   // Validate file exists
   if (!existsSync(filePath)) {
     console.log(chalk.red(`File not found: ${filePath}`));
+    return;
+  }
+
+  // Security check: Ensure file is inside workDir to prevent path traversal attacks
+  if (!isPathInsideWorkDir(filePath, workDir)) {
+    console.log(chalk.red('⚠️  Security Error: File path is outside the configured workspace'));
+    console.log(chalk.gray(`File: ${filePath}`));
+    console.log(chalk.gray(`Workspace: ${workDir}`));
+    console.log(chalk.yellow('\nFor security reasons, you can only submit files from within your workspace.'));
+    console.log(chalk.gray('Use "leetcode config workdir <path>" to change your workspace.'));
     return;
   }
 
