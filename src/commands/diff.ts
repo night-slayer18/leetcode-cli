@@ -5,6 +5,7 @@ import { leetcodeClient } from '../api/client.js';
 import { config } from '../storage/config.js';
 import { findSolutionFile } from '../utils/fileUtils.js';
 import { requireAuth } from '../utils/auth.js';
+import { isPathInsideWorkDir } from '../utils/validation.js';
 import { readFile } from 'fs/promises';
 import { existsSync } from 'fs';
 import { diffLines } from 'diff';
@@ -133,6 +134,15 @@ export async function diffCommand(problemId: string, options: DiffOptions): Prom
       
       if (!existsSync(options.file)) {
         console.log(chalk.red(`File not found: ${options.file}`));
+        return;
+      }
+
+      // Security: Validate file is inside workDir to prevent path traversal
+      if (!isPathInsideWorkDir(options.file, workDir)) {
+        console.log(chalk.red('⚠️  Security Error: File path is outside the configured workspace'));
+        console.log(chalk.gray(`File: ${options.file}`));
+        console.log(chalk.gray(`Workspace: ${workDir}`));
+        console.log(chalk.yellow('\nFor security reasons, you can only diff files from within your workspace.'));
         return;
       }
 
