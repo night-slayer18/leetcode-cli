@@ -6,6 +6,20 @@ import inquirer from 'inquirer';
 import ora from 'ora';
 import { config } from '../storage/config.js';
 
+function sanitizeRepoName(name: string): string {
+  return name.replace(/[^a-zA-Z0-9_-]/g, '-').replace(/--+/g, '-');
+}
+
+function isValidGitUrl(url: string): boolean {
+  const httpsPattern = /^https:\/\/[\w.-]+\/[\w./-]+$/;
+  const sshPattern = /^git@[\w.-]+:[\w./-]+$/;
+  return httpsPattern.test(url) || sshPattern.test(url);
+}
+
+function escapeShellArg(arg: string): string {
+  return `'${arg.replace(/'/g, "'\\''")}'`;
+}
+
 function isGitInstalled(): boolean {
   try {
     execSync('git --version', { stdio: 'ignore' });
@@ -88,7 +102,8 @@ async function setupRemote(workDir: string): Promise<string> {
       if (createGh) {
         spinner.start('Creating GitHub repository...');
         try {
-          const repoName = workDir.split('/').pop() || 'leetcode-solutions';
+          const rawRepoName = workDir.split('/').pop() || 'leetcode-solutions';
+          const repoName = sanitizeRepoName(rawRepoName);
           execSync(`gh repo create ${repoName} --private --source=. --remote=origin`, { cwd: workDir });
           spinner.succeed('Created and linked GitHub repository');
           
@@ -119,6 +134,13 @@ async function setupRemote(workDir: string): Promise<string> {
         ]);
         repoUrl = url;
     }
+  }
+
+  // Security: Validate URL format before using in shell command
+  if (repoUrl && !isValidGitUrl(repoUrl)) {
+    console.log(chalk.red('Invalid repository URL format.'));
+    console.log(chalk.gray('Expected: https://github.com/user/repo or git@github.com:user/repo'));
+    return '';
   }
   
   // Save to config if we have one now
@@ -176,13 +198,13 @@ export async function syncCommand(): Promise<void> {
     // Add
     execSync('git add .', { cwd: workDir });
 
-    // Commit
+    // Commit - Security: Use escapeShellArg to prevent injection
     const lines = status.trim().split('\n');
     const count = lines.length;
     const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
     const message = `Sync: ${count} solutions - ${timestamp}`;
     
-    execSync(`git commit -m "${message}"`, { cwd: workDir });
+    execSync(`git commit -m ${escapeShellArg(message)}`, { cwd: workDir });
 
     // Try pushing to main or master
     try {
