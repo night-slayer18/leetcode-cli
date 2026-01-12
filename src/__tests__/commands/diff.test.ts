@@ -83,7 +83,8 @@ describe('Diff Command', () => {
     });
 
     it('should compare with local file', async () => {
-      await diffCommand('1', { file: 'other-solution.ts' });
+      // Must use a path inside workDir due to security path traversal check
+      await diffCommand('1', { file: '/tmp/leetcode/other-solution.ts' });
 
       expect(outputContains('Summary')).toBe(true);
     });
@@ -113,6 +114,22 @@ describe('Diff Command', () => {
 
       expect(leetcodeClient.getSubmissionList).toHaveBeenCalled();
       // Spinner.fail is called when no accepted found
+    });
+
+    describe('security', () => {
+      it('should reject --file paths outside workDir (path traversal)', async () => {
+        // /etc/passwd is outside /tmp/leetcode
+        await diffCommand('1', { file: '/etc/passwd' });
+        
+        // Should show security error, not file comparison
+        expect(outputContains('Security Error')).toBe(true);
+      });
+
+      it('should reject relative path traversal in --file option', async () => {
+        await diffCommand('1', { file: '../../../etc/passwd' });
+        
+        expect(outputContains('Security Error')).toBe(true);
+      });
     });
   });
 });

@@ -78,4 +78,24 @@ describe('Sync Command', () => {
       expect(config.getRepo).toHaveBeenCalled();
     });
   });
+
+  describe('security', () => {
+    it('should reject invalid git URL format (command injection attempt)', async () => {
+      // Simulating a user entering a malicious URL via prompt
+      vi.mocked(config.getRepo).mockReturnValue('; echo hello #');
+      
+      await syncCommand();
+      
+      // Security validation should kick in and show error about invalid URL
+      expect(outputContains('Invalid repository URL format')).toBe(true);
+    });
+
+    it('should reject URLs with shell metacharacters', async () => {
+      vi.mocked(config.getRepo).mockReturnValue('https://evil.com/$(id)/repo');
+      
+      await syncCommand();
+      
+      expect(outputContains('Invalid repository URL format')).toBe(true);
+    });
+  });
 });
