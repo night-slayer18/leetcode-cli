@@ -204,6 +204,22 @@ describe('Solve Commands', () => {
         );
       });
     });
+
+    describe('security', () => {
+      it('should reject files outside workDir (path traversal)', async () => {
+        // /etc/passwd is definitely outside /tmp/leetcode
+        await testCommand('/etc/passwd', {});
+        
+        // Should NOT call testSolution because file is outside workDir
+        expect(leetcodeClient.testSolution).not.toHaveBeenCalled();
+      });
+
+      it('should reject relative path traversal attempts', async () => {
+        await testCommand('../../../etc/passwd', {});
+        
+        expect(leetcodeClient.testSolution).not.toHaveBeenCalled();
+      });
+    });
   });
 
   describe('submitCommand', () => {
@@ -226,6 +242,22 @@ describe('Solve Commands', () => {
         await submitCommand('/tmp/leetcode/Easy/Array/1.two-sum.ts');
 
         expect(leetcodeClient.submitSolution).toHaveBeenCalled();
+      });
+    });
+
+    describe('security', () => {
+      it('should reject files outside workDir (path traversal)', async () => {
+        // /etc/passwd is definitely outside /tmp/leetcode
+        await submitCommand('/etc/passwd');
+        
+        // Should NOT call submitSolution because file is outside workDir
+        expect(leetcodeClient.submitSolution).not.toHaveBeenCalled();
+      });
+
+      it('should reject relative path traversal attempts', async () => {
+        await submitCommand('../../../etc/passwd');
+        
+        expect(leetcodeClient.submitSolution).not.toHaveBeenCalled();
       });
     });
   });
