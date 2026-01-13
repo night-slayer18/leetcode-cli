@@ -33,6 +33,8 @@ A modern, feature-rich LeetCode CLI built with TypeScript.
 
 **[View Full Documentation →](https://night-slayer18.github.io/leetcode-cli/)**
 
+**[Read the Blog Post →](https://leetcode-cli.hashnode.dev/leetcode-cli)**
+
 ## Installation
 
 ```bash
