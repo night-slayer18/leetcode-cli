@@ -3,6 +3,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 import got from 'got';
 import { versionStorage } from '../storage/version.js';
+import { isNewerVersion, hasMajorVersionBump } from '../utils/semver.js';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -44,26 +45,12 @@ async function fetchLatestVersion(): Promise<{ version: string; hasBreakingChang
   const currentVersion = getCurrentVersion();
   
   // Check if major version bump (breaking change)
-  const currentMajor = parseInt(currentVersion.split('.')[0]);
-  const latestMajor = parseInt(latestVersion.split('.')[0]);
-  const hasBreakingChanges = latestMajor > currentMajor;
+  const hasBreakingChanges = hasMajorVersionBump(currentVersion, latestVersion);
   
   return { version: latestVersion, hasBreakingChanges };
 }
 
-/**
- * Compare semver versions
- */
-function isNewerVersion(current: string, latest: string): boolean {
-  const currentParts = current.split('.').map(Number);
-  const latestParts = latest.split('.').map(Number);
-  
-  for (let i = 0; i < 3; i++) {
-    if (latestParts[i] > currentParts[i]) return true;
-    if (latestParts[i] < currentParts[i]) return false;
-  }
-  return false;
-}
+// isNewerVersion is imported from ../utils/semver.js
 
 /**
  * Display update notification box

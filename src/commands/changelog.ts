@@ -2,6 +2,7 @@
 import chalk from 'chalk';
 import ora from 'ora';
 import got from 'got';
+import { isNewerVersion } from '../utils/semver.js';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -37,19 +38,7 @@ function getCurrentVersion(): string {
   }
 }
 
-/**
- * Compare semver versions - returns true if v1 > v2
- */
-function isNewerVersion(v1: string, v2: string): boolean {
-  const v1Parts = v1.replace('v', '').split('.').map(Number);
-  const v2Parts = v2.replace('v', '').split('.').map(Number);
-  
-  for (let i = 0; i < 3; i++) {
-    if (v1Parts[i] > v2Parts[i]) return true;
-    if (v1Parts[i] < v2Parts[i]) return false;
-  }
-  return false;
-}
+// isNewerVersion is imported from ../utils/semver.js
 
 /**
  * Fetch releases.md content from GitHub
@@ -68,13 +57,14 @@ async function fetchReleasesContent(): Promise<string> {
 function parseReleases(content: string): VersionEntry[] {
   const entries: VersionEntry[] = [];
   
-  // Split by version headers (## v1.0.0, ## v2.0.0, etc.)
-  const versionRegex = /^## (v[\d.]+)/gm;
+  // Split by version headers (## v1.0.0 or ## 1.0.0)
+  const versionRegex = /^## v?([\d.]+)/gm;
   const matches = [...content.matchAll(versionRegex)];
   
   for (let i = 0; i < matches.length; i++) {
     const match = matches[i];
-    const version = match[1];
+    // Normalize to always have 'v' prefix
+    const version = `v${match[1]}`;
     const startIndex = match.index! + match[0].length;
     const endIndex = i + 1 < matches.length ? matches[i + 1].index! : content.length;
     const versionContent = content.slice(startIndex, endIndex).trim();
