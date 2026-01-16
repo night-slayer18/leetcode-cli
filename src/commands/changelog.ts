@@ -29,20 +29,23 @@ interface VersionEntry {
  * Get current installed version from package.json
  */
 function getCurrentVersion(): string {
-  try {
-    const packagePath = join(__dirname, '../package.json');
-    const packageJson = JSON.parse(readFileSync(packagePath, 'utf-8'));
-    return packageJson.version;
-  } catch {
-    return '0.0.0';
+  // Try multiple paths to handle dev (src) and prod (dist) environments
+  const candidates = [
+    join(__dirname, '../package.json'),      // Production (dist relative)
+    join(__dirname, '../../package.json')    // Development/Test (src/commands relative)
+  ];
+
+  for (const packagePath of candidates) {
+    try {
+      const packageJson = JSON.parse(readFileSync(packagePath, 'utf-8'));
+      if (packageJson.version) return packageJson.version;
+    } catch {
+      continue;
+    }
   }
+
+  throw new Error('Could not read package.json version. Ensure you are running from a valid installation.');
 }
-
-// isNewerVersion is imported from ../utils/semver.js
-
-/**
- * Fetch releases.md content from GitHub
- */
 async function fetchReleasesContent(): Promise<string> {
   const response = await got(RELEASES_URL, {
     timeout: { request: 10000 },

@@ -1,5 +1,18 @@
 # Release Notes
 
+## v2.1.1
+
+> **Release Date**: 2026-01-17
+> **Focus**: Refactoring & Robustness
+
+### 🔧 Improvements
+- **Code Refactoring**: Extracted shared semver utility for consistent version comparison
+- **Improved Parsing**: Enhanced changelog parser regex to handle various version formats
+- **Robustness**: Integration tests now verify against real npm/GitHub APIs
+- **Network Reliability**: Fixed potential hangs by enforcing strict 10s total timeout for registry checks
+
+---
+
 ## v2.1.0
 
 > **Release Date**: 2026-01-16

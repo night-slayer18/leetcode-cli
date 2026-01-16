@@ -224,6 +224,20 @@ describe('CLI Integration Tests', () => {
       expect(stdout).toContain('current');
       expect(stdout).toContain('delete');
     });
+
+    it('should have update command', () => {
+      const { stdout } = runCLI(['update', '--help']);
+      expect(stdout).toContain('update');
+      expect(stdout).toContain('--force');
+      expect(stdout).toContain('--check-only');
+    });
+
+    it('should have changelog command', () => {
+      const { stdout } = runCLI(['changelog', '--help']);
+      expect(stdout).toContain('changelog');
+      expect(stdout).toContain('--latest');
+      expect(stdout).toContain('--breaking');
+    });
   });
 
   describe('Collab Subcommands', () => {
