@@ -1,0 +1,49 @@
+name: Create GitHub Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract Release Notes
+        id: extract_notes
+        run: |
+          # Get version from tag (e.g., v2.1.1)
+          VERSION=${GITHUB_REF#refs/tags/}
+          
+          # Extract content between current version header and next version header
+          # Assumes format: ## vM.m.h
+          # sed -n "/^## ${VERSION}/,/^## v/p" docs/releases.md | sed '1d;$d'
+          
+          # More robust extraction using awk
+          awk -v ver="$VERSION" '
+            /^## / { 
+              if (p) exit; 
+              if ($2 == ver) p=1; 
+              next 
+            } 
+            p
+          ' docs/releases.md > release_notes.md
+          
+          # If empty, fallback to simple title
+          if [ ! -s release_notes.md ]; then
+            echo "Release $VERSION" > release_notes.md
+          fi
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: release_notes.md
+          draft: false
+          prerelease: false
