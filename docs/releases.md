@@ -1,5 +1,37 @@
 # Release Notes
 
+## v2.1.0
+
+> **Release Date**: 2026-01-16
+> **Focus**: CLI Updates & Changelog
+
+### 🚀 New Features
+
+#### Update Command (`leetcode update`)
+Check for CLI updates from npm registry with automatic update notifications.
+- Visual notification box when updates are available
+- Detects breaking changes (major version bumps) and warns users
+- 24-hour caching to avoid excessive registry calls
+- `--force` flag to bypass cache and re-check
+
+#### Changelog Command (`leetcode changelog`)
+View release notes directly from the CLI.
+- Fetches changelog from GitHub (works for global installs)
+- Default: shows only versions newer than your installed version
+- `--all` - Show full changelog
+- `--latest` - Show only latest version
+- `--breaking` - Filter to breaking changes only
+- Enhanced terminal display with emojis and formatting
+
+#### Startup Update Notifications
+Non-blocking check on startup shows a subtle banner if updates are available.
+
+### ⚡ Performance Improvements
+- Build minification enabled: bundle size reduced ~40% (163KB → 98KB)
+- Tree-shaking for better dead code elimination
+
+---
+
 ## v2.0.1
 
 > **Release Date**: 2026-01-12

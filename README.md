@@ -28,6 +28,8 @@ A modern, feature-rich LeetCode CLI built with TypeScript.
 - ⚙️ **Configurable** - Set language, editor, and working directory
 - 📂 **Smart file discovery** - Use problem ID, filename, or full path
 - 🔄 **Git Sync** - Auto-sync solutions to GitHub/GitLab
+- 🚀 **Auto-update notifications** - Get notified when updates are available
+
 
 ## 📚 Documentation
 
@@ -89,6 +91,9 @@ leetcode submit 1
 | `workspace <cmd>` | Manage workspaces for different contexts |
 | `config` | View or set configuration |
 | `sync` | Sync solutions to Git repository |
+| `update` | Check for CLI updates |
+| `changelog` | View release notes and breaking changes |
+
 
 ## Usage Examples
 

@@ -679,6 +679,81 @@ Shared across all workspaces:
 
 ---
 
+## CLI Updates
+
+### `leetcode update`
+Check for CLI updates from npm registry.
+
+**Options**:
+- `--force` - Force re-check (bypass 24-hour cache)
+- `--check-only` - Minimal output (no tips)
+
+**Features**:
+- Checks npm registry for latest version
+- Shows visual notification if update available
+- Warns about breaking changes (major version bumps)
+- 24-hour caching to avoid excessive registry calls
+
+**Examples**:
+```bash
+# Check for updates
+leetcode update
+
+# Force re-check (ignore cache)
+leetcode update --force
+```
+
+**Output when update available**:
+```
+╭──────────────────────────────────────────────────────────╮
+│  🚀 Update available: 2.0.1 → 3.0.0                      │
+│                                                          │
+│  ⚠️  This update contains breaking changes!              │
+│  Run: leetcode changelog to review changes               │
+│                                                          │
+│  Run: npm update -g @night-slayer18/leetcode-cli         │
+╰──────────────────────────────────────────────────────────╯
+```
+
+---
+
+### `leetcode changelog`
+View release notes and changelog.
+
+**Arguments**:
+- `[version]` - Optional specific version to show (e.g., `2.0.0`)
+
+**Options**:
+- `-a, --all` - Show all versions (default: only newer than installed)
+- `--latest` - Show only the latest version
+- `--breaking` - Show only versions with breaking changes
+
+**Features**:
+- Fetches release notes from GitHub
+- By default shows only versions newer than your installed version
+- Highlights breaking changes with ⚠️ warning
+- Enhanced terminal formatting with colors and emojis
+
+**Examples**:
+```bash
+# Show what's new since your version
+leetcode changelog
+
+# Show full changelog
+leetcode changelog --all
+
+# Show only the latest version
+leetcode changelog --latest
+
+# Show specific version
+leetcode changelog 2.0.0
+
+# Show only breaking changes
+leetcode changelog --breaking
+```
+
+---
+
 ## Global Options
 
 These work with any command:
