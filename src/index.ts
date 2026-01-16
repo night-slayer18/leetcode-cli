@@ -42,6 +42,8 @@ import {
   workspaceUseCommand,
   workspaceDeleteCommand,
 } from './commands/workspace.js';
+import { updateCommand, checkForUpdatesOnStartup } from './commands/update.js';
+import { changelogCommand } from './commands/changelog.js';
 
 const program = new Command();
 
@@ -508,8 +510,46 @@ snapshotCmd
   .description('Delete a snapshot')
   .action(snapshotDeleteCommand);
 
+// Update & Changelog
+program
+  .command('update')
+  .description('Check for CLI updates')
+  .option('--check-only', 'Only check for updates, do not show update instructions')
+  .option('-f, --force', 'Force check even if recently checked')
+  .addHelpText('after', `
+${chalk.yellow('Examples:')}
+  ${chalk.cyan('$ leetcode update')}                   Check for updates
+  ${chalk.cyan('$ leetcode update --force')}           Force re-check npm registry
+  ${chalk.cyan('$ leetcode update --check-only')}      Just check, minimal output
+`)
+  .action(updateCommand);
+
+program
+  .command('changelog [version]')
+  .description('View release notes and changelog')
+  .option('--latest', 'Show only the latest version')
+  .option('--breaking', 'Show only versions with breaking changes')
+  .option('-a, --all', 'Show all versions (default: only newer than installed)')
+  .addHelpText('after', `
+${chalk.yellow('Examples:')}
+  ${chalk.cyan('$ leetcode changelog')}                Show what's new since your version
+  ${chalk.cyan('$ leetcode changelog --all')}          View full changelog
+  ${chalk.cyan('$ leetcode changelog 2.0.0')}          Show specific version
+  ${chalk.cyan('$ leetcode changelog --latest')}       Show latest version only
+  ${chalk.cyan('$ leetcode changelog --breaking')}     Filter to breaking changes
+`)
+  .action((version, options) => changelogCommand(version, options));
+
 program.showHelpAfterError('(add --help for additional information)');
 
+
+// Check for updates on startup (non-blocking)
+const shouldCheckUpdates = process.argv.length > 2 && 
+  !['update', 'changelog', '--version', '-v', '--help', '-h'].includes(process.argv[2]);
+
+if (shouldCheckUpdates) {
+  checkForUpdatesOnStartup().catch(() => {}); // Silent fail
+}
 
 program.parse();
 

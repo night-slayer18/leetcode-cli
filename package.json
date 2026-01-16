@@ -12,7 +12,7 @@
     "url": "https://github.com/night-slayer18/leetcode-cli.git"
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts --clean",
+    "build": "tsup src/index.ts --format esm --dts --clean --minify --treeshake",
     "dev": "tsup src/index.ts --format esm --watch",
     "start": "node dist/index.js",
     "test": "vitest run",
