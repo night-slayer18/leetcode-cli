@@ -1,0 +1,58 @@
+name: Mark stale issues and PRs
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Daily at midnight UTC
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/stale@v9
+        with:
+          # Timing
+          days-before-stale: 60
+          days-before-close: 7
+
+          # Messages
+          stale-issue-message: |
+            This issue has been automatically marked as stale because it has not had recent activity.
+            It will be closed in 7 days if no further activity occurs.
+            If this issue is still relevant, please comment or remove the stale label.
+          stale-pr-message: |
+            This PR has been automatically marked as stale because it has not had recent activity.
+            It will be closed in 7 days if no further activity occurs.
+            Please update the PR or comment if it's still in progress.
+          close-issue-message: 'This issue was closed due to inactivity. Feel free to reopen if still relevant.'
+          close-pr-message: 'This PR was closed due to inactivity. Feel free to reopen if still relevant.'
+
+          # Labels
+          stale-issue-label: stale
+          stale-pr-label: stale
+
+          # Exempt labels - issues/PRs with these labels will NEVER be marked stale
+          exempt-issue-labels: |
+            pinned,
+            security,
+            bug,
+            help wanted,
+            good first issue,
+            discussion,
+            in-progress,
+            blocked
+          exempt-pr-labels: |
+            pinned,
+            security,
+            work-in-progress,
+            do not merge,
+            blocked
+
+          # Don't stale issues/PRs with assignees (someone is working on it)
+          exempt-all-assignees: true
+
+          # Performance - limit operations per run to avoid rate limits
+          operations-per-run: 100
