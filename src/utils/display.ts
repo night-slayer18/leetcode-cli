@@ -101,19 +101,19 @@ export function displayProblemDetail(problem: ProblemDetail): void {
   content = content.replace(/<br\s*\/?>/gi, '\n');
   
 
-  content = striptags(content) ?? '';
+  content = striptags(content);
   
 
   content = content
     .replace(/&nbsp;/g, ' ')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
-    .replace(/&amp;/g, '&')
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
     .replace(/&le;/g, '≤')
     .replace(/&ge;/g, '≥')
-    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(parseInt(code, 10)));
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(parseInt(code, 10)))
+    .replace(/&amp;/g, '&');
   
 
   content = content.replace(/\n{3,}/g, '\n\n').trim();

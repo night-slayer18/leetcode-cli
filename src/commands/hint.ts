@@ -82,9 +82,9 @@ function cleanHtml(html: string): string {
   return (striptags(formatted) ?? '')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
-    .replace(/&amp;/g, '&')
     .replace(/&nbsp;/g, ' ')
     .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, '&')
     .trim();
 }
 

@@ -116,12 +116,12 @@ function formatProblemContent(html: string): string {
     .replace(/&nbsp;/g, ' ')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
-    .replace(/&amp;/g, '&')
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
     .replace(/&le;/g, '<=')
     .replace(/&ge;/g, '>=')
-    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(parseInt(code, 10)));
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(parseInt(code, 10)))
+    .replace(/&amp;/g, '&');
   
   // Clean up whitespace
   content = content.replace(/\n{3,}/g, '\n\n').trim();
