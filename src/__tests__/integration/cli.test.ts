@@ -3,7 +3,7 @@
 // This catches issues like: missing shebang, broken imports, build errors
 
 import { describe, it, expect, beforeAll } from 'vitest';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 
@@ -13,7 +13,7 @@ const TIMEOUT = 10000; // 10 seconds
 // Helper to run CLI and get output
 function runCLI(args: string[]): { stdout: string; stderr: string; exitCode: number } {
   try {
-    const stdout = execSync(`node ${CLI_PATH} ${args.join(' ')}`, {
+    const stdout = execFileSync('node', [CLI_PATH, ...args], {
       encoding: 'utf-8',
       timeout: TIMEOUT,
       env: { ...process.env, NO_COLOR: '1' }, // Disable chalk colors
