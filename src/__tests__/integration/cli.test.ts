@@ -119,6 +119,12 @@ describe('CLI Integration Tests', () => {
       expect(stdout).toContain('show');
     });
 
+    it('should have hint command', () => {
+      const { stdout } = runCLI(['hint', '--help']);
+      expect(stdout).toContain('hint');
+      expect(stdout).toContain('--all');
+    });
+
     it('should have pick command', () => {
       const { stdout } = runCLI(['pick', '--help']);
       expect(stdout).toContain('pick');
@@ -309,6 +315,11 @@ describe('CLI Integration Tests', () => {
     it('should support pick alias "p"', () => {
       const { stdout } = runCLI(['p', '--help']);
       expect(stdout).toContain('pick');
+    });
+
+    it('should support hint alias "h"', () => {
+      const { stdout } = runCLI(['h', '--help']);
+      expect(stdout).toContain('hint');
     });
 
     it('should support test alias "t"', () => {

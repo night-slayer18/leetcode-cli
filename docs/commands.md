@@ -93,6 +93,31 @@ leetcode s two-sum
 
 ---
 
+### `leetcode hint <id>` (alias: `h`)
+Show hints for a problem to help you get unstuck.
+
+**Arguments**:
+- `<id>` - Problem ID or slug
+
+**Options**:
+- `-a, --all` - Show all hints at once (default: progressive reveal)
+
+**Examples**:
+```bash
+# Show hints one by one (press Enter for next hint)
+leetcode hint 1
+leetcode h 1
+
+# By slug
+leetcode hint two-sum
+
+# Show all hints at once
+leetcode hint 1 --all
+leetcode hint 1 -a
+```
+
+---
+
 ### `leetcode daily` (alias: `d`)
 Show today's daily challenge.
 

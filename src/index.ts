@@ -6,6 +6,7 @@ import chalk from 'chalk';
 import { loginCommand, logoutCommand, whoamiCommand } from './commands/login.js';
 import { listCommand } from './commands/list.js';
 import { showCommand } from './commands/show.js';
+import { hintCommand } from './commands/hint.js';
 import { pickCommand, batchPickCommand } from './commands/pick.js';
 import { testCommand } from './commands/test.js';
 import { submitCommand } from './commands/submit.js';
@@ -134,6 +135,22 @@ ${chalk.yellow('Examples:')}
   ${chalk.cyan('$ leetcode s 412')}                   Short alias
 `)
   .action(showCommand);
+
+program
+  .command('hint <id>')
+  .alias('h')
+  .description('Show hints for a problem')
+  .option('-a, --all', 'Show all hints at once')
+  .addHelpText('after', `
+${chalk.yellow('Examples:')}
+  ${chalk.cyan('$ leetcode hint 1')}                  Show hints for problem 1
+  ${chalk.cyan('$ leetcode hint two-sum')}            Show hints by slug
+  ${chalk.cyan('$ leetcode hint 1 --all')}            Show all hints at once
+  ${chalk.cyan('$ leetcode h 412')}                   Short alias
+
+${chalk.gray('Hints are revealed one at a time. Press Enter to see more.')}
+`)
+  .action(hintCommand);
 
 program
   .command('daily')

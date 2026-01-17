@@ -74,6 +74,7 @@ leetcode submit 1
 | `today` | Show daily progress & challenge |
 | `list` | List problems with filters |
 | `show <id>` | Display problem description |
+| `hint <id>` | Show hints for a problem |
 | `pick <id>` | Generate solution file |
 | `pick-batch <ids>` | Pick multiple problems |
 | `bookmark <action>` | Manage problem bookmarks |
@@ -120,6 +121,17 @@ leetcode list -s "binary tree"
 ```bash
 leetcode show 1
 leetcode show two-sum
+```
+
+### Get Hints
+
+```bash
+# Show hints one at a time (press Enter for next)
+leetcode hint 1
+leetcode hint two-sum
+
+# Show all hints at once
+leetcode hint 1 --all
 ```
 
 ### Pick Problem
