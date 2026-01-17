@@ -1,5 +1,6 @@
 // Code templates for different programming languages
 import type { SupportedLanguage, CodeSnippet } from '../types.js';
+import striptags from 'striptags';
 
 // File extensions for each language
 export const LANGUAGE_EXTENSIONS: Record<SupportedLanguage, string> = {
@@ -108,7 +109,7 @@ function formatProblemContent(html: string): string {
   content = content.replace(/<br\s*\/?>/gi, '\n');
   
   // Remove HTML tags
-  content = content.replace(/<[^>]+>/g, '');
+  content = striptags(content) ?? '';
   
   // Decode HTML entities
   content = content
