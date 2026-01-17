@@ -1,5 +1,21 @@
 # Release Notes
 
+## v2.2.1
+
+> **Release Date**: 2026-01-17
+> **Focus**: Security Hotfix & CI/CD Enhancements
+
+### 🔒 Security Fixes
+- **HTML Injection**: Fixed vulnerabilities in problem descriptions, hints, and code templates by replacing regex-based sanitization with `striptags` (#security).
+- **Double Escaping**: Fixed issue where HTML entities (like `&quot;`) could be double-unescaped (#security).
+- **Dependencies**: Updated CodeQL actions to v4 and added Dependency Review workflow.
+
+### 🔧 Improvements
+- **CI/CD**: Added Stale issue management and optimized Docker builds with caching.
+- **Linting**: Resolved all ESLint warnings and enforced stricter type safety.
+
+---
+
 ## v2.2.0
 
 > **Release Date**: 2026-01-17
