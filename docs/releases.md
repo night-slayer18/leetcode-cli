@@ -1,5 +1,30 @@
 # Release Notes
 
+## v2.2.0
+
+> **Release Date**: 2026-01-17
+> **Focus**: Problem Hints & Performance
+
+### 🚀 New Features
+
+#### Hint Command (`leetcode hint`)
+Get hints for a problem when you're stuck.
+- `leetcode hint <id>` - Show hints one at a time (press Enter for next)
+- `leetcode hint <id> --all` - Show all hints at once
+- Supports both problem ID and slug
+- Cleans HTML formatting for terminal display
+- Alias: `h`
+
+### ⚡ Performance Improvements
+
+#### Submission Polling Optimization
+- **Exponential backoff**: Reduced API calls by 60% (30 → 12 calls)
+- **Faster results**: 500ms initial delay for quicker feedback
+- **Network resilience**: Added retry logic for transient network errors
+- **Better error messages**: "Test" vs "Submission" context in timeouts
+
+---
+
 ## v2.1.1
 
 > **Release Date**: 2026-01-17
