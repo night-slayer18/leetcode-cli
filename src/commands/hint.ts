@@ -3,6 +3,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 import { leetcodeClient } from '../api/client.js';
 import { requireAuth } from '../utils/auth.js';
+import striptags from 'striptags';
 
 export async function hintCommand(idOrSlug: string, options: { all?: boolean }): Promise<void> {
   const { authorized } = await requireAuth();
@@ -67,7 +68,7 @@ function displayHint(hint: string, number: number, total: number): void {
 }
 
 function cleanHtml(html: string): string {
-  return html
+  const formatted = html
     .replace(/<code>/g, chalk.cyan('`'))
     .replace(/<\/code>/g, chalk.cyan('`'))
     .replace(/<b>/g, chalk.bold(''))
@@ -76,8 +77,9 @@ function cleanHtml(html: string): string {
     .replace(/<\/i>/g, '')
     .replace(/<br\s*\/?>/g, '\n')
     .replace(/<p>/g, '')
-    .replace(/<\/p>/g, '\n')
-    .replace(/<[^>]+>/g, '') // Remove remaining HTML tags
+    .replace(/<\/p>/g, '\n');
+    
+  return (striptags(formatted) ?? '')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&amp;/g, '&')
