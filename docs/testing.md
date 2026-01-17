@@ -23,37 +23,44 @@ npm test -- src/__tests__/commands/auth.test.ts
 ```
 src/__tests__/
 ├── setup.ts                 # Global test setup (console mocking)
+├── mocks/                   # Shared mock implementations
+│   ├── leetcodeClient.ts   # Mock LeetCode API client
+│   └── storage.ts          # Mock storage modules
 ├── commands/                # Unit tests for each command
 │   ├── auth.test.ts        # login, logout, whoami
 │   ├── browse.test.ts      # list, show, daily, random
-│   ├── solve.test.ts       # pick, test, submit (+ security tests)
-│   ├── progress.test.ts    # stat, submissions, today
-│   ├── timer.test.ts       # timer
-│   ├── config.test.ts      # config
-│   ├── notes.test.ts       # notes, bookmark
+│   ├── changelog.test.ts   # changelog
 │   ├── collab.test.ts      # collab host/join/sync/compare/leave/status
-│   ├── sync.test.ts        # sync
+│   ├── config.test.ts      # config
+│   ├── diff.test.ts        # diff command
+│   ├── hint.test.ts        # hint command
+│   ├── notes.test.ts       # notes, bookmark
+│   ├── progress.test.ts    # stat, submissions, today
 │   ├── snapshot.test.ts    # snapshot save/list/restore/diff/delete
-│   └── diff.test.ts        # diff command
+│   ├── solve.test.ts       # pick, test, submit (+ security tests)
+│   ├── sync.test.ts        # sync
+│   ├── timer.test.ts       # timer
+│   ├── update.test.ts      # update
+│   └── workspace.test.ts   # workspace create/use/list/delete
 ├── storage/
 │   └── workspace-integration.test.ts  # Multi-workspace isolation
 ├── utils/
-│   └── visualizer.test.ts  # Visual debugging output
+│   └── visualize.test.ts   # Visual debugging output
 └── integration/
     └── cli.test.ts         # Integration tests (runs actual CLI binary)
 ```
 
 ## Test Categories
 
-### Unit Tests (~150 tests)
+### Unit Tests (~177 tests)
 
 Test individual command logic with mocked dependencies:
 - API client is mocked to avoid network calls
 - Storage modules are mocked to avoid file system access
 - All command options and input variations are tested
-- **Security tests**: Path traversal prevention in test/submit
+- **Security tests**: Path traversal prevention in test/submit/diff
 
-### Integration Tests (~45 tests)
+### Integration Tests (~49 tests)
 
 Run the actual compiled CLI binary to catch:
 - Missing shebang in `dist/index.js`
@@ -66,10 +73,10 @@ Run the actual compiled CLI binary to catch:
 
 Current coverage by area:
 
-| Area | Coverage |
-|------|----------|
-| Commands | ~68% |
-| Overall | ~48% |
+| Area | Statements | Lines |
+|------|------------|-------|
+| Commands | 70.33% | 71.47% |
+| Overall | 54.64% | 55.93% |
 
 Lower overall coverage is expected because we mock:
 - `src/api/client.ts` - LeetCode API calls
