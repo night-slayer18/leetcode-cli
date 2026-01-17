@@ -1,5 +1,15 @@
 # Release Notes
 
+## v2.2.2
+
+> **Release Date**: 2026-01-18
+> **Focus**: Critical Bug Fix (Update Command)
+
+### 🐛 Bug Fixes
+- **Update Command**: Fixed a logic inversion where `leetcode update` would incorrectly report "You're on the latest version" even when updates were available. It now correctly prompts for updates.
+
+---
+
 ## v2.2.1
 
 > **Release Date**: 2026-01-17
