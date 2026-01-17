@@ -66,7 +66,7 @@ program
   .name('leetcode')
   .usage('[command] [options]')
   .description(chalk.bold.cyan('🔥 A modern LeetCode CLI built with TypeScript'))
-  .version('2.1.1', '-v, --version', 'Output the version number')
+  .version('2.2.0', '-v, --version', 'Output the version number')
   .helpOption('-h, --help', 'Display help for command')
   .addHelpText('after', `
 ${chalk.yellow('Examples:')}

@@ -1,6 +1,6 @@
 {
   "name": "@night-slayer18/leetcode-cli",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "description": "A modern LeetCode CLI built with TypeScript",
   "type": "module",
   "main": "dist/index.js",
