@@ -1,6 +1,7 @@
 
 import chalk from 'chalk';
 import Table from 'cli-table3';
+import striptags from 'striptags';
 import type { Problem, ProblemDetail, SubmissionResult, TestResult, Submission, TopicTag } from '../types.js';
 import { visualizeTestOutput } from './visualize.js';
 
@@ -100,7 +101,7 @@ export function displayProblemDetail(problem: ProblemDetail): void {
   content = content.replace(/<br\s*\/?>/gi, '\n');
   
 
-  content = content.replace(/<[^>]+>/g, '');
+  content = striptags(content) ?? '';
   
 
   content = content
