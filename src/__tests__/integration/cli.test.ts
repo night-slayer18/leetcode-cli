@@ -3,7 +3,7 @@
 // This catches issues like: missing shebang, broken imports, build errors
 
 import { describe, it, expect, beforeAll } from 'vitest';
-import { execSync, spawn } from 'child_process';
+import { execSync } from 'child_process';
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 

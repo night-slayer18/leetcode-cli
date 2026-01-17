@@ -216,7 +216,7 @@ describe('hintCommand', () => {
 
   describe('error handling', () => {
     it('should handle problem not found', async () => {
-      vi.mocked(leetcodeClient.getProblemById).mockResolvedValue(null as any);
+      vi.mocked(leetcodeClient.getProblemById).mockResolvedValue(null as unknown as Awaited<ReturnType<typeof leetcodeClient.getProblemById>>);
 
       await hintCommand('9999', {});
 

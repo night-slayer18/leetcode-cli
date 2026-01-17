@@ -240,7 +240,7 @@ describe('Problem Browsing Commands', () => {
 
     describe('error cases', () => {
       it('should handle problem not found', async () => {
-        vi.mocked(leetcodeClient.getProblemById).mockResolvedValueOnce(null as any);
+        vi.mocked(leetcodeClient.getProblemById).mockResolvedValueOnce(null as unknown as Awaited<ReturnType<typeof leetcodeClient.getProblemById>>);
         
         await showCommand('9999');
 

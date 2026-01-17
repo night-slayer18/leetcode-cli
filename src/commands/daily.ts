@@ -5,11 +5,6 @@ import { leetcodeClient } from '../api/client.js';
 import { requireAuth } from '../utils/auth.js';
 import { displayDailyChallenge } from '../utils/display.js';
 
-interface DailyOptions {
-  pick?: boolean;
-  lang?: string;
-}
-
 export async function dailyCommand(): Promise<void> {
   const { authorized } = await requireAuth();
   if (!authorized) return;

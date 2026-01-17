@@ -36,7 +36,6 @@ import {
 } from './queries.js';
 
 const LEETCODE_BASE_URL = 'https://leetcode.com';
-const LEETCODE_GRAPHQL_URL = `${LEETCODE_BASE_URL}/graphql`;
 
 export class LeetCodeClient {
   private client: Got;

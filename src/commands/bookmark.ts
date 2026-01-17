@@ -5,7 +5,7 @@ import ora from 'ora';
 import { bookmarks } from '../storage/bookmarks.js';
 import { leetcodeClient } from '../api/client.js';
 import { requireAuth } from '../utils/auth.js';
-import { config } from '../storage/config.js';
+
 import { isProblemId } from '../utils/validation.js';
 
 type BookmarkAction = 'add' | 'remove' | 'list' | 'clear';

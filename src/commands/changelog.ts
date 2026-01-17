@@ -262,7 +262,7 @@ export async function changelogCommand(version?: string, options: ChangelogOptio
       }
     }
     
-  } catch (error) {
+  } catch {
     spinner.fail('Failed to fetch changelog');
     console.log(chalk.gray('  Could not fetch release notes from GitHub.'));
     console.log(chalk.gray('  Visit: https://github.com/night-slayer18/leetcode-cli/blob/main/docs/releases.md'));

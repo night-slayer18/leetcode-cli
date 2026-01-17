@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createMockCredentialsStorage } from '../mocks/storage.js';
 import { createMockLeetCodeClient } from '../mocks/leetcodeClient.js';
-import { outputContains, getConsoleOutput } from '../setup.js';
+import { outputContains } from '../setup.js';
 
 // We need to mock modules before importing the commands
 vi.mock('../../storage/credentials.js', () => ({

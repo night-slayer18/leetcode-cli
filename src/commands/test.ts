@@ -72,7 +72,7 @@ export async function testCommand(fileOrId: string, options: TestOptions): Promi
       return;
     }
 
-    const [, problemId, titleSlug] = match;
+    const titleSlug = match[2];
     const ext = fileName.split('.').pop()!;
 
     const lang = getLangSlugFromExtension(ext);

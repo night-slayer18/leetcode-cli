@@ -1,6 +1,5 @@
 import { execSync } from 'child_process';
-import { existsSync, writeFileSync } from 'fs';
-import { join } from 'path';
+import { existsSync } from 'fs';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 import ora from 'ora';
@@ -24,7 +23,7 @@ function isGitInstalled(): boolean {
   try {
     execSync('git --version', { stdio: 'ignore' });
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -33,7 +32,7 @@ function isMapRepo(workDir: string): boolean {
   try {
     execSync('git rev-parse --is-inside-work-tree', { cwd: workDir, stdio: 'ignore' });
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -42,7 +41,7 @@ function isGhInstalled(): boolean {
   try {
     execSync('gh --version', { stdio: 'ignore' });
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -51,7 +50,7 @@ function getRemoteUrl(workDir: string): string | null {
   try {
     const url = execSync('git config --get remote.origin.url', { cwd: workDir, encoding: 'utf-8' });
     return url.trim();
-  } catch (error) {
+  } catch {
     return null;
   }
 }
@@ -154,7 +153,7 @@ async function setupRemote(workDir: string): Promise<string> {
       try {
           execSync(`git remote add origin ${repoUrl}`, { cwd: workDir });
           console.log(chalk.green('✓ Added remote origin'));
-      } catch (e) {
+      } catch {
           console.log(chalk.red('Failed to add remote origin'));
       }
   }
@@ -212,16 +211,16 @@ export async function syncCommand(): Promise<void> {
     } catch {
          try {
              execSync('git push -u origin master', { cwd: workDir, stdio: 'ignore' });
-         } catch (e) {
+         } catch {
              throw new Error('Failed to push to remote. Please check your git credentials and branch status.');
          }
     }
 
     spinner.succeed('Successfully synced solutions to remote');
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     spinner.fail('Sync failed');
-    if(error.message) {
+    if(error instanceof Error && error.message) {
         console.log(chalk.red(error.message));
     }
   }

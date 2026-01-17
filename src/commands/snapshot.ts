@@ -1,6 +1,6 @@
 // Snapshot command - save/restore solution versions
 import chalk from 'chalk';
-import { snapshotStorage, Snapshot } from '../storage/snapshots.js';
+import { snapshotStorage } from '../storage/snapshots.js';
 import { config } from '../storage/config.js';
 import { findSolutionFile, getLangSlugFromExtension } from '../utils/fileUtils.js';
 import { readFile, writeFile } from 'fs/promises';

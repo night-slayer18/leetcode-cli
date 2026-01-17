@@ -3,7 +3,7 @@ import ora from 'ora';
 import chalk from 'chalk';
 import { leetcodeClient } from '../api/client.js';
 import { requireAuth } from '../utils/auth.js';
-import { config } from '../storage/config.js';
+
 import { ProblemListFilters } from '../types.js';
 import { showCommand } from './show.js';
 import { pickCommand } from './pick.js';

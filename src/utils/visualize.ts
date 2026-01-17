@@ -131,7 +131,7 @@ export function visualizeTree(arr: unknown[]): string {
   const height = Math.floor(Math.log2(arr.length)) + 1;
   const maxWidth = Math.pow(2, height) * 3;
 
-  function renderLevel(level: number, startIdx: number, endIdx: number, indent: number): void {
+  function renderLevel(level: number, startIdx: number, endIdx: number, _indent: number): void {
     if (startIdx > arr.length - 1) return;
 
     const levelNodes: string[] = [];
