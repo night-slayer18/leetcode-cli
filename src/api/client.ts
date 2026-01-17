@@ -285,23 +285,32 @@ export class LeetCodeClient {
     return this.pollSubmission<SubmissionResult>(response.submission_id.toString(), 'submission', SubmissionResultSchema);
   }
 
-  private async pollSubmission<T>(id: string, _type: 'interpret' | 'submission', schema: z.ZodSchema<T>): Promise<T> {
+  private async pollSubmission<T>(id: string, type: 'interpret' | 'submission', schema: z.ZodSchema<T>): Promise<T> {
     const endpoint = `submissions/detail/${id}/check/`;
 
-    const maxAttempts = 30;
-    const delay = 1000;
+    const maxAttempts = 12;
+    const initialDelay = 500;  
+    const maxDelay = 3000;     
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      const result = await this.client.get(endpoint).json<T & { state: string }>();
+      try {
+        const result = await this.client.get(endpoint).json<T & { state: string }>();
 
-      if (result.state === 'SUCCESS' || result.state === 'FAILURE') {
-        return schema.parse(result);
+        if (result.state === 'SUCCESS' || result.state === 'FAILURE') {
+          return schema.parse(result);
+        }
+      } catch (error) {
+        if (attempt === maxAttempts - 1) {
+          const action = type === 'interpret' ? 'Test' : 'Submission';
+          throw new Error(`${action} check failed: ${error instanceof Error ? error.message : 'Network error'}`);
+        }
       }
-
+      const delay = Math.min(initialDelay * Math.pow(2, attempt), maxDelay);
       await new Promise(resolve => setTimeout(resolve, delay));
     }
 
-    throw new Error('Submission timeout: Result not available after 30 seconds');
+    const action = type === 'interpret' ? 'Test' : 'Submission';
+    throw new Error(`${action} timeout: Result not available after 30 seconds`);
   }
 }
 
