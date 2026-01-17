@@ -131,7 +131,7 @@ export async function updateCommand(options: UpdateOptions): Promise<void> {
   }
   
   // Compare versions
-  if (isNewerVersion(currentVersion, latestVersion)) {
+  if (isNewerVersion(latestVersion, currentVersion)) {
     displayUpdateBox(currentVersion, latestVersion, hasBreakingChanges);
     
     if (!options.checkOnly) {
@@ -154,7 +154,7 @@ export async function checkForUpdatesOnStartup(): Promise<void> {
   // Skip if check not needed
   if (!versionStorage.shouldCheck()) {
     const cached = versionStorage.getCached();
-    if (cached && isNewerVersion(getCurrentVersion(), cached.latestVersion)) {
+    if (cached && isNewerVersion(cached.latestVersion, getCurrentVersion())) {
       displayStartupBanner(getCurrentVersion(), cached.latestVersion, cached.hasBreakingChanges);
     }
     return;
@@ -165,7 +165,7 @@ export async function checkForUpdatesOnStartup(): Promise<void> {
     const result = await fetchLatestVersion();
     versionStorage.updateCache(result.version, result.hasBreakingChanges);
     
-    if (isNewerVersion(getCurrentVersion(), result.version)) {
+    if (isNewerVersion(result.version, getCurrentVersion())) {
       displayStartupBanner(getCurrentVersion(), result.version, result.hasBreakingChanges);
     }
   } catch {
