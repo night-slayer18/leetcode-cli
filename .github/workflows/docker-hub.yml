@@ -1,20 +1,21 @@
-name: Docker Publish
+name: DockerHub Publish
 
 on:
   push:
-    # Publish semver tags as releases.
-    tags: [ 'v*.*.*' ]
-
+    tags: ['v*.*.*']
+    branches: [main]
+    paths:
+      - 'docs/docker.md'
+  workflow_dispatch:
 
 env:
-  # Use docker.io for Docker Hub if empty
-  REGISTRY: docker.io
-  # github.repository as <account>/<repo>
   IMAGE_NAME: nightslayer/leetcode-cli
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Only build on version tags, not on README changes
+    if: startsWith(github.ref, 'refs/tags/v')
     permissions:
       contents: read
       packages: write
@@ -32,7 +33,7 @@ jobs:
           username: nightslayer
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Extract metadata (tags, labels) for Docker
+      - name: Extract metadata (tags, labels)
         id: meta
         uses: docker/metadata-action@v5
         with:
@@ -48,3 +49,19 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  sync-readme:
+    runs-on: ubuntu-latest
+    # Always sync README (on tags, README changes, or manual trigger)
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Sync README to DockerHub
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: nightslayer
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: nightslayer/leetcode-cli
+          readme-filepath: ./docs/docker.md
+          short-description: "🔥 A modern LeetCode CLI built with TypeScript"
