@@ -13,7 +13,7 @@ const MOCK_LEETCODE_DIR = join(TEST_DIR, '.leetcode');
 
 // Mock homedir BEFORE importing storage modules
 vi.mock('os', async (importOriginal) => {
-  const actual = await importOriginal() as typeof import('os');
+  const actual = (await importOriginal()) as typeof import('os');
   const testDir = join(actual.tmpdir(), `leetcode-test-${process.pid}`);
   return {
     ...actual,
@@ -46,14 +46,14 @@ describe('Workspace Storage Integration', () => {
   describe('Workspace Initialization', () => {
     it('should create default workspace on first access', () => {
       const active = workspaceStorage.getActive();
-      
+
       expect(active).toBe('default');
       expect(workspaceStorage.exists('default')).toBe(true);
     });
 
     it('should create workspace directory structure', () => {
       workspaceStorage.getActive(); // Triggers initialization
-      
+
       const wsDir = join(MOCK_LEETCODE_DIR, 'workspaces', 'default');
       expect(existsSync(wsDir)).toBe(true);
       expect(existsSync(join(wsDir, 'config.json'))).toBe(true);
@@ -192,7 +192,7 @@ describe('Workspace Storage Integration', () => {
     it('should list all workspaces correctly', () => {
       // Ensure default is initialized first
       workspaceStorage.getActive();
-      
+
       workspaceStorage.create('a', { workDir: '/a', lang: 'typescript' });
       workspaceStorage.create('b', { workDir: '/b', lang: 'typescript' });
       workspaceStorage.create('c', { workDir: '/c', lang: 'typescript' });

@@ -44,7 +44,6 @@ export async function collabHostCommand(problemId: string): Promise<void> {
 
     // Pick the problem and open in editor
     await pickCommand(problemId, { open: true });
-
   } catch (error) {
     spinner.fail('Failed to create room');
     if (error instanceof Error) {
@@ -86,7 +85,6 @@ export async function collabJoinCommand(roomCode: string): Promise<void> {
 
     // Pick the problem and open in editor
     await pickCommand(result.problemId, { open: true });
-
   } catch (error) {
     spinner.fail('Failed to join room');
     if (error instanceof Error) {
@@ -97,10 +95,12 @@ export async function collabJoinCommand(roomCode: string): Promise<void> {
 
 export async function collabSyncCommand(): Promise<void> {
   const session = collabService.getSession();
-  
+
   if (!session) {
     console.log(chalk.yellow('No active collaboration session.'));
-    console.log(chalk.gray('Use `leetcode collab host <id>` or `leetcode collab join <code>` first.'));
+    console.log(
+      chalk.gray('Use `leetcode collab host <id>` or `leetcode collab join <code>` first.')
+    );
     return;
   }
 
@@ -127,10 +127,12 @@ export async function collabSyncCommand(): Promise<void> {
 
 export async function collabCompareCommand(): Promise<void> {
   const session = collabService.getSession();
-  
+
   if (!session) {
     console.log(chalk.yellow('No active collaboration session.'));
-    console.log(chalk.gray('Use `leetcode collab host <id>` or `leetcode collab join <code>` first.'));
+    console.log(
+      chalk.gray('Use `leetcode collab host <id>` or `leetcode collab join <code>` first.')
+    );
     return;
   }
 
@@ -146,7 +148,7 @@ export async function collabCompareCommand(): Promise<void> {
   }
 
   const myCode = await readFile(filePath, 'utf-8');
-  
+
   // Get partner's code
   const partnerResult = await collabService.getPartnerCode();
 
@@ -178,7 +180,7 @@ export async function collabCompareCommand(): Promise<void> {
     console.log(`${chalk.gray(lineNum)} ${myLines[i]}`);
   }
 
-  // Partner's solution  
+  // Partner's solution
   console.log();
   console.log(chalk.bold.blue(`▸ ${partnerResult.username}'s Solution`));
   console.log(chalk.gray('─'.repeat(60)));
@@ -190,13 +192,15 @@ export async function collabCompareCommand(): Promise<void> {
 
   console.log();
   console.log(chalk.gray('─'.repeat(60)));
-  console.log(chalk.gray(`Your code: ${myLines.length} lines | Partner: ${partnerLines.length} lines`));
+  console.log(
+    chalk.gray(`Your code: ${myLines.length} lines | Partner: ${partnerLines.length} lines`)
+  );
   console.log();
 }
 
 export async function collabLeaveCommand(): Promise<void> {
   const session = collabService.getSession();
-  
+
   if (!session) {
     console.log(chalk.yellow('No active collaboration session.'));
     return;
@@ -208,10 +212,12 @@ export async function collabLeaveCommand(): Promise<void> {
 
 export async function collabStatusCommand(): Promise<void> {
   const session = collabService.getSession();
-  
+
   if (!session) {
     console.log(chalk.yellow('No active collaboration session.'));
-    console.log(chalk.gray('Use `leetcode collab host <id>` or `leetcode collab join <code>` to start.'));
+    console.log(
+      chalk.gray('Use `leetcode collab host <id>` or `leetcode collab join <code>` to start.')
+    );
     return;
   }
 
@@ -230,7 +236,11 @@ export async function collabStatusCommand(): Promise<void> {
   console.log(`  Role: ${session.isHost ? 'Host' : 'Guest'}`);
   console.log();
   console.log(chalk.bold('  Participants:'));
-  console.log(`    Host: ${status.host} ${status.hasHostCode ? chalk.green('✓ synced') : chalk.gray('pending')}`);
-  console.log(`    Guest: ${status.guest || chalk.gray('(waiting...)')} ${status.hasGuestCode ? chalk.green('✓ synced') : chalk.gray('pending')}`);
+  console.log(
+    `    Host: ${status.host} ${status.hasHostCode ? chalk.green('✓ synced') : chalk.gray('pending')}`
+  );
+  console.log(
+    `    Guest: ${status.guest || chalk.gray('(waiting...)')} ${status.hasGuestCode ? chalk.green('✓ synced') : chalk.gray('pending')}`
+  );
   console.log();
 }

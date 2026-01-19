@@ -54,7 +54,7 @@ export async function loginCommand(): Promise<void> {
 
     // Save credentials
     credentials.set(creds);
-    
+
     spinner.succeed(`Logged in as ${chalk.green(username)}`);
     console.log();
     console.log(chalk.gray(`Credentials saved to ${credentials.getPath()}`));
@@ -73,7 +73,7 @@ export async function logoutCommand(): Promise<void> {
 
 export async function whoamiCommand(): Promise<void> {
   const creds = credentials.get();
-  
+
   if (!creds) {
     console.log(chalk.yellow('Not logged in. Run "leetcode login" to authenticate.'));
     return;

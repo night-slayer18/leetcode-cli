@@ -10,8 +10,8 @@ vi.mock('../../storage/credentials.js', () => ({
 
 vi.mock('../../storage/config.js', () => ({
   config: {
-    getConfig: vi.fn(() => ({ 
-      language: 'typescript', 
+    getConfig: vi.fn(() => ({
+      language: 'typescript',
       workDir: '/tmp/leetcode',
       repo: 'https://github.com/user/repo.git',
     })),
@@ -46,7 +46,7 @@ vi.mock('ora', () => ({
 
 vi.mock('inquirer', () => ({
   default: {
-    prompt: vi.fn().mockResolvedValue({ 
+    prompt: vi.fn().mockResolvedValue({
       confirm: true,
       repoUrl: 'https://github.com/user/repo.git',
     }),
@@ -83,18 +83,18 @@ describe('Sync Command', () => {
     it('should reject invalid git URL format (command injection attempt)', async () => {
       // Simulating a user entering a malicious URL via prompt
       vi.mocked(config.getRepo).mockReturnValue('; echo hello #');
-      
+
       await syncCommand();
-      
+
       // Security validation should kick in and show error about invalid URL
       expect(outputContains('Invalid repository URL format')).toBe(true);
     });
 
     it('should reject URLs with shell metacharacters', async () => {
       vi.mocked(config.getRepo).mockReturnValue('https://evil.com/$(id)/repo');
-      
+
       await syncCommand();
-      
+
       expect(outputContains('Invalid repository URL format')).toBe(true);
     });
   });

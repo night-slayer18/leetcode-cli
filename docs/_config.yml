@@ -13,7 +13,7 @@ nav_enabled: true
 search_enabled: true
 
 # Footer (remove theme attribution)
-footer_content: ""
+footer_content: ''
 
 # Disable GitHub edit links
 gh_edit_link: false

@@ -42,7 +42,7 @@ export function getCodeTemplate(
 ): CodeSnippet | null {
   // Try to find the preferred language first
   const preferred = snippets.find(
-    s => LANG_SLUG_MAP[s.langSlug.toLowerCase()] === preferredLanguage
+    (s) => LANG_SLUG_MAP[s.langSlug.toLowerCase()] === preferredLanguage
   );
   if (preferred) return preferred;
 
@@ -60,8 +60,15 @@ export function generateSolutionFile(
   problemContent?: string
 ): string {
   const commentStyle = getCommentStyle(language);
-  const header = generateHeader(commentStyle, problemId, title, difficulty, titleSlug, problemContent);
-  
+  const header = generateHeader(
+    commentStyle,
+    problemId,
+    title,
+    difficulty,
+    titleSlug,
+    problemContent
+  );
+
   return `${header}\n\n${codeSnippet}\n`;
 }
 
@@ -93,24 +100,24 @@ function getCommentStyle(language: SupportedLanguage): CommentStyle {
 
 function formatProblemContent(html: string): string {
   let content = html;
-  
+
   // Convert superscripts
   content = content.replace(/<sup>(.*?)<\/sup>/gi, '^$1');
-  
+
   // Handle examples
   content = content.replace(/<strong class="example">Example (\d+):<\/strong>/gi, '\nExample $1:');
-  
+
   // Convert list items
   content = content.replace(/<li>/gi, '• ');
   content = content.replace(/<\/li>/gi, '\n');
-  
+
   // Convert paragraphs/breaks
   content = content.replace(/<\/p>/gi, '\n\n');
   content = content.replace(/<br\s*\/?>/gi, '\n');
-  
+
   // Remove HTML tags
   content = striptags(content) ?? '';
-  
+
   // Decode HTML entities
   content = content
     .replace(/&nbsp;/g, ' ')
@@ -122,10 +129,10 @@ function formatProblemContent(html: string): string {
     .replace(/&ge;/g, '>=')
     .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(parseInt(code, 10)))
     .replace(/&amp;/g, '&');
-  
+
   // Clean up whitespace
   content = content.replace(/\n{3,}/g, '\n\n').trim();
-  
+
   return content;
 }
 
@@ -138,22 +145,22 @@ function generateHeader(
   problemContent?: string
 ): string {
   const prefix = style.linePrefix;
-  
+
   const lines: string[] = [
     style.blockStart,
     `${prefix}${problemId}. ${title}`,
     `${prefix}Difficulty: ${difficulty}`,
     `${prefix}https://leetcode.com/problems/${titleSlug}/`,
   ];
-  
+
   if (problemContent) {
     lines.push(`${prefix}`);
     lines.push(`${prefix}${'─'.repeat(50)}`);
     lines.push(`${prefix}`);
-    
+
     const formattedContent = formatProblemContent(problemContent);
     const contentLines = formattedContent.split('\n');
-    
+
     for (const line of contentLines) {
       // Wrap long lines at ~70 chars
       if (line.length > 70) {
@@ -175,7 +182,7 @@ function generateHeader(
       }
     }
   }
-  
+
   lines.push(style.blockEnd);
   return lines.join('\n');
 }

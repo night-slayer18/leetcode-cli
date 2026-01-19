@@ -20,7 +20,7 @@ export async function statCommand(username?: string, options: StatOptions = {}):
 
   try {
     const targetUsername = username || currentUser;
-    
+
     if (!targetUsername) {
       spinner.fail('No username found');
       return;

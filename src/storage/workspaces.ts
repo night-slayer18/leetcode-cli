@@ -43,7 +43,7 @@ export const workspaceStorage = {
    */
   ensureInitialized(): void {
     const registry = loadRegistry();
-    
+
     // If no workspaces exist, create "default"
     if (registry.workspaces.length === 0) {
       this.create('default', {
@@ -98,7 +98,7 @@ export const workspaceStorage = {
    */
   create(name: string, config: WorkspaceConfig): boolean {
     const registry = loadRegistry();
-    
+
     if (registry.workspaces.includes(name)) {
       return false; // Already exists
     }
@@ -113,7 +113,10 @@ export const workspaceStorage = {
     writeFileSync(configPath, JSON.stringify(config, null, 2));
 
     // Initialize empty timer and collab
-    writeFileSync(join(wsDir, 'timer.json'), JSON.stringify({ solveTimes: {}, activeTimer: null }, null, 2));
+    writeFileSync(
+      join(wsDir, 'timer.json'),
+      JSON.stringify({ solveTimes: {}, activeTimer: null }, null, 2)
+    );
     writeFileSync(join(wsDir, 'collab.json'), JSON.stringify({ session: null }, null, 2));
 
     // Update registry
@@ -137,13 +140,13 @@ export const workspaceStorage = {
     }
 
     // Remove from registry (don't delete files to be safe)
-    registry.workspaces = registry.workspaces.filter(w => w !== name);
-    
+    registry.workspaces = registry.workspaces.filter((w) => w !== name);
+
     // If deleting active workspace, switch to default
     if (registry.active === name) {
       registry.active = 'default';
     }
-    
+
     saveRegistry(registry);
     return true;
   },
@@ -162,11 +165,11 @@ export const workspaceStorage = {
   getConfig(name?: string): WorkspaceConfig {
     const wsName = name ?? this.getActive();
     const configPath = join(WORKSPACES_DIR, wsName, 'config.json');
-    
+
     if (existsSync(configPath)) {
       return JSON.parse(readFileSync(configPath, 'utf-8'));
     }
-    
+
     // Default config
     return {
       workDir: join(homedir(), 'leetcode'),
@@ -181,10 +184,10 @@ export const workspaceStorage = {
     const wsName = name ?? this.getActive();
     const wsDir = join(WORKSPACES_DIR, wsName);
     ensureDir(wsDir);
-    
+
     const currentConfig = this.getConfig(wsName);
     const newConfig = { ...currentConfig, ...config };
-    
+
     writeFileSync(join(wsDir, 'config.json'), JSON.stringify(newConfig, null, 2));
   },
 

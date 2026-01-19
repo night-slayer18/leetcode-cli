@@ -55,6 +55,7 @@ src/__tests__/
 ### Unit Tests (~177 tests)
 
 Test individual command logic with mocked dependencies:
+
 - API client is mocked to avoid network calls
 - Storage modules are mocked to avoid file system access
 - All command options and input variations are tested
@@ -63,6 +64,7 @@ Test individual command logic with mocked dependencies:
 ### Integration Tests (~49 tests)
 
 Run the actual compiled CLI binary to catch:
+
 - Missing shebang in `dist/index.js`
 - Broken imports or build errors
 - Commands not registered with Commander.js
@@ -73,12 +75,13 @@ Run the actual compiled CLI binary to catch:
 
 Current coverage by area:
 
-| Area | Statements | Lines |
-|------|------------|-------|
-| Commands | 70.33% | 71.47% |
-| Overall | 54.64% | 55.93% |
+| Area     | Statements | Lines  |
+| -------- | ---------- | ------ |
+| Commands | 70.33%     | 71.47% |
+| Overall  | 54.64%     | 55.93% |
 
 Lower overall coverage is expected because we mock:
+
 - `src/api/client.ts` - LeetCode API calls
 - `src/storage/*` - Configuration persistence
 - `src/utils/display.ts` - Console output formatting

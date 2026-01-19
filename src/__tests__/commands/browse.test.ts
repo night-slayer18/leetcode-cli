@@ -240,8 +240,10 @@ describe('Problem Browsing Commands', () => {
 
     describe('error cases', () => {
       it('should handle problem not found', async () => {
-        vi.mocked(leetcodeClient.getProblemById).mockResolvedValueOnce(null as unknown as Awaited<ReturnType<typeof leetcodeClient.getProblemById>>);
-        
+        vi.mocked(leetcodeClient.getProblemById).mockResolvedValueOnce(
+          null as unknown as Awaited<ReturnType<typeof leetcodeClient.getProblemById>>
+        );
+
         await showCommand('9999');
 
         expect(leetcodeClient.getProblemById).toHaveBeenCalledWith('9999');
@@ -313,4 +315,3 @@ describe('Problem Browsing Commands', () => {
     });
   });
 });
-

@@ -1,10 +1,49 @@
-node_modules
-dist
-.git
-.github
-coverage
-docs
-src/__tests__
-vitest.config.ts
-*.md
+# Dependencies
+node_modules/
+
+# Build outputs (we rebuild in Docker)
+dist/
+build/
+
+# Git
+.git/
+.gitignore
+
+# IDE / Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Testing
+coverage/
+.nyc_output/
+src/__tests__/
+
+# Environment variables (use Docker secrets instead)
+.env
+.env.local
+.env*.local
+
+# Logs
 *.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Development config files
+.prettierrc
+.prettierignore
+.eslintrc*
+eslint.config.*
+vitest.config.*
+
+# GitHub
+.github/

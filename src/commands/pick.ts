@@ -46,15 +46,16 @@ export async function pickCommand(idOrSlug: string, options: PickOptions): Promi
 
     // Determine language
     const langInput = options.lang?.toLowerCase() ?? config.getLanguage();
-    const language: SupportedLanguage = (LANG_SLUG_MAP[langInput] ?? langInput) as SupportedLanguage;
+    const language: SupportedLanguage = (LANG_SLUG_MAP[langInput] ??
+      langInput) as SupportedLanguage;
 
     // Get code template
     const snippets = problem.codeSnippets ?? [];
     const template = getCodeTemplate(snippets, language);
-    
+
     // Determine the code to use based on template availability
     let code: string;
-    
+
     if (snippets.length === 0) {
       // Premium problem - no code snippets available from API
       spinner.warn(chalk.yellow('Premium Problem (No code snippets available)'));
@@ -63,7 +64,7 @@ export async function pickCommand(idOrSlug: string, options: PickOptions): Promi
     } else if (!template) {
       // Snippets exist but not for the selected language
       spinner.fail(`No code template available for ${language}`);
-      console.log(chalk.gray(`Available languages: ${snippets.map(s => s.langSlug).join(', ')}`));
+      console.log(chalk.gray(`Available languages: ${snippets.map((s) => s.langSlug).join(', ')}`));
       return false;
     } else {
       // Normal case - use the template code
@@ -84,12 +85,13 @@ export async function pickCommand(idOrSlug: string, options: PickOptions): Promi
     // Build folder path: workDir/Difficulty/Category/
     const workDir = config.getWorkDir();
     const difficulty = problem.difficulty; // Easy, Medium, Hard
-    const category = problem.topicTags.length > 0 
-      ? problem.topicTags[0].name.replace(/[^\w\s-]/g, '').trim() // First tag as category
-      : 'Uncategorized';
-    
+    const category =
+      problem.topicTags.length > 0
+        ? problem.topicTags[0].name.replace(/[^\w\s-]/g, '').trim() // First tag as category
+        : 'Uncategorized';
+
     const targetDir = join(workDir, difficulty, category);
-    
+
     // Ensure directory exists
     if (!existsSync(targetDir)) {
       await mkdir(targetDir, { recursive: true });
@@ -102,7 +104,7 @@ export async function pickCommand(idOrSlug: string, options: PickOptions): Promi
     if (existsSync(filePath)) {
       spinner.warn(`File already exists: ${fileName}`);
       console.log(chalk.gray(`Path: ${filePath}`));
-      
+
       // Optionally open existing file
       if (options.open !== false) {
         await openInEditor(filePath);
@@ -111,7 +113,7 @@ export async function pickCommand(idOrSlug: string, options: PickOptions): Promi
     }
 
     await writeFile(filePath, content, 'utf-8');
-    
+
     spinner.succeed(`Created ${chalk.green(fileName)}`);
     console.log(chalk.gray(`Path: ${filePath}`));
     console.log();
@@ -125,22 +127,22 @@ export async function pickCommand(idOrSlug: string, options: PickOptions): Promi
     return true;
   } catch (error) {
     spinner.fail('Failed to fetch problem');
-    
+
     if (error instanceof Error) {
       // Clean up Zod error messages
       if (error.message.includes('expected object, received null')) {
-         console.log(chalk.red(`Problem "${idOrSlug}" not found`));
+        console.log(chalk.red(`Problem "${idOrSlug}" not found`));
       } else {
-         try {
-           const zodError = JSON.parse(error.message);
-           if (Array.isArray(zodError)) {
-             console.log(chalk.red('API Response Validation Failed'));
-           } else {
-             console.log(chalk.red(error.message));
-           }
-         } catch {
-           console.log(chalk.red(error.message));
-         }
+        try {
+          const zodError = JSON.parse(error.message);
+          if (Array.isArray(zodError)) {
+            console.log(chalk.red('API Response Validation Failed'));
+          } else {
+            console.log(chalk.red(error.message));
+          }
+        } catch {
+          console.log(chalk.red(error.message));
+        }
       }
     }
     return false;

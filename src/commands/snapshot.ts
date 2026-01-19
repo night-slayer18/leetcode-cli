@@ -21,19 +21,18 @@ function formatTimeAgo(dateStr: string): string {
   return `${diffDays}d ago`;
 }
 
-export async function snapshotSaveCommand(
-  problemId: string,
-  name?: string
-): Promise<void> {
+export async function snapshotSaveCommand(problemId: string, name?: string): Promise<void> {
   const workDir = config.getWorkDir();
 
   try {
     // Find the solution file
     const filePath = await findSolutionFile(workDir, problemId);
-    
+
     if (!filePath) {
       console.log(chalk.red(`No solution file found for problem ${problemId}`));
-      console.log(chalk.gray('Run `leetcode pick ' + problemId + '` first to create a solution file.'));
+      console.log(
+        chalk.gray('Run `leetcode pick ' + problemId + '` first to create a solution file.')
+      );
       return;
     }
 
@@ -95,7 +94,7 @@ export async function snapshotListCommand(problemId: string): Promise<void> {
     const timeAgo = formatTimeAgo(snap.createdAt);
     console.log(
       `  ${chalk.cyan(snap.id.toString().padStart(2))}. ${chalk.white(snap.name.padEnd(25))} ` +
-      `${chalk.gray(snap.lines + ' lines')} ${chalk.gray('·')} ${chalk.gray(timeAgo)}`
+        `${chalk.gray(snap.lines + ' lines')} ${chalk.gray('·')} ${chalk.gray(timeAgo)}`
     );
   }
 
@@ -106,10 +105,7 @@ export async function snapshotListCommand(problemId: string): Promise<void> {
   console.log(chalk.gray(`  delete:  leetcode snapshot delete ${problemId} <id|name>`));
 }
 
-export async function snapshotRestoreCommand(
-  problemId: string,
-  idOrName: string
-): Promise<void> {
+export async function snapshotRestoreCommand(problemId: string, idOrName: string): Promise<void> {
   const workDir = config.getWorkDir();
 
   try {
@@ -118,7 +114,9 @@ export async function snapshotRestoreCommand(
 
     if (!snapshot) {
       console.log(chalk.red(`Snapshot "${idOrName}" not found for problem ${problemId}`));
-      console.log(chalk.gray('Run `leetcode snapshot list ' + problemId + '` to see available snapshots.'));
+      console.log(
+        chalk.gray('Run `leetcode snapshot list ' + problemId + '` to see available snapshots.')
+      );
       return;
     }
 
@@ -132,7 +130,7 @@ export async function snapshotRestoreCommand(
 
     // Read current code for backup
     const currentCode = await readFile(filePath, 'utf-8');
-    
+
     // Auto-backup before restore
     const backupName = `backup-before-restore-${Date.now()}`;
     const ext = extname(filePath).slice(1);
@@ -191,8 +189,8 @@ export async function snapshotDiffCommand(
     let removed = 0;
 
     for (const part of diff) {
-      const lines = part.value.split('\n').filter(l => l !== '');
-      
+      const lines = part.value.split('\n').filter((l) => l !== '');
+
       if (part.added) {
         added += lines.length;
         for (const line of lines) {
@@ -223,8 +221,8 @@ export async function snapshotDiffCommand(
     console.log(chalk.gray('─'.repeat(50)));
     console.log(
       `${chalk.green('+' + added + ' added')} ${chalk.gray('·')} ` +
-      `${chalk.red('-' + removed + ' removed')} ${chalk.gray('·')} ` +
-      `${chalk.gray(snap1.lines + ' → ' + snap2.lines + ' lines')}`
+        `${chalk.red('-' + removed + ' removed')} ${chalk.gray('·')} ` +
+        `${chalk.gray(snap1.lines + ' → ' + snap2.lines + ' lines')}`
     );
   } catch (error) {
     console.log(chalk.red('Failed to diff snapshots'));
@@ -234,10 +232,7 @@ export async function snapshotDiffCommand(
   }
 }
 
-export async function snapshotDeleteCommand(
-  problemId: string,
-  idOrName: string
-): Promise<void> {
+export async function snapshotDeleteCommand(problemId: string, idOrName: string): Promise<void> {
   const snapshot = snapshotStorage.get(problemId, idOrName);
 
   if (!snapshot) {

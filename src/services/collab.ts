@@ -18,19 +18,20 @@ export const collabService = {
     return collabStorage.getSession();
   },
 
-  async createRoom(problemId: string, username: string): Promise<{ roomCode: string } | { error: string }> {
+  async createRoom(
+    problemId: string,
+    username: string
+  ): Promise<{ roomCode: string } | { error: string }> {
     const roomCode = generateRoomCode();
 
-    const { error } = await supabase
-      .from('collab_rooms')
-      .insert({
-        room_code: roomCode,
-        problem_id: problemId,
-        host_username: username,
-        host_code: '',
-        guest_username: null,
-        guest_code: null,
-      });
+    const { error } = await supabase.from('collab_rooms').insert({
+      room_code: roomCode,
+      problem_id: problemId,
+      host_username: username,
+      host_code: '',
+      guest_username: null,
+      guest_code: null,
+    });
 
     if (error) {
       return { error: error.message };
@@ -47,7 +48,10 @@ export const collabService = {
     return { roomCode };
   },
 
-  async joinRoom(roomCode: string, username: string): Promise<{ problemId: string } | { error: string }> {
+  async joinRoom(
+    roomCode: string,
+    username: string
+  ): Promise<{ problemId: string } | { error: string }> {
     // Check if room exists
     const { data: room, error: fetchError } = await supabase
       .from('collab_rooms')
@@ -129,7 +133,10 @@ export const collabService = {
     }
   },
 
-  async getRoomStatus(): Promise<{ host: string; guest: string | null; hasHostCode: boolean; hasGuestCode: boolean } | { error: string }> {
+  async getRoomStatus(): Promise<
+    | { host: string; guest: string | null; hasHostCode: boolean; hasGuestCode: boolean }
+    | { error: string }
+  > {
     const session = collabStorage.getSession();
     if (!session) {
       return { error: 'No active session' };
@@ -158,10 +165,7 @@ export const collabService = {
     if (session) {
       // Optionally delete room if host leaves
       if (session.isHost) {
-        await supabase
-          .from('collab_rooms')
-          .delete()
-          .eq('room_code', session.roomCode);
+        await supabase.from('collab_rooms').delete().eq('room_code', session.roomCode);
       }
     }
     collabStorage.setSession(null);

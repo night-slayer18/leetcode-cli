@@ -58,7 +58,9 @@ export async function submitCommand(fileOrId: string): Promise<void> {
     console.log(chalk.red('⚠️  Security Error: File path is outside the configured workspace'));
     console.log(chalk.gray(`File: ${filePath}`));
     console.log(chalk.gray(`Workspace: ${workDir}`));
-    console.log(chalk.yellow('\nFor security reasons, you can only submit files from within your workspace.'));
+    console.log(
+      chalk.yellow('\nFor security reasons, you can only submit files from within your workspace.')
+    );
     console.log(chalk.gray('Use "leetcode config workdir <path>" to change your workspace.'));
     return;
   }
@@ -97,12 +99,7 @@ export async function submitCommand(fileOrId: string): Promise<void> {
 
     spinner.text = 'Submitting solution...';
 
-    const result = await leetcodeClient.submitSolution(
-      titleSlug,
-      code,
-      lang,
-      problem.questionId
-    );
+    const result = await leetcodeClient.submitSolution(titleSlug, code, lang, problem.questionId);
 
     spinner.stop();
     displaySubmissionResult(result);
@@ -120,17 +117,17 @@ export async function submitCommand(fileOrId: string): Promise<void> {
             timerResult.durationSeconds,
             activeTimer.durationMinutes
           );
-          
+
           const mins = Math.floor(timerResult.durationSeconds / 60);
           const secs = timerResult.durationSeconds % 60;
           const timeStr = `${mins}m ${secs}s`;
           const withinLimit = timerResult.durationSeconds <= activeTimer.durationMinutes * 60;
-          
+
           console.log();
           console.log(chalk.bold('⏱️  Timer Result:'));
           console.log(
             `   Solved in ${withinLimit ? chalk.green(timeStr) : chalk.yellow(timeStr)}` +
-            ` (limit: ${activeTimer.durationMinutes}m)`
+              ` (limit: ${activeTimer.durationMinutes}m)`
           );
           if (withinLimit) {
             console.log(chalk.green('   ✓ Within time limit!'));

@@ -12,11 +12,11 @@ const VSCODE_EDITORS = ['code', 'code-insiders', 'cursor', 'codium', 'vscodium']
 
 /**
  * Opens a file in the user's configured editor.
- * 
+ *
  * - For terminal editors: prints the command for manual execution
  * - For VS Code family: opens workspace and navigates to file
  * - For other editors: uses `open` package for cross-platform support
- * 
+ *
  * @param filePath - Absolute path to the file to open
  * @param workDir - Optional workspace directory (used by VS Code editors)
  */

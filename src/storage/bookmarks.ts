@@ -25,7 +25,10 @@ export const bookmarks = {
     if (!current.includes(problemId)) {
       return false;
     }
-    bookmarksStore.set('bookmarks', current.filter(id => id !== problemId));
+    bookmarksStore.set(
+      'bookmarks',
+      current.filter((id) => id !== problemId)
+    );
     return true;
   },
 

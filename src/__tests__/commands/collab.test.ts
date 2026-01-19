@@ -9,9 +9,15 @@ vi.mock('../../services/supabase.js', () => ({
       insert: vi.fn().mockResolvedValue({ error: null }),
       select: vi.fn(() => ({
         eq: vi.fn(() => ({
-          single: vi.fn().mockResolvedValue({ 
-            data: { room_code: 'ABC123', problem_id: '1', host_username: 'TestUser', host_code: 'code', guest_code: '' },
-            error: null 
+          single: vi.fn().mockResolvedValue({
+            data: {
+              room_code: 'ABC123',
+              problem_id: '1',
+              host_username: 'TestUser',
+              host_code: 'code',
+              guest_code: '',
+            },
+            error: null,
           }),
         })),
       })),
@@ -26,12 +32,15 @@ vi.mock('../../services/supabase.js', () => ({
 }));
 
 // Inline mock collab storage for hoisting
-let mockSession: { roomCode: string; problemId: string; isHost: boolean; username: string } | null = null;
+let mockSession: { roomCode: string; problemId: string; isHost: boolean; username: string } | null =
+  null;
 
 vi.mock('../../storage/collab.js', () => ({
   collabStorage: {
     getSession: vi.fn(() => mockSession),
-    setSession: vi.fn((s) => { mockSession = s; }),
+    setSession: vi.fn((s) => {
+      mockSession = s;
+    }),
   },
 }));
 
@@ -89,10 +98,10 @@ vi.mock('../../commands/pick.js', () => ({
 }));
 
 // Import after mocking
-import { 
-  collabHostCommand, 
-  collabJoinCommand, 
-  collabSyncCommand, 
+import {
+  collabHostCommand,
+  collabJoinCommand,
+  collabSyncCommand,
   collabStatusCommand,
   collabLeaveCommand,
   collabCompareCommand,

@@ -64,4 +64,4 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           repository: nightslayer/leetcode-cli
           readme-filepath: ./docs/docker.md
-          short-description: "🔥 A modern LeetCode CLI built with TypeScript"
+          short-description: '🔥 A modern LeetCode CLI built with TypeScript'

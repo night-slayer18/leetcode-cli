@@ -47,8 +47,8 @@ export class LeetCodeClient {
       headers: {
         'Content-Type': 'application/json',
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-        'Origin': LEETCODE_BASE_URL,
-        'Referer': `${LEETCODE_BASE_URL}/`,
+        Origin: LEETCODE_BASE_URL,
+        Referer: `${LEETCODE_BASE_URL}/`,
       },
       timeout: { request: 30000 },
       retry: { limit: 2 },
@@ -59,7 +59,7 @@ export class LeetCodeClient {
     this.credentials = credentials;
     this.client = this.client.extend({
       headers: {
-        'Cookie': `LEETCODE_SESSION=${credentials.session}; csrftoken=${credentials.csrfToken}`,
+        Cookie: `LEETCODE_SESSION=${credentials.session}; csrftoken=${credentials.csrfToken}`,
         'X-CSRFToken': credentials.csrfToken,
       },
     });
@@ -70,9 +70,11 @@ export class LeetCodeClient {
   }
 
   private async graphql<T>(query: string, variables: Record<string, unknown> = {}): Promise<T> {
-    const response = await this.client.post('graphql', {
-      json: { query, variables },
-    }).json<{ data: T; errors?: Array<{ message: string }> }>();
+    const response = await this.client
+      .post('graphql', {
+        json: { query, variables },
+      })
+      .json<{ data: T; errors?: Array<{ message: string }> }>();
 
     if (response.errors?.length) {
       throw new Error(`GraphQL Error: ${response.errors[0].message}`);
@@ -85,12 +87,14 @@ export class LeetCodeClient {
     const data = await this.graphql<{
       userStatus: { isSignedIn: boolean; username: string | null };
     }>(USER_STATUS_QUERY);
-    
+
     const validated = UserStatusSchema.parse(data.userStatus);
     return validated;
   }
 
-  async getProblems(filters: ProblemListFilters = {}): Promise<{ total: number; problems: Problem[] }> {
+  async getProblems(
+    filters: ProblemListFilters = {}
+  ): Promise<{ total: number; problems: Problem[] }> {
     const variables: Record<string, unknown> = {
       categorySlug: '',
       limit: filters.limit ?? 50,
@@ -116,7 +120,7 @@ export class LeetCodeClient {
     }>(PROBLEM_LIST_QUERY, variables);
 
     const validatedProblems = z.array(ProblemSchema).parse(data.problemsetQuestionList.questions);
-    
+
     return {
       total: data.problemsetQuestionList.total,
       problems: validatedProblems,
@@ -124,11 +128,10 @@ export class LeetCodeClient {
   }
 
   async getProblem(titleSlug: string): Promise<ProblemDetail> {
-    const data = await this.graphql<{ question: ProblemDetail }>(
-      PROBLEM_DETAIL_QUERY,
-      { titleSlug }
-    );
-    
+    const data = await this.graphql<{ question: ProblemDetail }>(PROBLEM_DETAIL_QUERY, {
+      titleSlug,
+    });
+
     const validated = ProblemDetailSchema.parse(data.question);
     return validated as ProblemDetail;
   }
@@ -136,12 +139,12 @@ export class LeetCodeClient {
   async getProblemById(id: string): Promise<ProblemDetail> {
     // First get the title slug from the problem list
     const { problems } = await this.getProblems({ searchKeywords: id, limit: 10 });
-    const problem = problems.find(p => p.questionFrontendId === id);
-    
+    const problem = problems.find((p) => p.questionFrontendId === id);
+
     if (!problem) {
       throw new Error(`Problem #${id} not found`);
     }
-    
+
     return this.getProblem(problem.titleSlug);
   }
 
@@ -149,7 +152,7 @@ export class LeetCodeClient {
     const data = await this.graphql<{
       activeDailyCodingChallengeQuestion: DailyChallenge;
     }>(DAILY_CHALLENGE_QUERY);
-    
+
     const validated = DailyChallengeSchema.parse(data.activeDailyCodingChallengeQuestion);
     return validated as DailyChallenge;
   }
@@ -197,7 +200,7 @@ export class LeetCodeClient {
 
     const user = data.matchedUser;
     const validated = UserProfileSchema.parse(user);
-    
+
     return {
       username: validated.username,
       realName: validated.profile.realName,
@@ -227,7 +230,11 @@ export class LeetCodeClient {
     return data.matchedUser.tagProblemCounts;
   }
 
-  async getSubmissionList(slug: string, limit: number = 20, offset: number = 0): Promise<Submission[]> {
+  async getSubmissionList(
+    slug: string,
+    limit: number = 20,
+    offset: number = 0
+  ): Promise<Submission[]> {
     const data = await this.graphql<{
       questionSubmissionList: { submissions: Submission[] };
     }>(SUBMISSION_LIST_QUERY, { questionSlug: slug, limit, offset });
@@ -253,14 +260,16 @@ export class LeetCodeClient {
     questionId: string
   ): Promise<TestResult> {
     // Interpret endpoint for running tests
-    const response = await this.client.post(`problems/${titleSlug}/interpret_solution/`, {
-      json: {
-        data_input: testcases,
-        lang,
-        typed_code: code,
-        question_id: questionId,
-      },
-    }).json<{ interpret_id: string }>();
+    const response = await this.client
+      .post(`problems/${titleSlug}/interpret_solution/`, {
+        json: {
+          data_input: testcases,
+          lang,
+          typed_code: code,
+          question_id: questionId,
+        },
+      })
+      .json<{ interpret_id: string }>();
 
     // Poll for results
     return this.pollSubmission<TestResult>(response.interpret_id, 'interpret', TestResultSchema);
@@ -272,24 +281,34 @@ export class LeetCodeClient {
     lang: string,
     questionId: string
   ): Promise<SubmissionResult> {
-    const response = await this.client.post(`problems/${titleSlug}/submit/`, {
-      json: {
-        lang,
-        typed_code: code,
-        question_id: questionId,
-      },
-    }).json<{ submission_id: number }>();
+    const response = await this.client
+      .post(`problems/${titleSlug}/submit/`, {
+        json: {
+          lang,
+          typed_code: code,
+          question_id: questionId,
+        },
+      })
+      .json<{ submission_id: number }>();
 
     // Poll for results
-    return this.pollSubmission<SubmissionResult>(response.submission_id.toString(), 'submission', SubmissionResultSchema);
+    return this.pollSubmission<SubmissionResult>(
+      response.submission_id.toString(),
+      'submission',
+      SubmissionResultSchema
+    );
   }
 
-  private async pollSubmission<T>(id: string, type: 'interpret' | 'submission', schema: z.ZodSchema<T>): Promise<T> {
+  private async pollSubmission<T>(
+    id: string,
+    type: 'interpret' | 'submission',
+    schema: z.ZodSchema<T>
+  ): Promise<T> {
     const endpoint = `submissions/detail/${id}/check/`;
 
     const maxAttempts = 12;
-    const initialDelay = 500;  
-    const maxDelay = 3000;     
+    const initialDelay = 500;
+    const maxDelay = 3000;
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       try {
@@ -301,11 +320,13 @@ export class LeetCodeClient {
       } catch (error) {
         if (attempt === maxAttempts - 1) {
           const action = type === 'interpret' ? 'Test' : 'Submission';
-          throw new Error(`${action} check failed: ${error instanceof Error ? error.message : 'Network error'}`);
+          throw new Error(
+            `${action} check failed: ${error instanceof Error ? error.message : 'Network error'}`
+          );
         }
       }
       const delay = Math.min(initialDelay * Math.pow(2, attempt), maxDelay);
-      await new Promise(resolve => setTimeout(resolve, delay));
+      await new Promise((resolve) => setTimeout(resolve, delay));
     }
 
     const action = type === 'interpret' ? 'Test' : 'Submission';

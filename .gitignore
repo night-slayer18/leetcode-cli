@@ -1,26 +1,54 @@
 # Dependencies
 node_modules/
 
-# Build output
+# Build outputs
 dist/
+build/
+*.tsbuildinfo
 
-# IDE
-.idea/
-.vscode/
-*.swp
-*.swo
-.DS_Store
-
-# Logs
-*.log
-npm-debug.log*
-
-# Environment
+# Environment variables
 .env
 .env.local
+.env*.local
 
-# Test coverage
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
 coverage/
+.nyc_output/
 
 # OS files
+.DS_Store
 Thumbs.db
+Desktop.ini
+
+# IDE / Editors
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-workspace
+*.sublime-project
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Package manager locks (keep package-lock.json, ignore others)
+yarn.lock
+pnpm-lock.yaml
+
+# Debug
+.node_repl_history
+*.pid
+*.seed
+*.pid.lock

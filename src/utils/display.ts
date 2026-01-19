@@ -1,10 +1,15 @@
-
 import chalk from 'chalk';
 import Table from 'cli-table3';
 import striptags from 'striptags';
-import type { Problem, ProblemDetail, SubmissionResult, TestResult, Submission, TopicTag } from '../types.js';
+import type {
+  Problem,
+  ProblemDetail,
+  SubmissionResult,
+  TestResult,
+  Submission,
+  TopicTag,
+} from '../types.js';
 import { visualizeTestOutput } from './visualize.js';
-
 
 export function displayProblemList(problems: Problem[], total: number): void {
   const table = new Table({
@@ -55,14 +60,13 @@ export function displayProblemDetail(problem: ProblemDetail): void {
   }
 
   if (problem.topicTags.length) {
-    const tags = problem.topicTags.map(t => chalk.bgBlue.white(` ${t.name} `)).join(' ');
+    const tags = problem.topicTags.map((t) => chalk.bgBlue.white(` ${t.name} `)).join(' ');
     console.log(`  ${tags}`);
     console.log();
   }
 
   console.log(chalk.gray('─'.repeat(60)));
   console.log();
-
 
   let content = problem.content;
 
@@ -73,36 +77,28 @@ export function displayProblemDetail(problem: ProblemDetail): void {
     console.log();
     return;
   }
-  
 
   content = content.replace(/<sup>(.*?)<\/sup>/gi, '^$1');
-  
+
   content = content.replace(/<strong class="example">Example (\d+):<\/strong>/gi, '§EXAMPLE§$1§');
-  
 
   content = content.replace(/Input:/gi, '§INPUT§');
   content = content.replace(/Output:/gi, '§OUTPUT§');
   content = content.replace(/Explanation:/gi, '§EXPLAIN§');
-  
 
   content = content.replace(/<strong>Constraints:<\/strong>/gi, '§CONSTRAINTS§');
   content = content.replace(/Constraints:/gi, '§CONSTRAINTS§');
-  
 
   content = content.replace(/<strong>Follow-up:/gi, '§FOLLOWUP§');
   content = content.replace(/Follow-up:/gi, '§FOLLOWUP§');
-  
 
   content = content.replace(/<li>/gi, '  • ');
   content = content.replace(/<\/li>/gi, '\n');
-  
 
   content = content.replace(/<\/p>/gi, '\n\n');
   content = content.replace(/<br\s*\/?>/gi, '\n');
-  
 
   content = striptags(content);
-  
 
   content = content
     .replace(/&nbsp;/g, ' ')
@@ -114,10 +110,8 @@ export function displayProblemDetail(problem: ProblemDetail): void {
     .replace(/&ge;/g, '≥')
     .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(parseInt(code, 10)))
     .replace(/&amp;/g, '&');
-  
 
   content = content.replace(/\n{3,}/g, '\n\n').trim();
-  
 
   content = content.replace(/§EXAMPLE§(\d+)§/g, (_, num) => chalk.green.bold(`📌 Example ${num}:`));
   content = content.replace(/§INPUT§/g, chalk.yellow('Input:'));
@@ -125,14 +119,14 @@ export function displayProblemDetail(problem: ProblemDetail): void {
   content = content.replace(/§EXPLAIN§/g, chalk.gray('Explanation:'));
   content = content.replace(/§CONSTRAINTS§/g, chalk.cyan.bold('\n📋 Constraints:'));
   content = content.replace(/§FOLLOWUP§/g, chalk.magenta.bold('\n💡 Follow-up:'));
-  
+
   console.log(content);
   console.log();
 }
 
 export function displayTestResult(result: TestResult, topicTags?: TopicTag[]): void {
   console.log();
-  
+
   if (result.compile_error) {
     console.log(chalk.red.bold('❌ Compile Error'));
     console.log(chalk.red(result.compile_error));
@@ -158,34 +152,38 @@ export function displayTestResult(result: TestResult, topicTags?: TopicTag[]): v
   if (topicTags && outputs.length > 0) {
     console.log();
     console.log(chalk.gray.bold('─'.repeat(50)));
-    
+
     // Filter out empty entries
     const validCases = outputs
       .map((out, i) => ({ out, exp: expected[i] ?? '' }))
       .filter(({ out, exp }) => out !== '' || exp !== '');
-    
+
     for (let i = 0; i < validCases.length; i++) {
       const { out, exp } = validCases[i];
-      const { outputVis, expectedVis, matches, unsupported } = visualizeTestOutput(out, exp, topicTags);
+      const { outputVis, expectedVis, matches, unsupported } = visualizeTestOutput(
+        out,
+        exp,
+        topicTags
+      );
 
       console.log();
       console.log(chalk.gray(`Test Case ${i + 1}:`));
-      
+
       if (unsupported) {
         console.log(chalk.yellow('  ⚠ No visualization available for this problem type'));
-        console.log(chalk.gray(`  Tags: ${topicTags.map(t => t.name).join(', ')}`));
+        console.log(chalk.gray(`  Tags: ${topicTags.map((t) => t.name).join(', ')}`));
       }
-      
+
       console.log();
       console.log(chalk.cyan('  Your Output:'));
-      outputVis.split('\n').forEach(line => console.log(`    ${line}`));
+      outputVis.split('\n').forEach((line) => console.log(`    ${line}`));
       console.log();
       console.log(chalk.cyan('  Expected:'));
-      expectedVis.split('\n').forEach(line => console.log(`    ${line}`));
+      expectedVis.split('\n').forEach((line) => console.log(`    ${line}`));
       console.log();
       console.log(matches ? chalk.green('  ✓ Match') : chalk.red('  ✗ Mismatch'));
     }
-    
+
     console.log(chalk.gray.bold('─'.repeat(50)));
   } else {
     // Standard mode
@@ -202,7 +200,7 @@ export function displayTestResult(result: TestResult, topicTags?: TopicTag[]): v
     }
   }
 
-  const stdoutEntries = (result.std_output_list ?? []).filter(s => s);
+  const stdoutEntries = (result.std_output_list ?? []).filter((s) => s);
   if (stdoutEntries.length > 0) {
     console.log();
     console.log(chalk.gray('Stdout:'));
@@ -233,15 +231,21 @@ export function displaySubmissionResult(result: SubmissionResult): void {
   if (result.status_msg === 'Accepted') {
     console.log(chalk.green.bold('✓ Accepted!'));
     console.log();
-    console.log(chalk.gray('Runtime:'), chalk.white(result.status_runtime), 
-      chalk.gray(`(beats ${result.runtime_percentile?.toFixed(1) ?? 'N/A'}%)`));
-    console.log(chalk.gray('Memory:'), chalk.white(result.status_memory),
-      chalk.gray(`(beats ${result.memory_percentile?.toFixed(1) ?? 'N/A'}%)`));
+    console.log(
+      chalk.gray('Runtime:'),
+      chalk.white(result.status_runtime),
+      chalk.gray(`(beats ${result.runtime_percentile?.toFixed(1) ?? 'N/A'}%)`)
+    );
+    console.log(
+      chalk.gray('Memory:'),
+      chalk.white(result.status_memory),
+      chalk.gray(`(beats ${result.memory_percentile?.toFixed(1) ?? 'N/A'}%)`)
+    );
   } else {
     console.log(chalk.red.bold(`❌ ${result.status_msg}`));
     console.log();
     console.log(chalk.gray(`Passed ${result.total_correct}/${result.total_testcases} testcases`));
-    
+
     if (result.code_output) {
       console.log(chalk.gray('Your Output:'), result.code_output);
     }
@@ -281,29 +285,30 @@ export function displayUserStats(
     }
   }
 
-  const total = acStats.find(s => s.difficulty === 'All')?.count ?? 0;
+  const total = acStats.find((s) => s.difficulty === 'All')?.count ?? 0;
   table.push([chalk.white.bold('Total'), chalk.white.bold(total.toString())]);
 
   console.log(table.toString());
   console.log();
-  console.log(chalk.gray('🔥 Current streak:'), chalk.hex('#FFA500')(streak.toString()), chalk.gray('days'));
+  console.log(
+    chalk.gray('🔥 Current streak:'),
+    chalk.hex('#FFA500')(streak.toString()),
+    chalk.gray('days')
+  );
   console.log(chalk.gray('📅 Total active days:'), chalk.white(totalActiveDays.toString()));
 }
 
-export function displayDailyChallenge(
-  date: string,
-  problem: Problem
-): void {
+export function displayDailyChallenge(date: string, problem: Problem): void {
   console.log();
   console.log(chalk.bold.yellow('🎯 Daily Challenge'), chalk.gray(`(${date})`));
   console.log();
   console.log(chalk.white(`${problem.questionFrontendId}. ${problem.title}`));
   console.log(colorDifficulty(problem.difficulty));
   console.log(chalk.gray(`https://leetcode.com/problems/${problem.titleSlug}/`));
-  
+
   if (problem.topicTags.length) {
     console.log();
-    const tags = problem.topicTags.map(t => chalk.blue(t.name)).join(' ');
+    const tags = problem.topicTags.map((t) => chalk.blue(t.name)).join(' ');
     console.log(chalk.gray('Tags:'), tags);
   }
 }
@@ -350,7 +355,7 @@ export function displaySubmissionsList(submissions: Submission[]): void {
     const isAC = s.statusDisplay === 'Accepted';
 
     const cleanTime = new Date(parseInt(s.timestamp) * 1000).toLocaleString();
-    
+
     table.push([
       s.id,
       isAC ? chalk.green(s.statusDisplay) : chalk.red(s.statusDisplay),

@@ -32,7 +32,10 @@ function formatDuration(seconds: number): string {
   }
 }
 
-export async function timerCommand(idOrSlug: string | undefined, options: TimerOptions): Promise<void> {
+export async function timerCommand(
+  idOrSlug: string | undefined,
+  options: TimerOptions
+): Promise<void> {
   // Handle --stats flag
   if (options.stats) {
     await showTimerStats(idOrSlug);
@@ -62,7 +65,7 @@ export async function timerCommand(idOrSlug: string | undefined, options: TimerO
   if (activeTimer) {
     const startedAt = new Date(activeTimer.startedAt);
     const elapsed = Math.floor((Date.now() - startedAt.getTime()) / 1000);
-    
+
     console.log(chalk.yellow('⚠️  You have an active timer running:'));
     console.log(chalk.white(`   Problem: ${activeTimer.title}`));
     console.log(chalk.white(`   Elapsed: ${formatDuration(elapsed)}`));
@@ -115,7 +118,6 @@ export async function timerCommand(idOrSlug: string | undefined, options: TimerO
 
     // Pick the problem (opens editor)
     await pickCommand(idOrSlug, { open: true });
-
   } catch (error) {
     spinner.fail('Failed to start timer');
     if (error instanceof Error) {
@@ -126,7 +128,7 @@ export async function timerCommand(idOrSlug: string | undefined, options: TimerO
 
 async function stopActiveTimer(): Promise<void> {
   const result = timerStorage.stopTimer();
-  
+
   if (!result) {
     console.log(chalk.yellow('No active timer to stop.'));
     return;
@@ -141,7 +143,7 @@ async function showTimerStats(problemId?: string): Promise<void> {
   if (problemId && /^\d+$/.test(problemId)) {
     // Show stats for specific problem
     const times = timerStorage.getSolveTimes(problemId);
-    
+
     if (times.length === 0) {
       console.log(chalk.yellow(`No solve times recorded for problem ${problemId}`));
       return;
@@ -165,7 +167,7 @@ async function showTimerStats(problemId?: string): Promise<void> {
     // Show overall stats
     const stats = timerStorage.getStats();
     const allTimes = timerStorage.getAllSolveTimes();
-    
+
     console.log();
     console.log(chalk.bold('⏱️  Timer Statistics'));
     console.log(chalk.gray('─'.repeat(40)));
@@ -177,7 +179,7 @@ async function showTimerStats(problemId?: string): Promise<void> {
 
     // Show recent solves
     const recentSolves: { problemId: string; title: string; duration: number; date: string }[] = [];
-    
+
     for (const [id, times] of Object.entries(allTimes)) {
       for (const t of times) {
         recentSolves.push({
@@ -191,15 +193,15 @@ async function showTimerStats(problemId?: string): Promise<void> {
 
     if (recentSolves.length > 0) {
       recentSolves.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      
+
       console.log(chalk.bold('  Recent Solves:'));
       for (const solve of recentSolves.slice(0, 5)) {
         const date = new Date(solve.date).toLocaleDateString();
         console.log(
           chalk.gray(`    ${date}  `) +
-          chalk.white(`${solve.problemId}. ${solve.title.substring(0, 25)}`) +
-          chalk.gray('  ') +
-          chalk.cyan(formatDuration(solve.duration))
+            chalk.white(`${solve.problemId}. ${solve.title.substring(0, 25)}`) +
+            chalk.gray('  ') +
+            chalk.cyan(formatDuration(solve.duration))
         );
       }
     }

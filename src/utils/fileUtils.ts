@@ -21,7 +21,7 @@ export async function findSolutionFile(
   for (const entry of entries) {
     // Skip hidden directories (like .notes)
     if (entry.name.startsWith('.')) continue;
-    
+
     const fullPath = join(dir, entry.name);
     if (entry.isDirectory()) {
       const found = await findSolutionFile(fullPath, problemId, currentDepth + 1);
@@ -75,7 +75,7 @@ const EXT_TO_LANG_MAP: Record<string, SupportedLanguage> = {
 
 export function detectLanguageFromFile(filePath: string): SupportedLanguage | null {
   const ext = filePath.split('.').pop()?.toLowerCase();
-  return ext ? EXT_TO_LANG_MAP[ext] ?? null : null;
+  return ext ? (EXT_TO_LANG_MAP[ext] ?? null) : null;
 }
 
 export function getLangSlugFromExtension(ext: string): string | null {

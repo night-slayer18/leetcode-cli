@@ -30,7 +30,6 @@ A modern, feature-rich LeetCode CLI built with TypeScript.
 - 🔄 **Git Sync** - Auto-sync solutions to GitHub/GitLab
 - 🚀 **Auto-update notifications** - Get notified when updates are available
 
-
 ## 📚 Documentation
 
 **[View Full Documentation →](https://night-slayer18.github.io/leetcode-cli/)**
@@ -66,35 +65,34 @@ leetcode submit 1
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| `login` | Login with LeetCode browser cookies |
-| `logout` | Clear stored credentials |
-| `whoami` | Check login status |
-| `today` | Show daily progress & challenge |
-| `list` | List problems with filters |
-| `show <id>` | Display problem description |
-| `hint <id>` | Show hints for a problem |
-| `pick <id>` | Generate solution file |
-| `pick-batch <ids>` | Pick multiple problems |
-| `bookmark <action>` | Manage problem bookmarks |
-| `note <id>` | Manage problem notes |
-| `daily` | Show today's challenge |
-| `random` | Get a random problem |
-| `test <id\|file>` | Test solution against sample cases |
-| `submit <id\|file>` | Submit solution to LeetCode |
-| `submissions <id>` | View past submissions |
-| `stat [username]` | Show user statistics |
-| `timer <id>` | Interview mode with timer |
-| `snapshot <cmd>` | Save and restore solution versions |
-| `diff <id>` | Compare solution with past submissions |
-| `collab <cmd>` | Collaborative coding with a partner |
-| `workspace <cmd>` | Manage workspaces for different contexts |
-| `config` | View or set configuration |
-| `sync` | Sync solutions to Git repository |
-| `update` | Check for CLI updates |
-| `changelog` | View release notes and breaking changes |
-
+| Command             | Description                              |
+| ------------------- | ---------------------------------------- |
+| `login`             | Login with LeetCode browser cookies      |
+| `logout`            | Clear stored credentials                 |
+| `whoami`            | Check login status                       |
+| `today`             | Show daily progress & challenge          |
+| `list`              | List problems with filters               |
+| `show <id>`         | Display problem description              |
+| `hint <id>`         | Show hints for a problem                 |
+| `pick <id>`         | Generate solution file                   |
+| `pick-batch <ids>`  | Pick multiple problems                   |
+| `bookmark <action>` | Manage problem bookmarks                 |
+| `note <id>`         | Manage problem notes                     |
+| `daily`             | Show today's challenge                   |
+| `random`            | Get a random problem                     |
+| `test <id\|file>`   | Test solution against sample cases       |
+| `submit <id\|file>` | Submit solution to LeetCode              |
+| `submissions <id>`  | View past submissions                    |
+| `stat [username]`   | Show user statistics                     |
+| `timer <id>`        | Interview mode with timer                |
+| `snapshot <cmd>`    | Save and restore solution versions       |
+| `diff <id>`         | Compare solution with past submissions   |
+| `collab <cmd>`      | Collaborative coding with a partner      |
+| `workspace <cmd>`   | Manage workspaces for different contexts |
+| `config`            | View or set configuration                |
+| `sync`              | Sync solutions to Git repository         |
+| `update`            | Check for CLI updates                    |
+| `changelog`         | View release notes and breaking changes  |
 
 ## Usage Examples
 
@@ -204,21 +202,21 @@ leetcode submissions 1 --download
 ```
 
 ### Productivity Features
- 
- ```bash
- # Show today's progress & challenge
- leetcode today
- 
- # Pick multiple problems at once
- leetcode pick-batch 1 2 3 -l python3
- 
- # Bookmark problems
- leetcode bookmark add 1
- leetcode bookmark list
- 
- # Keep personal notes
- leetcode note 1 edit
- ```
+
+```bash
+# Show today's progress & challenge
+leetcode today
+
+# Pick multiple problems at once
+leetcode pick-batch 1 2 3 -l python3
+
+# Bookmark problems
+leetcode bookmark add 1
+leetcode bookmark list
+
+# Keep personal notes
+leetcode note 1 edit
+```
 
 ### User Statistics
 
@@ -236,12 +234,12 @@ leetcode stat -s
 leetcode stat -t
 ```
 
- ### Git Integration
+### Git Integration
 
- ```bash
- # Sync all solutions to your configured git repo
- leetcode sync
- ```
+```bash
+# Sync all solutions to your configured git repo
+leetcode sync
+```
 
 ### Interview Timer
 
@@ -339,8 +337,8 @@ leetcode workspace delete old-workspace
 ```
 
 Each workspace has its own config, timer history, and solution snapshots.
- 
- ### Configuration
+
+### Configuration
 
 ```bash
 # View current config
@@ -377,19 +375,19 @@ leetcode/
 
 ## Supported Languages
 
-| Language | Extension |
-|----------|-----------|
-| TypeScript | `.ts` |
-| JavaScript | `.js` |
-| Python3 | `.py` |
-| Java | `.java` |
-| C++ | `.cpp` |
-| C | `.c` |
-| C# | `.cs` |
-| Go | `.go` |
-| Rust | `.rs` |
-| Kotlin | `.kt` |
-| Swift | `.swift` |
+| Language   | Extension |
+| ---------- | --------- |
+| TypeScript | `.ts`     |
+| JavaScript | `.js`     |
+| Python3    | `.py`     |
+| Java       | `.java`   |
+| C++        | `.cpp`    |
+| C          | `.c`      |
+| C#         | `.cs`     |
+| Go         | `.go`     |
+| Rust       | `.rs`     |
+| Kotlin     | `.kt`     |
+| Swift      | `.swift`  |
 
 ## Authentication
 
@@ -450,6 +448,7 @@ You can run the CLI using Docker without installing Node.js.
 ### Method 1: Pre-built Image (Recommended)
 
 1. **Pull the image**:
+
    ```bash
    docker pull nightslayer/leetcode-cli:latest
    ```
@@ -457,6 +456,7 @@ You can run the CLI using Docker without installing Node.js.
 2. **Setup Shell Function** (Add to your shell config):
 
    **Bash/Zsh** (`~/.bashrc` or `~/.zshrc`):
+
    ```bash
    leetcode() {
      docker run -it --rm \
@@ -468,6 +468,7 @@ You can run the CLI using Docker without installing Node.js.
    ```
 
    **Fish** (`~/.config/fish/config.fish`):
+
    ```fish
    function leetcode
        docker run -it --rm \
@@ -479,6 +480,7 @@ You can run the CLI using Docker without installing Node.js.
    ```
 
    **PowerShell** (`$PROFILE`):
+
    ```powershell
    function leetcode {
      docker run -it --rm `
@@ -498,19 +500,20 @@ You can run the CLI using Docker without installing Node.js.
 ### Method 2: Build Locally
 
 1. **Build the image**:
-    ```bash
-    docker build -t leetcode-cli .
-    ```
+
+   ```bash
+   docker build -t leetcode-cli .
+   ```
 
 2. **Run commands**:
-    ```bash
-    docker run -it --rm \
-      -w /root/leetcode \
-      -v "$(pwd)/leetcode:/root/leetcode" \
-      -v "$HOME/.leetcode:/root/.leetcode" \
-      leetcode-cli list
-    ```
-    *Note: We mount `~/.leetcode` to persist login credentials and `leetcode` folder to save solution files.*
+   ```bash
+   docker run -it --rm \
+     -w /root/leetcode \
+     -v "$(pwd)/leetcode:/root/leetcode" \
+     -v "$HOME/.leetcode:/root/.leetcode" \
+     leetcode-cli list
+   ```
+   _Note: We mount `~/.leetcode` to persist login credentials and `leetcode` folder to save solution files._
 
 ## License
 

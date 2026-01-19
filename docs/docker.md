@@ -3,6 +3,7 @@
 Run the CLI via Docker without local Node.js installation.
 
 ## Pre-built Image (Recommended)
+
 You can pull the image directly from Docker Hub.
 
 ```bash
@@ -10,9 +11,11 @@ docker pull nightslayer/leetcode-cli:latest
 ```
 
 ### Setup Shell Function
+
 Add to your shell config (functions forward arguments properly, aliases don't):
 
 **Bash/Zsh** (`~/.bashrc` or `~/.zshrc`):
+
 ```bash
 leetcode() {
   docker run -it --rm \
@@ -24,6 +27,7 @@ leetcode() {
 ```
 
 **Fish** (`~/.config/fish/config.fish`):
+
 ```fish
 function leetcode
     docker run -it --rm \
@@ -35,6 +39,7 @@ end
 ```
 
 **PowerShell** (`$PROFILE`):
+
 ```powershell
 function leetcode {
   docker run -it --rm `
@@ -46,6 +51,7 @@ function leetcode {
 ```
 
 ### Usage
+
 ```bash
 leetcode list
 leetcode pick 1
@@ -53,9 +59,11 @@ leetcode submit 1
 ```
 
 ## Build Locally
+
 If you prefer to build it yourself:
 
 1. **Build**:
+
    ```bash
    docker build -t leetcode-cli .
    ```
@@ -68,4 +76,3 @@ If you prefer to build it yourself:
      -v "$HOME/.leetcode:/root/.leetcode" \
      leetcode-cli list
    ```
-

@@ -1,4 +1,3 @@
-
 import { writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import { join } from 'path';
@@ -17,7 +16,10 @@ interface SubmissionsOptions {
   download?: boolean;
 }
 
-export async function submissionsCommand(idOrSlug: string, options: SubmissionsOptions): Promise<void> {
+export async function submissionsCommand(
+  idOrSlug: string,
+  options: SubmissionsOptions
+): Promise<void> {
   const { authorized } = await requireAuth();
   if (!authorized) return;
 
@@ -39,10 +41,9 @@ export async function submissionsCommand(idOrSlug: string, options: SubmissionsO
     const slug = problem.titleSlug;
     spinner.text = 'Fetching submissions...';
 
-
     const limit = options.limit ? parseInt(options.limit, 10) : 20;
     const submissions = await leetcodeClient.getSubmissionList(slug, limit);
-    
+
     spinner.stop();
 
     if (submissions.length === 0) {
@@ -50,9 +51,8 @@ export async function submissionsCommand(idOrSlug: string, options: SubmissionsO
       return;
     }
 
-
     if (options.last) {
-      const lastAC = submissions.find(s => s.statusDisplay === 'Accepted');
+      const lastAC = submissions.find((s) => s.statusDisplay === 'Accepted');
       if (lastAC) {
         console.log(chalk.bold('Last Accepted Submission:'));
         displaySubmissionsList([lastAC]);
@@ -63,11 +63,10 @@ export async function submissionsCommand(idOrSlug: string, options: SubmissionsO
       displaySubmissionsList(submissions);
     }
 
-
     if (options.download) {
       const downloadSpinner = ora('Downloading submission...').start();
-      
-      const lastAC = submissions.find(s => s.statusDisplay === 'Accepted');
+
+      const lastAC = submissions.find((s) => s.statusDisplay === 'Accepted');
       if (!lastAC) {
         downloadSpinner.fail('No accepted submission found to download.');
         return;
@@ -80,14 +79,14 @@ export async function submissionsCommand(idOrSlug: string, options: SubmissionsO
       }
 
       const details = await leetcodeClient.getSubmissionDetails(submissionId);
-      
 
       const workDir = config.getWorkDir();
       const difficulty = problem.difficulty;
-      const category = problem.topicTags.length > 0 
-        ? problem.topicTags[0].name.replace(/[^\w\s-]/g, '').trim() 
-        : 'Uncategorized';
-      
+      const category =
+        problem.topicTags.length > 0
+          ? problem.topicTags[0].name.replace(/[^\w\s-]/g, '').trim()
+          : 'Uncategorized';
+
       const targetDir = join(workDir, difficulty, category);
       if (!existsSync(targetDir)) {
         await mkdir(targetDir, { recursive: true });
@@ -96,16 +95,15 @@ export async function submissionsCommand(idOrSlug: string, options: SubmissionsO
       const langSlug = details.lang.name;
       const supportedLang = LANG_SLUG_MAP[langSlug] ?? 'txt';
       const ext = LANGUAGE_EXTENSIONS[supportedLang as SupportedLanguage] ?? langSlug;
-      
+
       const fileName = `${problem.questionFrontendId}.${problem.titleSlug}.submission-${lastAC.id}.${ext}`;
       const filePath = join(targetDir, fileName);
 
       await writeFile(filePath, details.code, 'utf-8');
-      
+
       downloadSpinner.succeed(`Downloaded to ${chalk.green(fileName)}`);
       console.log(chalk.gray(`Path: ${filePath}`));
     }
-
   } catch (error) {
     spinner.fail('Failed to fetch submissions');
     if (error instanceof Error) {

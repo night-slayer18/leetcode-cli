@@ -12,7 +12,7 @@ type BookmarkAction = 'add' | 'remove' | 'list' | 'clear';
 
 export async function bookmarkCommand(action: string, id?: string): Promise<void> {
   const validActions: BookmarkAction[] = ['add', 'remove', 'list', 'clear'];
-  
+
   if (!validActions.includes(action as BookmarkAction)) {
     console.log(chalk.red(`Invalid action: ${action}`));
     console.log(chalk.gray('Valid actions: add, remove, list, clear'));
@@ -80,9 +80,8 @@ async function listBookmarks(): Promise<void> {
 
   const { authorized } = await requireAuth();
   if (authorized) {
-    
     const spinner = ora({ text: 'Fetching problem details...', spinner: 'dots' }).start();
-    
+
     try {
       const table = new Table({
         head: [

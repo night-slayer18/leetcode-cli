@@ -19,7 +19,7 @@ export async function notesCommand(problemId: string, action?: string): Promise<
   }
 
   const noteAction: NoteAction = action === 'view' ? 'view' : 'edit';
-  
+
   const notesDir = join(config.getWorkDir(), '.notes');
   const notePath = join(notesDir, `${problemId}.md`);
 
@@ -69,7 +69,7 @@ async function editNote(notePath: string, problemId: string): Promise<void> {
 
 async function generateNoteTemplate(problemId: string): Promise<string> {
   let header = `# Problem ${problemId} Notes\n\n`;
-  
+
   const { authorized } = await requireAuth();
   if (authorized) {
     try {
@@ -78,9 +78,9 @@ async function generateNoteTemplate(problemId: string): Promise<string> {
         header = `# ${problemId}. ${problem.title}\n\n`;
         header += `**Difficulty:** ${problem.difficulty}\n`;
         header += `**URL:** https://leetcode.com/problems/${problem.titleSlug}/\n`;
-        
+
         if (problem.topicTags.length > 0) {
-          header += `**Topics:** ${problem.topicTags.map(t => t.name).join(', ')}\n`;
+          header += `**Topics:** ${problem.topicTags.map((t) => t.name).join(', ')}\n`;
         }
         header += '\n---\n\n';
       }

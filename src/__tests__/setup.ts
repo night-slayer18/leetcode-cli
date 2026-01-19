@@ -18,14 +18,14 @@ const originalError = console.error;
 beforeEach(() => {
   // Clear mock console before each test
   mockConsole.clear();
-  
+
   // Mock console.log to capture output
   console.log = vi.fn((...args) => {
-    mockConsole.logs.push(args.map(a => String(a)).join(' '));
+    mockConsole.logs.push(args.map((a) => String(a)).join(' '));
   });
-  
+
   console.error = vi.fn((...args) => {
-    mockConsole.errors.push(args.map(a => String(a)).join(' '));
+    mockConsole.errors.push(args.map((a) => String(a)).join(' '));
   });
 });
 
@@ -33,7 +33,7 @@ afterEach(() => {
   // Restore console after each test
   console.log = originalLog;
   console.error = originalError;
-  
+
   // Clear all mocks
   vi.clearAllMocks();
 });

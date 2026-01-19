@@ -84,7 +84,7 @@ export const timerStorage = {
     timerMinutes: number
   ): void {
     const data = loadTimer();
-    
+
     if (!data.solveTimes[problemId]) {
       data.solveTimes[problemId] = [];
     }

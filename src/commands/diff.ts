@@ -19,18 +19,23 @@ interface DiffOptions {
 function showCodeBlock(code: string, label: string): void {
   const lines = code.split('\n');
   const lineCount = lines.length;
-  
+
   console.log();
   console.log(chalk.bold.cyan(`=== ${label} (${lineCount} lines) ===`));
   console.log(chalk.gray('─'.repeat(60)));
-  
+
   lines.forEach((line, i) => {
     const lineNum = (i + 1).toString().padStart(3);
     console.log(chalk.gray(lineNum + ' │ ') + line);
   });
 }
 
-function showUnifiedDiff(sourceCode: string, targetCode: string, sourceLabel: string, targetLabel: string): void {
+function showUnifiedDiff(
+  sourceCode: string,
+  targetCode: string,
+  sourceLabel: string,
+  targetLabel: string
+): void {
   const sourceLines = sourceCode.split('\n').length;
   const targetLines = targetCode.split('\n').length;
 
@@ -45,7 +50,7 @@ function showUnifiedDiff(sourceCode: string, targetCode: string, sourceLabel: st
   let removed = 0;
 
   for (const part of diff) {
-    const lines = part.value.split('\n').filter(l => l !== '');
+    const lines = part.value.split('\n').filter((l) => l !== '');
 
     if (part.added) {
       added += lines.length;
@@ -76,33 +81,39 @@ function showUnifiedDiff(sourceCode: string, targetCode: string, sourceLabel: st
   console.log(chalk.gray('─'.repeat(60)));
   console.log(
     `${chalk.green('+' + added + ' added')} ${chalk.gray('·')} ` +
-    `${chalk.red('-' + removed + ' removed')} ${chalk.gray('·')} ` +
-    `${chalk.gray(sourceLines + ' → ' + targetLines + ' lines')}`
+      `${chalk.red('-' + removed + ' removed')} ${chalk.gray('·')} ` +
+      `${chalk.gray(sourceLines + ' → ' + targetLines + ' lines')}`
   );
 }
 
-function showComparison(sourceCode: string, targetCode: string, sourceLabel: string, targetLabel: string, unified: boolean): void {
+function showComparison(
+  sourceCode: string,
+  targetCode: string,
+  sourceLabel: string,
+  targetLabel: string,
+  unified: boolean
+): void {
   if (unified) {
     showUnifiedDiff(sourceCode, targetCode, sourceLabel, targetLabel);
   } else {
     showCodeBlock(sourceCode, sourceLabel);
     showCodeBlock(targetCode, targetLabel);
-    
+
     const diff = diffLines(sourceCode, targetCode);
     let added = 0;
     let removed = 0;
     for (const part of diff) {
-      const lines = part.value.split('\n').filter(l => l !== '');
+      const lines = part.value.split('\n').filter((l) => l !== '');
       if (part.added) added += lines.length;
       else if (part.removed) removed += lines.length;
     }
-    
+
     console.log();
     console.log(chalk.gray('─'.repeat(60)));
     console.log(
       `${chalk.bold('Summary:')} ` +
-      `${chalk.green('+' + added + ' added')} ${chalk.gray('·')} ` +
-      `${chalk.red('-' + removed + ' removed')}`
+        `${chalk.green('+' + added + ' added')} ${chalk.gray('·')} ` +
+        `${chalk.red('-' + removed + ' removed')}`
     );
     console.log(chalk.gray('Tip: Use --unified for line-by-line diff'));
   }
@@ -121,7 +132,9 @@ export async function diffCommand(problemId: string, options: DiffOptions): Prom
 
     if (!filePath) {
       spinner.fail(`No solution file found for problem ${problemId}`);
-      console.log(chalk.gray('Run `leetcode pick ' + problemId + '` first to create a solution file.'));
+      console.log(
+        chalk.gray('Run `leetcode pick ' + problemId + '` first to create a solution file.')
+      );
       return;
     }
 
@@ -131,7 +144,7 @@ export async function diffCommand(problemId: string, options: DiffOptions): Prom
     // Case 1: Compare with specific file
     if (options.file) {
       spinner.stop();
-      
+
       if (!existsSync(options.file)) {
         console.log(chalk.red(`File not found: ${options.file}`));
         return;
@@ -142,12 +155,22 @@ export async function diffCommand(problemId: string, options: DiffOptions): Prom
         console.log(chalk.red('⚠️  Security Error: File path is outside the configured workspace'));
         console.log(chalk.gray(`File: ${options.file}`));
         console.log(chalk.gray(`Workspace: ${workDir}`));
-        console.log(chalk.yellow('\nFor security reasons, you can only diff files from within your workspace.'));
+        console.log(
+          chalk.yellow(
+            '\nFor security reasons, you can only diff files from within your workspace.'
+          )
+        );
         return;
       }
 
       const otherCode = await readFile(options.file, 'utf-8');
-      showComparison(currentCode, otherCode, 'Your Solution', options.file, options.unified ?? false);
+      showComparison(
+        currentCode,
+        otherCode,
+        'Your Solution',
+        options.file,
+        options.unified ?? false
+      );
       return;
     }
 
@@ -164,13 +187,19 @@ export async function diffCommand(problemId: string, options: DiffOptions): Prom
       const submission = await leetcodeClient.getSubmissionDetails(submissionId);
       spinner.stop();
 
-      showComparison(currentCode, submission.code, 'Your Solution', `Submission #${submissionId}`, options.unified ?? false);
+      showComparison(
+        currentCode,
+        submission.code,
+        'Your Solution',
+        `Submission #${submissionId}`,
+        options.unified ?? false
+      );
       return;
     }
 
     // Case 3: Compare with last accepted submission (default)
     const submissions = await leetcodeClient.getSubmissionList(problem.titleSlug, 50);
-    const accepted = submissions.find(s => s.statusDisplay === 'Accepted');
+    const accepted = submissions.find((s) => s.statusDisplay === 'Accepted');
 
     if (!accepted) {
       spinner.fail('No accepted submissions found for this problem');
@@ -181,8 +210,13 @@ export async function diffCommand(problemId: string, options: DiffOptions): Prom
     const acceptedDetails = await leetcodeClient.getSubmissionDetails(parseInt(accepted.id, 10));
     spinner.stop();
 
-    showComparison(currentCode, acceptedDetails.code, 'Your Solution', 'Last Accepted', options.unified ?? false);
-
+    showComparison(
+      currentCode,
+      acceptedDetails.code,
+      'Your Solution',
+      'Last Accepted',
+      options.unified ?? false
+    );
   } catch (error) {
     spinner.fail('Failed to diff');
     if (error instanceof Error) {

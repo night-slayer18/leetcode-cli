@@ -103,35 +103,39 @@ async function setupRemote(workDir: string): Promise<string> {
         try {
           const rawRepoName = workDir.split('/').pop() || 'leetcode-solutions';
           const repoName = sanitizeRepoName(rawRepoName);
-          execSync(`gh repo create ${repoName} --private --source=. --remote=origin`, { cwd: workDir });
+          execSync(`gh repo create ${repoName} --private --source=. --remote=origin`, {
+            cwd: workDir,
+          });
           spinner.succeed('Created and linked GitHub repository');
-          
+
           // Fetch the URL to save it
-           repoUrl = getRemoteUrl(workDir) || '';
-           if(repoUrl) {
-               config.setRepo(repoUrl);
-           }
-           return repoUrl;
+          repoUrl = getRemoteUrl(workDir) || '';
+          if (repoUrl) {
+            config.setRepo(repoUrl);
+          }
+          return repoUrl;
         } catch (error) {
           spinner.fail('Failed to create GitHub repository');
           console.log(chalk.red(error));
-           // Fallback to manual entry
+          // Fallback to manual entry
         }
       }
     }
 
     // 3. Fallback: Manual URL entry
     if (!repoUrl) {
-       console.log(chalk.yellow('\nPlease create a new repository on your Git provider and copy the URL.'));
-        const { url } = await inquirer.prompt([
-            {
-            type: 'input',
-            name: 'url',
-            message: 'Enter remote repository URL:',
-            validate: (input) => input.length > 0 ? true : 'URL cannot be empty',
-            },
-        ]);
-        repoUrl = url;
+      console.log(
+        chalk.yellow('\nPlease create a new repository on your Git provider and copy the URL.')
+      );
+      const { url } = await inquirer.prompt([
+        {
+          type: 'input',
+          name: 'url',
+          message: 'Enter remote repository URL:',
+          validate: (input) => (input.length > 0 ? true : 'URL cannot be empty'),
+        },
+      ]);
+      repoUrl = url;
     }
   }
 
@@ -141,21 +145,21 @@ async function setupRemote(workDir: string): Promise<string> {
     console.log(chalk.gray('Expected: https://github.com/user/repo or git@github.com:user/repo'));
     return '';
   }
-  
+
   // Save to config if we have one now
-  if(repoUrl) {
-      config.setRepo(repoUrl);
+  if (repoUrl) {
+    config.setRepo(repoUrl);
   }
 
   // 4. Add remote if missing
   const currentRemote = getRemoteUrl(workDir);
   if (!currentRemote && repoUrl) {
-      try {
-          execSync(`git remote add origin ${repoUrl}`, { cwd: workDir });
-          console.log(chalk.green('✓ Added remote origin'));
-      } catch {
-          console.log(chalk.red('Failed to add remote origin'));
-      }
+    try {
+      execSync(`git remote add origin ${repoUrl}`, { cwd: workDir });
+      console.log(chalk.green('✓ Added remote origin'));
+    } catch {
+      console.log(chalk.red('Failed to add remote origin'));
+    }
   }
 
   return repoUrl || '';
@@ -163,7 +167,7 @@ async function setupRemote(workDir: string): Promise<string> {
 
 export async function syncCommand(): Promise<void> {
   const workDir = config.getWorkDir();
-  
+
   if (!existsSync(workDir)) {
     console.log(chalk.red(`Work directory does not exist: ${workDir}`));
     return;
@@ -188,7 +192,7 @@ export async function syncCommand(): Promise<void> {
   try {
     // Check for changes
     const status = execSync('git status --porcelain', { cwd: workDir, encoding: 'utf-8' });
-    
+
     if (!status) {
       spinner.info('No changes to sync');
       return;
@@ -202,26 +206,27 @@ export async function syncCommand(): Promise<void> {
     const count = lines.length;
     const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
     const message = `Sync: ${count} solutions - ${timestamp}`;
-    
+
     execSync(`git commit -m ${escapeShellArg(message)}`, { cwd: workDir });
 
     // Try pushing to main or master
     try {
-        execSync('git push -u origin main', { cwd: workDir, stdio: 'ignore' });
+      execSync('git push -u origin main', { cwd: workDir, stdio: 'ignore' });
     } catch {
-         try {
-             execSync('git push -u origin master', { cwd: workDir, stdio: 'ignore' });
-         } catch {
-             throw new Error('Failed to push to remote. Please check your git credentials and branch status.');
-         }
+      try {
+        execSync('git push -u origin master', { cwd: workDir, stdio: 'ignore' });
+      } catch {
+        throw new Error(
+          'Failed to push to remote. Please check your git credentials and branch status.'
+        );
+      }
     }
 
     spinner.succeed('Successfully synced solutions to remote');
-
   } catch (error: unknown) {
     spinner.fail('Sync failed');
-    if(error instanceof Error && error.message) {
-        console.log(chalk.red(error.message));
+    if (error instanceof Error && error.message) {
+      console.log(chalk.red(error.message));
     }
   }
 }

@@ -54,7 +54,9 @@ export async function testCommand(fileOrId: string, options: TestOptions): Promi
     console.log(chalk.red('⚠️  Security Error: File path is outside the configured workspace'));
     console.log(chalk.gray(`File: ${filePath}`));
     console.log(chalk.gray(`Workspace: ${workDir}`));
-    console.log(chalk.yellow('\nFor security reasons, you can only test files from within your workspace.'));
+    console.log(
+      chalk.yellow('\nFor security reasons, you can only test files from within your workspace.')
+    );
     console.log(chalk.gray('Use "leetcode config workdir <path>" to change your workspace.'));
     return;
   }
@@ -91,7 +93,13 @@ export async function testCommand(fileOrId: string, options: TestOptions): Promi
 
     spinner.text = 'Running tests...';
 
-    const result = await leetcodeClient.testSolution(titleSlug, code, lang, testcases, problem.questionId);
+    const result = await leetcodeClient.testSolution(
+      titleSlug,
+      code,
+      lang,
+      testcases,
+      problem.questionId
+    );
 
     spinner.stop();
     displayTestResult(result, options.visualize ? problem.topicTags : undefined);

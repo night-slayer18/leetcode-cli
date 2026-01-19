@@ -28,7 +28,7 @@ jobs:
             } 
             p
           ' docs/releases.md > release_notes.md
-          
+
           if [ ! -s release_notes.md ]; then
             echo "Release $VERSION" > release_notes.md
           fi

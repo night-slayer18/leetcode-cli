@@ -110,10 +110,12 @@ export const UserProfileSchema = z.object({
     ranking: z.number(),
   }),
   submitStatsGlobal: z.object({
-    acSubmissionNum: z.array(z.object({
-      difficulty: z.string(),
-      count: z.number(),
-    })),
+    acSubmissionNum: z.array(
+      z.object({
+        difficulty: z.string(),
+        count: z.number(),
+      })
+    ),
   }),
   userCalendar: z.object({
     streak: z.number(),

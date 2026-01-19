@@ -3,12 +3,24 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { outputContains } from '../setup.js';
 
 // Mock storage
-let mockActiveTimer: { problemId: string; title: string; difficulty: string; startedAt: string; durationMinutes: number } | null = null;
+let mockActiveTimer: {
+  problemId: string;
+  title: string;
+  difficulty: string;
+  startedAt: string;
+  durationMinutes: number;
+} | null = null;
 
 vi.mock('../../storage/timer.js', () => ({
   timerStorage: {
     startTimer: vi.fn((problemId, title, difficulty, duration) => {
-      mockActiveTimer = { problemId, title, difficulty, startedAt: new Date().toISOString(), durationMinutes: duration };
+      mockActiveTimer = {
+        problemId,
+        title,
+        difficulty,
+        startedAt: new Date().toISOString(),
+        durationMinutes: duration,
+      };
     }),
     getActiveTimer: vi.fn(() => mockActiveTimer),
     stopTimer: vi.fn(() => {
@@ -19,12 +31,26 @@ vi.mock('../../storage/timer.js', () => ({
     recordSolveTime: vi.fn(),
     getSolveTimes: vi.fn((problemId) => {
       if (problemId === '1') {
-        return [{ title: 'Two Sum', durationSeconds: 600, timerMinutes: 20, solvedAt: new Date().toISOString() }];
+        return [
+          {
+            title: 'Two Sum',
+            durationSeconds: 600,
+            timerMinutes: 20,
+            solvedAt: new Date().toISOString(),
+          },
+        ];
       }
       return [];
     }),
     getAllSolveTimes: vi.fn(() => ({
-      '1': [{ title: 'Two Sum', durationSeconds: 600, timerMinutes: 20, solvedAt: new Date().toISOString() }],
+      '1': [
+        {
+          title: 'Two Sum',
+          durationSeconds: 600,
+          timerMinutes: 20,
+          solvedAt: new Date().toISOString(),
+        },
+      ],
     })),
     getStats: vi.fn(() => ({ totalProblems: 10, totalTime: 3600, avgTime: 360 })),
   },
@@ -124,12 +150,12 @@ describe('Timer Command', () => {
     });
 
     it('should show warning when timer already active', async () => {
-      mockActiveTimer = { 
-        problemId: '2', 
-        title: 'Add Two Numbers', 
-        difficulty: 'Medium', 
-        startedAt: new Date().toISOString(), 
-        durationMinutes: 40 
+      mockActiveTimer = {
+        problemId: '2',
+        title: 'Add Two Numbers',
+        difficulty: 'Medium',
+        startedAt: new Date().toISOString(),
+        durationMinutes: 40,
       };
 
       await timerCommand('1', {});
@@ -148,12 +174,12 @@ describe('Timer Command', () => {
 
   describe('stop timer', () => {
     it('should stop active timer with --stop', async () => {
-      mockActiveTimer = { 
-        problemId: '1', 
-        title: 'Two Sum', 
-        difficulty: 'Easy', 
-        startedAt: new Date().toISOString(), 
-        durationMinutes: 20 
+      mockActiveTimer = {
+        problemId: '1',
+        title: 'Two Sum',
+        difficulty: 'Easy',
+        startedAt: new Date().toISOString(),
+        durationMinutes: 20,
       };
 
       await timerCommand('', { stop: true });
@@ -191,4 +217,3 @@ describe('Timer Command', () => {
     });
   });
 });
-

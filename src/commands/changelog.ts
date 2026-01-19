@@ -11,7 +11,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Fetch releases.md from GitHub raw URL
-const RELEASES_URL = 'https://raw.githubusercontent.com/night-slayer18/leetcode-cli/main/docs/releases.md';
+const RELEASES_URL =
+  'https://raw.githubusercontent.com/night-slayer18/leetcode-cli/main/docs/releases.md';
 
 interface ChangelogOptions {
   latest?: boolean;
@@ -31,8 +32,8 @@ interface VersionEntry {
 function getCurrentVersion(): string {
   // Try multiple paths to handle dev (src) and prod (dist) environments
   const candidates = [
-    join(__dirname, '../package.json'),      // Production (dist relative)
-    join(__dirname, '../../package.json')    // Development/Test (src/commands relative)
+    join(__dirname, '../package.json'), // Production (dist relative)
+    join(__dirname, '../../package.json'), // Development/Test (src/commands relative)
   ];
 
   for (const packagePath of candidates) {
@@ -44,7 +45,9 @@ function getCurrentVersion(): string {
     }
   }
 
-  throw new Error('Could not read package.json version. Ensure you are running from a valid installation.');
+  throw new Error(
+    'Could not read package.json version. Ensure you are running from a valid installation.'
+  );
 }
 async function fetchReleasesContent(): Promise<string> {
   const response = await got(RELEASES_URL, {
@@ -59,11 +62,11 @@ async function fetchReleasesContent(): Promise<string> {
  */
 function parseReleases(content: string): VersionEntry[] {
   const entries: VersionEntry[] = [];
-  
+
   // Split by version headers (## v1.0.0 or ## 1.0.0)
   const versionRegex = /^## v?([\d.]+)/gm;
   const matches = [...content.matchAll(versionRegex)];
-  
+
   for (let i = 0; i < matches.length; i++) {
     const match = matches[i];
     // Normalize to always have 'v' prefix
@@ -71,17 +74,17 @@ function parseReleases(content: string): VersionEntry[] {
     const startIndex = match.index! + match[0].length;
     const endIndex = i + 1 < matches.length ? matches[i + 1].index! : content.length;
     const versionContent = content.slice(startIndex, endIndex).trim();
-    
+
     // Check if this version has breaking changes
     const hasBreakingChanges = versionContent.includes('⚠️ Breaking Change');
-    
+
     entries.push({
       version,
       content: versionContent,
       hasBreakingChanges,
     });
   }
-  
+
   return entries;
 }
 
@@ -90,21 +93,21 @@ function parseReleases(content: string): VersionEntry[] {
  */
 function renderReleaseContent(version: string, content: string, isBreaking: boolean): void {
   // Version header with box
-  const versionLine = isBreaking 
+  const versionLine = isBreaking
     ? chalk.bgRed.white.bold(` ${version} `) + chalk.red(' ⚠️  BREAKING CHANGES')
     : chalk.bgCyan.black.bold(` ${version} `);
-  
+
   console.log(versionLine);
   console.log();
-  
+
   // Process content line by line with enhanced formatting
   const lines = content.split('\n');
   let inList = false;
-  
+
   for (const line of lines) {
     // Skip empty lines at start
     if (line.trim() === '' && !inList) continue;
-    
+
     // Release date/focus info
     if (line.startsWith('> **Release Date**')) {
       const date = line.replace('> **Release Date**: ', '').trim();
@@ -117,15 +120,15 @@ function renderReleaseContent(version: string, content: string, isBreaking: bool
       console.log();
       continue;
     }
-    
+
     // Section headers with emojis
     if (line.startsWith('### ')) {
       const header = line.replace('### ', '').trim();
       console.log();
-      
+
       // Check if header already has an emoji
       const hasEmoji = /^[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/u.test(header);
-      
+
       if (hasEmoji) {
         // Header already has emoji, use as-is
         console.log(chalk.bold.yellow(`  ${header}`));
@@ -140,41 +143,44 @@ function renderReleaseContent(version: string, content: string, isBreaking: bool
         else if (header.includes('Architecture')) emoji = '🏗️';
         else if (header.includes('Testing')) emoji = '🧪';
         else if (header.includes('Config')) emoji = '⚙️';
-        
+
         console.log(chalk.bold.yellow(`  ${emoji} ${header}`));
       }
       inList = true;
       continue;
     }
-    
+
     // Subheaders
     if (line.startsWith('#### ')) {
       const subheader = line.replace('#### ', '').trim();
       console.log(chalk.bold.white(`     ${subheader}`));
       continue;
     }
-    
+
     // List items with better indentation
     if (line.startsWith('- **')) {
       // Bold item with description
       const match = line.match(/^- \*\*(.+?)\*\*:?\s*(.*)/);
       if (match) {
-        console.log(chalk.cyan(`     • ${chalk.bold(match[1])}`) + (match[2] ? chalk.white(`: ${match[2]}`) : ''));
+        console.log(
+          chalk.cyan(`     • ${chalk.bold(match[1])}`) +
+            (match[2] ? chalk.white(`: ${match[2]}`) : '')
+        );
       } else {
         console.log(chalk.cyan(`     • ${line.replace('- ', '')}`));
       }
       continue;
     }
-    
+
     if (line.startsWith('- ')) {
       const item = line.replace('- ', '').trim();
       console.log(chalk.white(`     • ${item}`));
       continue;
     }
-    
+
     // Skip horizontal rules and empty quotes
     if (line.startsWith('---') || line.trim() === '>') continue;
-    
+
     // Other content
     if (line.trim()) {
       console.log(chalk.gray(`     ${line.trim()}`));
@@ -182,34 +188,37 @@ function renderReleaseContent(version: string, content: string, isBreaking: bool
   }
 }
 
-export async function changelogCommand(version?: string, options: ChangelogOptions = {}): Promise<void> {
+export async function changelogCommand(
+  version?: string,
+  options: ChangelogOptions = {}
+): Promise<void> {
   const spinner = ora('Fetching changelog...').start();
-  
+
   try {
     const content = await fetchReleasesContent();
     spinner.stop();
-    
+
     const entries = parseReleases(content);
-    
+
     if (entries.length === 0) {
       console.log(chalk.yellow('No release entries found.'));
       return;
     }
-    
+
     // Get current installed version
     const currentVersion = getCurrentVersion();
-    
+
     // Filter versions based on options
     let filteredEntries = entries;
-    
+
     if (version) {
       // Show specific version
       const normalizedVersion = version.startsWith('v') ? version : `v${version}`;
-      filteredEntries = entries.filter(e => e.version === normalizedVersion);
-      
+      filteredEntries = entries.filter((e) => e.version === normalizedVersion);
+
       if (filteredEntries.length === 0) {
         console.log(chalk.red(`Version ${version} not found in changelog.`));
-        console.log(chalk.gray('Available versions: ' + entries.map(e => e.version).join(', ')));
+        console.log(chalk.gray('Available versions: ' + entries.map((e) => e.version).join(', ')));
         return;
       }
     } else if (options.latest) {
@@ -217,8 +226,8 @@ export async function changelogCommand(version?: string, options: ChangelogOptio
       filteredEntries = entries.slice(0, 1);
     } else if (options.breaking) {
       // Show only versions with breaking changes
-      filteredEntries = entries.filter(e => e.hasBreakingChanges);
-      
+      filteredEntries = entries.filter((e) => e.hasBreakingChanges);
+
       if (filteredEntries.length === 0) {
         console.log(chalk.green('✓ No breaking changes in any release.'));
         return;
@@ -228,43 +237,50 @@ export async function changelogCommand(version?: string, options: ChangelogOptio
       filteredEntries = entries;
     } else {
       // Default: show only versions newer than current installed version
-      filteredEntries = entries.filter(e => isNewerVersion(e.version, currentVersion));
-      
+      filteredEntries = entries.filter((e) => isNewerVersion(e.version, currentVersion));
+
       if (filteredEntries.length === 0) {
         console.log(chalk.green(`✓ You're on the latest version (${currentVersion})`));
         console.log(chalk.gray('Use --all to see the full changelog.'));
         return;
       }
-      
+
       console.log(chalk.gray(`Showing changes since your version (${currentVersion})`));
       console.log(chalk.gray('Use --all to see the full changelog.'));
     }
-    
+
     // Header
     console.log();
     console.log(chalk.bold.cyan('📋 LeetCode CLI Release Notes'));
     console.log(chalk.gray('─'.repeat(50)));
     console.log();
-    
+
     // Render each entry
     for (const entry of filteredEntries) {
       renderReleaseContent(entry.version, entry.content, entry.hasBreakingChanges);
       console.log(chalk.gray('─'.repeat(60)));
       console.log();
     }
-    
+
     // Footer with version count
     if (!version && !options.latest) {
-      const breakingCount = entries.filter(e => e.hasBreakingChanges).length;
+      const breakingCount = entries.filter((e) => e.hasBreakingChanges).length;
       console.log(chalk.gray(`Showing ${filteredEntries.length} of ${entries.length} releases`));
       if (breakingCount > 0 && !options.breaking) {
-        console.log(chalk.yellow(`${breakingCount} release(s) contain breaking changes. Use --breaking to filter.`));
+        console.log(
+          chalk.yellow(
+            `${breakingCount} release(s) contain breaking changes. Use --breaking to filter.`
+          )
+        );
       }
     }
-    
   } catch {
     spinner.fail('Failed to fetch changelog');
     console.log(chalk.gray('  Could not fetch release notes from GitHub.'));
-    console.log(chalk.gray('  Visit: https://github.com/night-slayer18/leetcode-cli/blob/main/docs/releases.md'));
+    console.log(
+      chalk.gray(
+        '  Visit: https://github.com/night-slayer18/leetcode-cli/blob/main/docs/releases.md'
+      )
+    );
   }
 }

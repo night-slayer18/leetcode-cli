@@ -1,0 +1,26 @@
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Dependencies
+node_modules/
+package-lock.json
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Auto-generated files
+*.min.js
+*.min.css
+
+# License (preserve original formatting)
+LICENSE

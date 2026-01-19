@@ -34,11 +34,15 @@ export const mockCredentials = {
 
 export function createMockCredentialsStorage() {
   let storedCredentials: typeof mockCredentials | null = mockCredentials;
-  
+
   return {
     get: vi.fn(() => storedCredentials),
-    set: vi.fn((creds) => { storedCredentials = creds; }),
-    clear: vi.fn(() => { storedCredentials = null; }),
+    set: vi.fn((creds) => {
+      storedCredentials = creds;
+    }),
+    clear: vi.fn(() => {
+      storedCredentials = null;
+    }),
     getPath: vi.fn().mockReturnValue('/tmp/.leetcode/credentials.json'),
   };
 }
@@ -53,10 +57,12 @@ export const mockCollabSession = {
 
 export function createMockCollabStorage() {
   let session: typeof mockCollabSession | null = null;
-  
+
   return {
     getSession: vi.fn(() => session),
-    setSession: vi.fn((s) => { session = s; }),
+    setSession: vi.fn((s) => {
+      session = s;
+    }),
   };
 }
 
@@ -64,7 +70,7 @@ export function createMockCollabStorage() {
 export function createMockTimerStorage() {
   let activeTimer: { problemId: string; startedAt: string; durationMinutes: number } | null = null;
   const solveTimes: Record<string, unknown[]> = {};
-  
+
   return {
     startTimer: vi.fn((problemId, title, difficulty, duration) => {
       activeTimer = { problemId, startedAt: new Date().toISOString(), durationMinutes: duration };

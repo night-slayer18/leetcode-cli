@@ -50,7 +50,6 @@ export async function hintCommand(idOrSlug: string, options: { all?: boolean }):
       // Show hints one at a time with prompts
       await showHintsProgressively(hints);
     }
-
   } catch (error) {
     spinner.fail('Failed to fetch problem hints');
     if (error instanceof Error) {
@@ -61,7 +60,7 @@ export async function hintCommand(idOrSlug: string, options: { all?: boolean }):
 
 function displayHint(hint: string, number: number, total: number): void {
   const cleanedHint = cleanHtml(hint);
-  
+
   console.log(chalk.bold.yellow(`💡 Hint ${number}/${total}`));
   console.log(chalk.white(cleanedHint));
   console.log();
@@ -78,7 +77,7 @@ function cleanHtml(html: string): string {
     .replace(/<br\s*\/?>/g, '\n')
     .replace(/<p>/g, '')
     .replace(/<\/p>/g, '\n');
-    
+
   return (striptags(formatted) ?? '')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
@@ -108,10 +107,14 @@ async function showHintsProgressively(hints: string[]): Promise<void> {
 
       if (index < hints.length - 1) {
         rl.question(
-          chalk.gray(`Press Enter for next hint (${hints.length - index - 1} remaining), or 'q' to quit: `),
+          chalk.gray(
+            `Press Enter for next hint (${hints.length - index - 1} remaining), or 'q' to quit: `
+          ),
           (answer) => {
             if (answer.toLowerCase() === 'q') {
-              console.log(chalk.gray('\nGood luck! You can always run this command again for more hints.'));
+              console.log(
+                chalk.gray('\nGood luck! You can always run this command again for more hints.')
+              );
               rl.close();
               resolve();
             } else {

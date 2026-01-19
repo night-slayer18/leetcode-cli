@@ -19,7 +19,7 @@ export const credentials = {
   get(): LeetCodeCredentials | null {
     const session = credentialsStore.get('session');
     const csrfToken = credentialsStore.get('csrfToken');
-    
+
     if (!session || !csrfToken) return null;
     return { session, csrfToken };
   },

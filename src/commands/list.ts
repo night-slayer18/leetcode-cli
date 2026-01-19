@@ -62,7 +62,7 @@ export async function listCommand(options: ListOptions): Promise<void> {
     }
 
     const { total, problems } = await leetcodeClient.getProblems(filters);
-    
+
     spinner.stop();
 
     if (problems.length === 0) {
@@ -73,7 +73,9 @@ export async function listCommand(options: ListOptions): Promise<void> {
     displayProblemList(problems, total);
 
     if (page * limit < total) {
-      console.log(chalk.gray(`\nPage ${page} of ${Math.ceil(total / limit)}. Use --page to navigate.`));
+      console.log(
+        chalk.gray(`\nPage ${page} of ${Math.ceil(total / limit)}. Use --page to navigate.`)
+      );
     }
   } catch (error) {
     spinner.fail('Failed to fetch problems');

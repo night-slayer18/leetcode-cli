@@ -12,8 +12,22 @@ vi.mock('../../api/client.js', () => ({
       difficulty: 'Easy',
     }),
     getSubmissionList: vi.fn().mockResolvedValue([
-      { id: '12345', statusDisplay: 'Accepted', lang: 'typescript', runtime: '80 ms', timestamp: '1234567890', memory: '42.1 MB' },
-      { id: '12344', statusDisplay: 'Wrong Answer', lang: 'typescript', runtime: 'N/A', timestamp: '1234567889', memory: 'N/A' },
+      {
+        id: '12345',
+        statusDisplay: 'Accepted',
+        lang: 'typescript',
+        runtime: '80 ms',
+        timestamp: '1234567890',
+        memory: '42.1 MB',
+      },
+      {
+        id: '12344',
+        statusDisplay: 'Wrong Answer',
+        lang: 'typescript',
+        runtime: 'N/A',
+        timestamp: '1234567889',
+        memory: 'N/A',
+      },
     ]),
     getSubmissionDetails: vi.fn().mockResolvedValue({
       code: 'function twoSum(nums, target) { return [0, 1]; }',
@@ -37,7 +51,11 @@ vi.mock('../../utils/auth.js', () => ({
 }));
 
 vi.mock('fs/promises', () => ({
-  readFile: vi.fn().mockResolvedValue('function twoSum(nums, target) {\n  // brute force\n  for (let i = 0; i < nums.length; i++) {\n    for (let j = i + 1; j < nums.length; j++) {\n      if (nums[i] + nums[j] === target) return [i, j];\n    }\n  }\n}'),
+  readFile: vi
+    .fn()
+    .mockResolvedValue(
+      'function twoSum(nums, target) {\n  // brute force\n  for (let i = 0; i < nums.length; i++) {\n    for (let j = i + 1; j < nums.length; j++) {\n      if (nums[i] + nums[j] === target) return [i, j];\n    }\n  }\n}'
+    ),
 }));
 
 vi.mock('fs', () => ({
@@ -107,7 +125,14 @@ describe('Diff Command', () => {
 
     it('should handle no accepted submissions', async () => {
       vi.mocked(leetcodeClient.getSubmissionList).mockResolvedValueOnce([
-        { id: '12344', statusDisplay: 'Wrong Answer', lang: 'typescript', runtime: 'N/A', timestamp: '1234567889', memory: 'N/A' },
+        {
+          id: '12344',
+          statusDisplay: 'Wrong Answer',
+          lang: 'typescript',
+          runtime: 'N/A',
+          timestamp: '1234567889',
+          memory: 'N/A',
+        },
       ]);
 
       await diffCommand('1', {});
@@ -120,14 +145,14 @@ describe('Diff Command', () => {
       it('should reject --file paths outside workDir (path traversal)', async () => {
         // /etc/passwd is outside /tmp/leetcode
         await diffCommand('1', { file: '/etc/passwd' });
-        
+
         // Should show security error, not file comparison
         expect(outputContains('Security Error')).toBe(true);
       });
 
       it('should reject relative path traversal in --file option', async () => {
         await diffCommand('1', { file: '../../../etc/passwd' });
-        
+
         expect(outputContains('Security Error')).toBe(true);
       });
     });

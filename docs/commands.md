@@ -7,6 +7,7 @@ Complete reference for all CLI commands based on actual implementation.
 ## Authentication Commands
 
 ### `leetcode login`
+
 Login to LeetCode with browser cookies.
 
 **Usage**: `leetcode login`
@@ -14,6 +15,7 @@ Login to LeetCode with browser cookies.
 ---
 
 ### `leetcode logout`
+
 Clear stored credentials.
 
 **Usage**: `leetcode logout`
@@ -21,6 +23,7 @@ Clear stored credentials.
 ---
 
 ### `leetcode whoami`
+
 Check current login status.
 
 **Usage**: `leetcode whoami`
@@ -30,17 +33,20 @@ Check current login status.
 ## Problem Browsing
 
 ### `leetcode list` (alias: `l`)
+
 List LeetCode problems with filtering options.
 
 **Options**:
+
 - `-d, --difficulty <level>` - Filter by difficulty (easy/medium/hard)
-- `-s, --status <status>` - Filter by status (todo/solved/attempted)  
+- `-s, --status <status>` - Filter by status (todo/solved/attempted)
 - `-t, --tag <tags...>` - Filter by topic tags (can specify multiple)
 - `-q, --search <keywords>` - Search by keywords
 - `-n, --limit <number>` - Number of problems to show (default: 20)
 - `-p, --page <number>` - Page number (default: 1)
 
 **Examples**:
+
 ```bash
 # List all problems
 leetcode list
@@ -75,12 +81,15 @@ leetcode list -d medium -t dp -n 15 -p 1
 ---
 
 ### `leetcode show <id>` (alias: `s`)
+
 Show problem description.
 
 **Arguments**:
+
 - `<id>` - Problem ID or slug
 
 **Usage**:
+
 ```bash
 # By problem ID
 leetcode show 1
@@ -94,15 +103,19 @@ leetcode s two-sum
 ---
 
 ### `leetcode hint <id>` (alias: `h`)
+
 Show hints for a problem to help you get unstuck.
 
 **Arguments**:
+
 - `<id>` - Problem ID or slug
 
 **Options**:
+
 - `-a, --all` - Show all hints at once (default: progressive reveal)
 
 **Examples**:
+
 ```bash
 # Show hints one by one (press Enter for next hint)
 leetcode hint 1
@@ -119,9 +132,11 @@ leetcode hint 1 -a
 ---
 
 ### `leetcode daily` (alias: `d`)
+
 Show today's daily challenge.
 
 **Usage**:
+
 ```bash
 leetcode daily
 leetcode d
@@ -130,15 +145,18 @@ leetcode d
 ---
 
 ### `leetcode random` (alias: `r`)
+
 Get a random problem.
 
 **Options**:
+
 - `-d, --difficulty <level>` - Filter by difficulty (easy/medium/hard)
 - `-t, --tag <tag>` - Filter by topic tag
 - `--pick` - Auto-generate solution file
 - `--no-open` - Do not open file in editor (only with --pick)
 
 **Examples**:
+
 ```bash
 # Get any random problem
 leetcode random
@@ -166,16 +184,20 @@ leetcode random -d medium -t dp --pick --no-open
 ## Solving Problems
 
 ### `leetcode pick <id>` (alias: `p`)
+
 Generate solution file for a problem.
 
 **Arguments**:
+
 - `<id>` - Problem ID or slug
 
 **Options**:
+
 - `-l, --lang <language>` - Programming language for the solution
 - `--no-open` - Do not open file in editor
 
 **Examples**:
+
 ```bash
 # Pick by ID (uses default language)
 leetcode pick 1
@@ -197,16 +219,20 @@ leetcode pick 1 -l cpp --no-open
 ---
 
 ### `leetcode test <file>` (alias: `t`)
+
 Test solution against sample test cases.
 
 **Arguments**:
+
 - `<file>` - Problem ID, filename, or file path
 
 **Options**:
+
 - `-c, --testcase <testcase>` - Custom test case input
 - `-V, --visualize` - Visual output for data structures
 
 **Three Ways to Test**:
+
 ```bash
 # Method 1: By problem ID (auto-finds file in workdir)
 leetcode test 1
@@ -250,12 +276,15 @@ Test Case 1:
 ---
 
 ### `leetcode submit <file>` (alias: `x`)
+
 Submit solution to LeetCode.
 
 **Arguments**:
+
 - `<file>` - Problem ID, filename, or file path
 
 **Three Ways to Submit**:
+
 ```bash
 # Method 1: By problem ID (auto-finds file in workdir)
 leetcode submit 1
@@ -279,17 +308,21 @@ leetcode x ../problems/1.two-sum.cpp
 ## Submission History
 
 ### `leetcode submissions <id>`
+
 View past submissions for a problem.
 
 **Arguments**:
+
 - `<id>` - Problem ID or slug
 
 **Options**:
+
 - `-n, --limit <number>` - Number of submissions to show (default: 20)
 - `--last` - Show details of the last accepted submission
 - `--download` - Download the last accepted submission code
 
 **Examples**:
+
 ```bash
 # View last 20 submissions
 leetcode submissions 1
@@ -314,26 +347,30 @@ leetcode submissions 1 --last --download
 ## User Statistics
 
 ### `leetcode stat [username]`
+
 Show user statistics and analytics.
 
 **Arguments**:
+
 - `[username]` - Optional username (defaults to logged-in user)
 
 **Options**:
+
 - `-c, --calendar` - Weekly activity summary for the last 12 weeks
-- `-s, --skills` - Skill breakdown by topic tags  
+- `-s, --skills` - Skill breakdown by topic tags
 - `-t, --trend` - Daily trend chart for the last 7 days
 
 **What each option shows**:
 
-| Option | Description |
-|--------|-------------|
-| (none) | Basic stats: problems solved by difficulty, rank, streak |
-| `-c` | Weekly table showing submissions count and active days per week for 12 weeks |
-| `-s` | Problems solved grouped by tags (Fundamental/Intermediate/Advanced) - helps identify strong & weak topics |
-| `-t` | Bar chart of daily submissions for the past 7 days with day labels |
+| Option | Description                                                                                               |
+| ------ | --------------------------------------------------------------------------------------------------------- |
+| (none) | Basic stats: problems solved by difficulty, rank, streak                                                  |
+| `-c`   | Weekly table showing submissions count and active days per week for 12 weeks                              |
+| `-s`   | Problems solved grouped by tags (Fundamental/Intermediate/Advanced) - helps identify strong & weak topics |
+| `-t`   | Bar chart of daily submissions for the past 7 days with day labels                                        |
 
 **Usage**:
+
 ```bash
 # Show basic stats (solved count, rank, streak)
 leetcode stat
@@ -356,15 +393,18 @@ leetcode stat -t
 ## Git Integration
 
 ### `leetcode sync`
+
 Sync all solutions to your configured Git repository.
 
 **Features**:
+
 - Automatically handles `git init` if the working directory is not a git repo.
 - Can create a private GitHub repository automatically if `gh` CLI is installed.
 - Commits changes with stats (e.g., "Sync: 5 solutions - 2026-01-07...").
 - Pushes to the configured remote.
 
 **Usage**:
+
 ```bash
 leetcode sync
 ```
@@ -374,20 +414,24 @@ leetcode sync
 ## Interview Timer
 
 ### `leetcode timer [id]`
+
 Start interview mode with a countdown timer to simulate interview conditions.
 
 **How it works**:
+
 - Starts a timer and opens the problem in your editor
 - Default time limits: Easy (20 min), Medium (40 min), Hard (60 min)
 - When you submit successfully, your solve time is recorded
 - View your historical solve times with `--stats`
 
 **Options**:
+
 - `-m, --minutes <minutes>` - Custom time limit in minutes
 - `--stats` - Show solve time statistics
 - `--stop` - Stop active timer
 
 **Usage**:
+
 ```bash
 # Start timer for problem 1 (uses default time based on difficulty)
 leetcode timer 1
@@ -407,9 +451,11 @@ leetcode timer --stop
 ## Configuration
 
 ### `leetcode config`
+
 View or set configuration.
 
 **Options**:
+
 - `-l, --lang <language>` - Set default programming language
 - `-e, --editor <editor>` - Set editor command
 - `-w, --workdir <path>` - Set working directory for solutions
@@ -417,6 +463,7 @@ View or set configuration.
 - `-i, --interactive` - Interactive configuration mode
 
 **Examples**:
+
 ```bash
 # View current config
 leetcode config
@@ -449,6 +496,7 @@ leetcode config -l cpp -e code -w ~/leetcode
 ## Collaborative Coding
 
 ### `leetcode collab host <id>`
+
 Host a collaboration session for a problem.
 
 **Usage**: `leetcode collab host <problemId>`
@@ -456,6 +504,7 @@ Host a collaboration session for a problem.
 Creates a new collaboration room and generates a unique room code to share with your partner.
 
 **Examples**:
+
 ```bash
 leetcode collab host 1
 # Output: Room Code: ABC123
@@ -464,11 +513,13 @@ leetcode collab host 1
 ---
 
 ### `leetcode collab join <code>`
+
 Join an existing collaboration session.
 
 **Usage**: `leetcode collab join <roomCode>`
 
 **Examples**:
+
 ```bash
 leetcode collab join ABC123
 ```
@@ -476,6 +527,7 @@ leetcode collab join ABC123
 ---
 
 ### `leetcode collab sync`
+
 Upload your current solution to the collaboration room.
 
 **Usage**: `leetcode collab sync`
@@ -485,6 +537,7 @@ Reads your local solution file and syncs it to the cloud so your partner can see
 ---
 
 ### `leetcode collab compare`
+
 Compare your solution with your partner's solution.
 
 **Usage**: `leetcode collab compare`
@@ -494,6 +547,7 @@ Displays both solutions sequentially with line numbers for easy comparison.
 ---
 
 ### `leetcode collab status`
+
 Check the current collaboration session status.
 
 **Usage**: `leetcode collab status`
@@ -503,6 +557,7 @@ Shows room code, problem ID, participants, and sync status.
 ---
 
 ### `leetcode collab leave`
+
 Leave the current collaboration session.
 
 **Usage**: `leetcode collab leave`
@@ -514,13 +569,16 @@ If you're the host, the room will be deleted.
 ## Solution Snapshots
 
 ### `leetcode snapshot save <id> [name]`
+
 Save current solution as a snapshot.
 
 **Arguments**:
+
 - `<id>` - Problem ID
 - `[name]` - Optional snapshot name (defaults to `snapshot-N`)
 
 **Examples**:
+
 ```bash
 leetcode snapshot save 1 "brute-force"
 leetcode snapshot save 1 "hash-map-approach"
@@ -530,12 +588,15 @@ leetcode snapshot save 1  # auto-named "snapshot-1"
 ---
 
 ### `leetcode snapshot list <id>`
+
 List all snapshots for a problem.
 
 **Arguments**:
+
 - `<id>` - Problem ID
 
 **Example**:
+
 ```bash
 leetcode snapshot list 1
 #   1. brute-force         (15 lines, 5m ago)
@@ -545,13 +606,16 @@ leetcode snapshot list 1
 ---
 
 ### `leetcode snapshot restore <id> <snapshot>`
+
 Restore a previously saved snapshot. Auto-creates backup of current code.
 
 **Arguments**:
-- `<id>` - Problem ID  
+
+- `<id>` - Problem ID
 - `<snapshot>` - Snapshot ID or name
 
 **Examples**:
+
 ```bash
 leetcode snapshot restore 1 1           # By ID
 leetcode snapshot restore 1 brute-force # By name
@@ -560,14 +624,17 @@ leetcode snapshot restore 1 brute-force # By name
 ---
 
 ### `leetcode snapshot diff <id> <snap1> <snap2>`
+
 Compare two snapshots with colored diff output.
 
 **Arguments**:
+
 - `<id>` - Problem ID
 - `<snap1>` - First snapshot ID or name
 - `<snap2>` - Second snapshot ID or name
 
 **Example**:
+
 ```bash
 leetcode snapshot diff 1 1 2
 # Shows: + added lines, - removed lines, metrics
@@ -576,13 +643,16 @@ leetcode snapshot diff 1 1 2
 ---
 
 ### `leetcode snapshot delete <id> <snapshot>`
+
 Delete a snapshot.
 
 **Arguments**:
+
 - `<id>` - Problem ID
 - `<snapshot>` - Snapshot ID or name
 
 **Example**:
+
 ```bash
 leetcode snapshot delete 1 brute-force
 ```
@@ -592,12 +662,15 @@ leetcode snapshot delete 1 brute-force
 ## Solution Diff
 
 ### `leetcode diff <id>`
+
 Compare your current solution with past submissions or other files.
 
 **Arguments**:
+
 - `<id>` - Problem ID
 
 **Options**:
+
 - `-s, --submission <id>` - Compare with specific submission ID
 - `-f, --file <path>` - Compare with a local file
 - `-u, --unified` - Show unified diff (line-by-line changes)
@@ -605,6 +678,7 @@ Compare your current solution with past submissions or other files.
 **Default**: Shows both solutions one below the other with line numbers and summary.
 
 **Examples**:
+
 ```bash
 # Compare with last accepted submission
 leetcode diff 1
@@ -624,6 +698,7 @@ leetcode diff 1 --file other-solution.py
 ## Workspace Management
 
 ### `leetcode workspace current`
+
 Show the currently active workspace and its configuration.
 
 **Usage**: `leetcode workspace current`
@@ -631,6 +706,7 @@ Show the currently active workspace and its configuration.
 ---
 
 ### `leetcode workspace list`
+
 List all available workspaces.
 
 **Usage**: `leetcode workspace list`
@@ -640,12 +716,15 @@ Shows all workspaces with the active one marked. Each workspace displays its wor
 ---
 
 ### `leetcode workspace create <name>`
+
 Create a new workspace.
 
 **Options**:
+
 - `-w, --workdir <path>` - Set custom working directory (default: `~/leetcode/<name>`)
 
 **Examples**:
+
 ```bash
 # Create workspace with default workdir
 leetcode workspace create interview
@@ -657,11 +736,13 @@ leetcode workspace create contest -w ~/leetcode-contests
 ---
 
 ### `leetcode workspace use <name>`
+
 Switch to a different workspace.
 
 **Usage**: `leetcode workspace use <name>`
 
 **Examples**:
+
 ```bash
 # Switch to interview workspace
 leetcode workspace use interview
@@ -673,16 +754,19 @@ leetcode workspace use default
 ---
 
 ### `leetcode workspace delete <name>`
+
 Delete a workspace.
 
 **Usage**: `leetcode workspace delete <name>`
 
 **Notes**:
+
 - Cannot delete the `default` workspace
 - Files in the workDir are NOT deleted (only the workspace config is removed)
 - If deleting the active workspace, switches to `default`
 
 **Examples**:
+
 ```bash
 # Delete old workspace
 leetcode workspace delete old-project
@@ -693,12 +777,14 @@ leetcode workspace delete old-project
 ### Workspace Isolation
 
 Each workspace has its own:
+
 - **Config**: language, editor, workDir, syncRepo
 - **Timer history**: solve times and active timer
 - **Collab sessions**: active collaboration state
 - **Snapshots**: solution version history
 
 Shared across all workspaces:
+
 - **Credentials**: LeetCode login session
 - **Bookmarks**: problem bookmarks
 
@@ -707,19 +793,23 @@ Shared across all workspaces:
 ## CLI Updates
 
 ### `leetcode update`
+
 Check for CLI updates from npm registry.
 
 **Options**:
+
 - `--force` - Force re-check (bypass 24-hour cache)
 - `--check-only` - Minimal output (no tips)
 
 **Features**:
+
 - Checks npm registry for latest version
 - Shows visual notification if update available
 - Warns about breaking changes (major version bumps)
 - 24-hour caching to avoid excessive registry calls
 
 **Examples**:
+
 ```bash
 # Check for updates
 leetcode update
@@ -729,6 +819,7 @@ leetcode update --force
 ```
 
 **Output when update available**:
+
 ```
 ╭──────────────────────────────────────────────────────────╮
 │  🚀 Update available: 2.0.1 → 3.0.0                      │
@@ -743,23 +834,28 @@ leetcode update --force
 ---
 
 ### `leetcode changelog`
+
 View release notes and changelog.
 
 **Arguments**:
+
 - `[version]` - Optional specific version to show (e.g., `2.0.0`)
 
 **Options**:
+
 - `-a, --all` - Show all versions (default: only newer than installed)
 - `--latest` - Show only the latest version
 - `--breaking` - Show only versions with breaking changes
 
 **Features**:
+
 - Fetches release notes from GitHub
 - By default shows only versions newer than your installed version
 - Highlights breaking changes with ⚠️ warning
 - Enhanced terminal formatting with colors and emojis
 
 **Examples**:
+
 ```bash
 # Show what's new since your version
 leetcode changelog
@@ -787,6 +883,7 @@ These work with any command:
 - `-v, --version` - Output the version number
 
 **Examples**:
+
 ```bash
 # Get help
 leetcode --help

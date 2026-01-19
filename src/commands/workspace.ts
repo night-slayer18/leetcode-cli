@@ -8,7 +8,7 @@ import { join } from 'path';
 export async function workspaceCurrentCommand(): Promise<void> {
   const active = workspaceStorage.getActive();
   const config = workspaceStorage.getConfig(active);
-  
+
   console.log();
   console.log(chalk.bold.cyan(`📁 Active Workspace: ${active}`));
   console.log(chalk.gray('─'.repeat(40)));
@@ -22,11 +22,11 @@ export async function workspaceCurrentCommand(): Promise<void> {
 export async function workspaceListCommand(): Promise<void> {
   const workspaces = workspaceStorage.list();
   const active = workspaceStorage.getActive();
-  
+
   console.log();
   console.log(chalk.bold('Workspaces:'));
   console.log();
-  
+
   for (const ws of workspaces) {
     const config = workspaceStorage.getConfig(ws);
     const marker = ws === active ? chalk.green('▸ ') : '  ';
@@ -37,21 +37,24 @@ export async function workspaceListCommand(): Promise<void> {
   console.log();
 }
 
-export async function workspaceCreateCommand(name: string, options: { workdir?: string }): Promise<void> {
+export async function workspaceCreateCommand(
+  name: string,
+  options: { workdir?: string }
+): Promise<void> {
   if (workspaceStorage.exists(name)) {
     console.log(chalk.red(`Workspace "${name}" already exists`));
     return;
   }
 
   const workDir = options.workdir ?? join(homedir(), 'leetcode', name);
-  
+
   const config: WorkspaceConfig = {
     workDir,
     lang: 'typescript',
   };
 
   const success = workspaceStorage.create(name, config);
-  
+
   if (success) {
     console.log(chalk.green(`✓ Created workspace "${name}"`));
     console.log(`  workDir: ${chalk.gray(workDir)}`);
@@ -70,7 +73,7 @@ export async function workspaceUseCommand(name: string): Promise<void> {
   }
 
   const success = workspaceStorage.setActive(name);
-  
+
   if (success) {
     const config = workspaceStorage.getConfig(name);
     console.log(chalk.green(`✓ Switched to workspace "${name}"`));
@@ -91,12 +94,14 @@ export async function workspaceDeleteCommand(name: string): Promise<void> {
     return;
   }
 
-  const { confirmed } = await inquirer.prompt([{
-    type: 'confirm',
-    name: 'confirmed',
-    message: `Delete workspace "${name}"? (files in workDir will NOT be deleted)`,
-    default: false,
-  }]);
+  const { confirmed } = await inquirer.prompt([
+    {
+      type: 'confirm',
+      name: 'confirmed',
+      message: `Delete workspace "${name}"? (files in workDir will NOT be deleted)`,
+      default: false,
+    },
+  ]);
 
   if (!confirmed) {
     console.log(chalk.gray('Cancelled'));
@@ -104,7 +109,7 @@ export async function workspaceDeleteCommand(name: string): Promise<void> {
   }
 
   const success = workspaceStorage.delete(name);
-  
+
   if (success) {
     console.log(chalk.green(`✓ Deleted workspace "${name}"`));
   } else {

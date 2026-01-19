@@ -7,22 +7,22 @@ type VizType = 'linkedlist' | 'tree' | 'matrix' | 'graph' | 'array' | 'string';
 const TAG_VISUALIZATION: Record<string, VizType> = {
   'Linked List': 'linkedlist',
   'Doubly-Linked List': 'linkedlist',
-  'Tree': 'tree',
+  Tree: 'tree',
   'Binary Tree': 'tree',
   'Binary Search Tree': 'tree',
-  'Trie': 'tree',
+  Trie: 'tree',
   'Segment Tree': 'tree',
   'Binary Indexed Tree': 'tree',
-  'Graph': 'graph',
-  'Matrix': 'matrix',
-  'Array': 'array',
+  Graph: 'graph',
+  Matrix: 'matrix',
+  Array: 'array',
   'Hash Table': 'array',
-  'Stack': 'array',
-  'Queue': 'array',
+  Stack: 'array',
+  Queue: 'array',
   'Monotonic Stack': 'array',
   'Monotonic Queue': 'array',
   'Heap (Priority Queue)': 'array',
-  'String': 'string',
+  String: 'string',
 };
 
 /**
@@ -58,7 +58,7 @@ function isMatrix(value: unknown): value is unknown[][] {
 /**
  * Render array with index boxes
  * Input: [1, 2, 3, 4, 5]
- * Output: 
+ * Output:
  *   [0] [1] [2] [3] [4]
  *    1   2   3   4   5
  */
@@ -67,20 +67,22 @@ export function visualizeArray(arr: unknown[], expected?: unknown[]): string {
     return String(arr);
   }
 
-  const maxLen = Math.max(...arr.map(v => String(v).length), 1);
+  const maxLen = Math.max(...arr.map((v) => String(v).length), 1);
   const cellWidth = Math.max(maxLen, 3);
 
   // Index row
   const indices = arr.map((_, i) => `[${i}]`.padStart(cellWidth).padEnd(cellWidth)).join(' ');
-  
+
   // Value row with optional diff highlighting
-  const values = arr.map((v, i) => {
-    const valStr = String(v).padStart(cellWidth).padEnd(cellWidth);
-    if (expected && Array.isArray(expected) && expected[i] !== v) {
-      return chalk.red.bold(valStr);
-    }
-    return valStr;
-  }).join(' ');
+  const values = arr
+    .map((v, i) => {
+      const valStr = String(v).padStart(cellWidth).padEnd(cellWidth);
+      if (expected && Array.isArray(expected) && expected[i] !== v) {
+        return chalk.red.bold(valStr);
+      }
+      return valStr;
+    })
+    .join(' ');
 
   return `${chalk.gray(indices)}\n${values}`;
 }
@@ -94,7 +96,7 @@ export function visualizeLinkedList(arr: unknown[], expected?: unknown[]): strin
   if (!Array.isArray(arr)) {
     return String(arr);
   }
-  
+
   if (arr.length === 0) {
     return chalk.gray('(empty)');
   }
@@ -137,18 +139,18 @@ export function visualizeTree(arr: unknown[]): string {
     const levelNodes: string[] = [];
     const levelBranches: string[] = [];
     const spacing = Math.floor(maxWidth / Math.pow(2, level + 1));
-    
+
     for (let i = startIdx; i <= endIdx && i < arr.length; i++) {
       const val = arr[i];
       const nodeStr = val === null ? ' ' : String(val);
       levelNodes.push(nodeStr.padStart(spacing).padEnd(spacing));
-      
+
       // Add branch indicators
       const leftChild = 2 * i + 1;
       const rightChild = 2 * i + 2;
       const hasLeft = leftChild < arr.length && arr[leftChild] !== null;
       const hasRight = rightChild < arr.length && arr[rightChild] !== null;
-      
+
       if (hasLeft || hasRight) {
         let branch = '';
         if (hasLeft) branch += '/';
@@ -200,7 +202,8 @@ export function visualizeMatrix(matrix: unknown[][], expected?: unknown[][]): st
   const lines: string[] = [];
 
   // Column headers
-  const colHeaders = '    ' + matrix[0].map((_, i) => String(i).padStart(cellWidth).padEnd(cellWidth)).join(' ');
+  const colHeaders =
+    '    ' + matrix[0].map((_, i) => String(i).padStart(cellWidth).padEnd(cellWidth)).join(' ');
   lines.push(chalk.gray(colHeaders));
 
   // Top border
@@ -208,14 +211,16 @@ export function visualizeMatrix(matrix: unknown[][], expected?: unknown[][]): st
 
   for (let r = 0; r < rows; r++) {
     // Row content
-    const rowContent = matrix[r].map((v, c) => {
-      const valStr = String(v).padStart(2);
-      if (expected && isMatrix(expected) && expected[r] && expected[r][c] !== v) {
-        return chalk.red.bold(valStr);
-      }
-      return valStr;
-    }).join(' │ ');
-    
+    const rowContent = matrix[r]
+      .map((v, c) => {
+        const valStr = String(v).padStart(2);
+        if (expected && isMatrix(expected) && expected[r] && expected[r][c] !== v) {
+          return chalk.red.bold(valStr);
+        }
+        return valStr;
+      })
+      .join(' │ ');
+
     lines.push(chalk.gray(`  ${r} `) + `│ ${rowContent} │`);
 
     // Row separator or bottom border
@@ -238,9 +243,7 @@ export function visualizeGraph(adjList: unknown[][]): string {
   }
 
   const lines = adjList.map((neighbors, node) => {
-    const neighborStr = Array.isArray(neighbors) 
-      ? neighbors.join(', ') 
-      : String(neighbors);
+    const neighborStr = Array.isArray(neighbors) ? neighbors.join(', ') : String(neighbors);
     return `  ${chalk.cyan(String(node))} → [${neighborStr}]`;
   });
 
@@ -303,9 +306,7 @@ export function visualizeTestOutput(
     case 'string':
       if (Array.isArray(outputVal)) {
         outputVis = visualizeArray(outputVal, expectedVal as unknown[]);
-        expectedVis = Array.isArray(expectedVal) 
-          ? visualizeArray(expectedVal) 
-          : String(expected);
+        expectedVis = Array.isArray(expectedVal) ? visualizeArray(expectedVal) : String(expected);
       } else {
         // Scalar values or strings - show with diff highlighting
         outputVis = matches ? String(output) : chalk.red.bold(String(output));

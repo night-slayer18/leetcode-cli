@@ -5,7 +5,10 @@ import { outputContains } from '../setup.js';
 // Mock storage
 let mockWorkspaces: string[] = ['default'];
 let mockActiveWorkspace = 'default';
-let mockConfigs: Record<string, { workDir: string; lang: string; editor?: string; syncRepo?: string }> = {
+let mockConfigs: Record<
+  string,
+  { workDir: string; lang: string; editor?: string; syncRepo?: string }
+> = {
   default: { workDir: '/tmp/leetcode', lang: 'typescript' },
 };
 
@@ -28,7 +31,7 @@ vi.mock('../../storage/workspaces.js', () => ({
     delete: vi.fn((name: string) => {
       if (name === 'default') return false;
       if (!mockWorkspaces.includes(name)) return false;
-      mockWorkspaces = mockWorkspaces.filter(w => w !== name);
+      mockWorkspaces = mockWorkspaces.filter((w) => w !== name);
       delete mockConfigs[name];
       if (mockActiveWorkspace === name) mockActiveWorkspace = 'default';
       return true;
@@ -98,7 +101,7 @@ describe('Workspace Commands', () => {
       mockConfigs['python-study'] = { workDir: '/tmp/python', lang: 'python3' };
 
       await workspaceListCommand();
-      
+
       expect(outputContains('default')).toBe(true);
       expect(outputContains('interview')).toBe(true);
       expect(outputContains('python-study')).toBe(true);
@@ -110,7 +113,7 @@ describe('Workspace Commands', () => {
       mockActiveWorkspace = 'interview';
 
       await workspaceListCommand();
-      
+
       expect(workspaceStorage.getActive).toHaveBeenCalled();
     });
   });
@@ -118,25 +121,31 @@ describe('Workspace Commands', () => {
   describe('workspace create', () => {
     it('should create a new workspace', async () => {
       await workspaceCreateCommand('interview', {});
-      
-      expect(workspaceStorage.create).toHaveBeenCalledWith('interview', expect.objectContaining({
-        workDir: expect.stringContaining('interview'),
-        lang: 'typescript',
-      }));
+
+      expect(workspaceStorage.create).toHaveBeenCalledWith(
+        'interview',
+        expect.objectContaining({
+          workDir: expect.stringContaining('interview'),
+          lang: 'typescript',
+        })
+      );
       expect(outputContains('Created workspace')).toBe(true);
     });
 
     it('should use custom workdir when provided', async () => {
       await workspaceCreateCommand('custom', { workdir: '/custom/path' });
-      
-      expect(workspaceStorage.create).toHaveBeenCalledWith('custom', expect.objectContaining({
-        workDir: '/custom/path',
-      }));
+
+      expect(workspaceStorage.create).toHaveBeenCalledWith(
+        'custom',
+        expect.objectContaining({
+          workDir: '/custom/path',
+        })
+      );
     });
 
     it('should reject duplicate workspace names', async () => {
       await workspaceCreateCommand('default', {});
-      
+
       expect(outputContains('already exists')).toBe(true);
     });
   });
@@ -147,14 +156,14 @@ describe('Workspace Commands', () => {
       mockConfigs['interview'] = { workDir: '/tmp/interview', lang: 'java' };
 
       await workspaceUseCommand('interview');
-      
+
       expect(workspaceStorage.setActive).toHaveBeenCalledWith('interview');
       expect(outputContains('Switched to workspace')).toBe(true);
     });
 
     it('should reject non-existent workspace', async () => {
       await workspaceUseCommand('nonexistent');
-      
+
       expect(outputContains('not found')).toBe(true);
     });
   });
@@ -166,7 +175,7 @@ describe('Workspace Commands', () => {
       vi.mocked(inquirer.prompt).mockResolvedValueOnce({ confirmed: true });
 
       await workspaceDeleteCommand('interview');
-      
+
       expect(workspaceStorage.delete).toHaveBeenCalledWith('interview');
       expect(outputContains('Deleted workspace')).toBe(true);
     });
@@ -177,21 +186,21 @@ describe('Workspace Commands', () => {
       vi.mocked(inquirer.prompt).mockResolvedValueOnce({ confirmed: false });
 
       await workspaceDeleteCommand('interview');
-      
+
       expect(workspaceStorage.delete).not.toHaveBeenCalled();
       expect(outputContains('Cancelled')).toBe(true);
     });
 
     it('should prevent deleting default workspace', async () => {
       await workspaceDeleteCommand('default');
-      
+
       expect(workspaceStorage.delete).not.toHaveBeenCalled();
       expect(outputContains('Cannot delete the default workspace')).toBe(true);
     });
 
     it('should reject non-existent workspace', async () => {
       await workspaceDeleteCommand('nonexistent');
-      
+
       expect(outputContains('not found')).toBe(true);
     });
   });

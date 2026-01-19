@@ -80,15 +80,13 @@ export const snapshotStorage = {
     }
 
     // Generate next ID
-    const nextId = meta.snapshots.length > 0
-      ? Math.max(...meta.snapshots.map(s => s.id)) + 1
-      : 1;
+    const nextId = meta.snapshots.length > 0 ? Math.max(...meta.snapshots.map((s) => s.id)) + 1 : 1;
 
     // Generate name if not provided
     const snapshotName = name || `snapshot-${nextId}`;
 
     // Check for duplicate name
-    const existing = meta.snapshots.find(s => s.name === snapshotName);
+    const existing = meta.snapshots.find((s) => s.name === snapshotName);
     if (existing) {
       return { error: `Snapshot with name "${snapshotName}" already exists (ID: ${existing.id})` };
     }
@@ -137,13 +135,13 @@ export const snapshotStorage = {
    */
   get(problemId: string, idOrName: string): Snapshot | null {
     const meta = loadMeta(problemId);
-    
+
     // Try by ID first
-    const byId = meta.snapshots.find(s => s.id === parseInt(idOrName, 10));
+    const byId = meta.snapshots.find((s) => s.id === parseInt(idOrName, 10));
     if (byId) return byId;
 
     // Try by name
-    const byName = meta.snapshots.find(s => s.name === idOrName);
+    const byName = meta.snapshots.find((s) => s.name === idOrName);
     return byName || null;
   },
 
@@ -164,7 +162,7 @@ export const snapshotStorage = {
   delete(problemId: string, idOrName: string): boolean {
     const meta = loadMeta(problemId);
     const snapshot = this.get(problemId, idOrName);
-    
+
     if (!snapshot) {
       return false;
     }
@@ -176,7 +174,7 @@ export const snapshotStorage = {
     }
 
     // Remove from meta
-    meta.snapshots = meta.snapshots.filter(s => s.id !== snapshot.id);
+    meta.snapshots = meta.snapshots.filter((s) => s.id !== snapshot.id);
     saveMeta(problemId, meta);
 
     return true;

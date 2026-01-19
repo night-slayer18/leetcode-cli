@@ -45,8 +45,18 @@ vi.mock('../../api/client.js', () => ({
       topicTags: [{ name: 'Array' }],
     }),
     getSubmissionList: vi.fn().mockResolvedValue([
-      { id: '123', statusDisplay: 'Accepted', lang: { name: 'typescript' }, timestamp: '1704067200' },
-      { id: '122', statusDisplay: 'Wrong Answer', lang: { name: 'typescript' }, timestamp: '1704066000' },
+      {
+        id: '123',
+        statusDisplay: 'Accepted',
+        lang: { name: 'typescript' },
+        timestamp: '1704067200',
+      },
+      {
+        id: '122',
+        statusDisplay: 'Wrong Answer',
+        lang: { name: 'typescript' },
+        timestamp: '1704066000',
+      },
     ]),
     getSubmissionDetails: vi.fn().mockResolvedValue({
       code: 'function twoSum() { return [0,1]; }',

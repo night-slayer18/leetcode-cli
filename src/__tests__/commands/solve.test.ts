@@ -37,9 +37,7 @@ vi.mock('../../api/client.js', () => ({
       difficulty: 'Easy',
       content: '<p>Given an array...</p>',
       topicTags: [{ name: 'Array' }],
-      codeSnippets: [
-        { lang: 'TypeScript', langSlug: 'typescript', code: 'function twoSum() {}' },
-      ],
+      codeSnippets: [{ lang: 'TypeScript', langSlug: 'typescript', code: 'function twoSum() {}' }],
       exampleTestcases: '[2,7,11,15]\n9',
     }),
     getProblem: vi.fn().mockResolvedValue({
@@ -209,14 +207,14 @@ describe('Solve Commands', () => {
       it('should reject files outside workDir (path traversal)', async () => {
         // /etc/passwd is definitely outside /tmp/leetcode
         await testCommand('/etc/passwd', {});
-        
+
         // Should NOT call testSolution because file is outside workDir
         expect(leetcodeClient.testSolution).not.toHaveBeenCalled();
       });
 
       it('should reject relative path traversal attempts', async () => {
         await testCommand('../../../etc/passwd', {});
-        
+
         expect(leetcodeClient.testSolution).not.toHaveBeenCalled();
       });
     });
@@ -249,14 +247,14 @@ describe('Solve Commands', () => {
       it('should reject files outside workDir (path traversal)', async () => {
         // /etc/passwd is definitely outside /tmp/leetcode
         await submitCommand('/etc/passwd');
-        
+
         // Should NOT call submitSolution because file is outside workDir
         expect(leetcodeClient.submitSolution).not.toHaveBeenCalled();
       });
 
       it('should reject relative path traversal attempts', async () => {
         await submitCommand('../../../etc/passwd');
-        
+
         expect(leetcodeClient.submitSolution).not.toHaveBeenCalled();
       });
     });

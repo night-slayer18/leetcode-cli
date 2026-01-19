@@ -5,8 +5,8 @@ import { outputContains } from '../setup.js';
 // Mock storage
 vi.mock('../../storage/config.js', () => ({
   config: {
-    getConfig: vi.fn(() => ({ 
-      language: 'typescript', 
+    getConfig: vi.fn(() => ({
+      language: 'typescript',
       workDir: '/tmp/leetcode',
       editor: 'code',
       repo: undefined,

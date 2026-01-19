@@ -33,15 +33,17 @@ vi.mock('../../storage/snapshots.js', () => ({
       snapshots: mockSnapshots,
     })),
     get: vi.fn((problemId, idOrName) => {
-      const byId = mockSnapshots.find(s => s.id === parseInt(idOrName, 10));
+      const byId = mockSnapshots.find((s) => s.id === parseInt(idOrName, 10));
       if (byId) return byId;
-      return mockSnapshots.find(s => s.name === idOrName) || null;
+      return mockSnapshots.find((s) => s.name === idOrName) || null;
     }),
     getCode: vi.fn(() => 'function twoSum() { return [0,1]; }'),
     delete: vi.fn((problemId, idOrName) => {
-      const snapshot = mockSnapshots.find(s => s.id === parseInt(idOrName, 10) || s.name === idOrName);
+      const snapshot = mockSnapshots.find(
+        (s) => s.id === parseInt(idOrName, 10) || s.name === idOrName
+      );
       if (!snapshot) return false;
-      mockSnapshots = mockSnapshots.filter(s => s.id !== snapshot.id);
+      mockSnapshots = mockSnapshots.filter((s) => s.id !== snapshot.id);
       return true;
     }),
     hasSnapshots: vi.fn(() => mockSnapshots.length > 0),
@@ -121,7 +123,7 @@ describe('Snapshot Commands', () => {
     it('should show error when duplicate name exists', async () => {
       // Mock save to return error for duplicate
       vi.mocked(snapshotStorage.save).mockReturnValueOnce({
-        error: 'Snapshot with name "brute-force" already exists (ID: 1)'
+        error: 'Snapshot with name "brute-force" already exists (ID: 1)',
       });
 
       await snapshotSaveCommand('1', 'brute-force');
@@ -133,8 +135,22 @@ describe('Snapshot Commands', () => {
   describe('snapshotListCommand', () => {
     it('should list snapshots', async () => {
       mockSnapshots = [
-        { id: 1, name: 'brute-force', fileName: '1_brute-force.ts', language: 'typescript', lines: 10, createdAt: new Date().toISOString() },
-        { id: 2, name: 'hash-map', fileName: '2_hash-map.ts', language: 'typescript', lines: 15, createdAt: new Date().toISOString() },
+        {
+          id: 1,
+          name: 'brute-force',
+          fileName: '1_brute-force.ts',
+          language: 'typescript',
+          lines: 10,
+          createdAt: new Date().toISOString(),
+        },
+        {
+          id: 2,
+          name: 'hash-map',
+          fileName: '2_hash-map.ts',
+          language: 'typescript',
+          lines: 15,
+          createdAt: new Date().toISOString(),
+        },
       ];
 
       await snapshotListCommand('1');
@@ -154,7 +170,14 @@ describe('Snapshot Commands', () => {
   describe('snapshotRestoreCommand', () => {
     it('should restore a snapshot by ID', async () => {
       mockSnapshots = [
-        { id: 1, name: 'brute-force', fileName: '1_brute-force.ts', language: 'typescript', lines: 10, createdAt: new Date().toISOString() },
+        {
+          id: 1,
+          name: 'brute-force',
+          fileName: '1_brute-force.ts',
+          language: 'typescript',
+          lines: 10,
+          createdAt: new Date().toISOString(),
+        },
       ];
 
       await snapshotRestoreCommand('1', '1');
@@ -176,8 +199,22 @@ describe('Snapshot Commands', () => {
   describe('snapshotDiffCommand', () => {
     it('should show diff between two snapshots', async () => {
       mockSnapshots = [
-        { id: 1, name: 'brute-force', fileName: '1_brute-force.ts', language: 'typescript', lines: 10, createdAt: new Date().toISOString() },
-        { id: 2, name: 'hash-map', fileName: '2_hash-map.ts', language: 'typescript', lines: 15, createdAt: new Date().toISOString() },
+        {
+          id: 1,
+          name: 'brute-force',
+          fileName: '1_brute-force.ts',
+          language: 'typescript',
+          lines: 10,
+          createdAt: new Date().toISOString(),
+        },
+        {
+          id: 2,
+          name: 'hash-map',
+          fileName: '2_hash-map.ts',
+          language: 'typescript',
+          lines: 15,
+          createdAt: new Date().toISOString(),
+        },
       ];
 
       await snapshotDiffCommand('1', '1', '2');
@@ -191,7 +228,14 @@ describe('Snapshot Commands', () => {
   describe('snapshotDeleteCommand', () => {
     it('should delete a snapshot', async () => {
       mockSnapshots = [
-        { id: 1, name: 'brute-force', fileName: '1_brute-force.ts', language: 'typescript', lines: 10, createdAt: new Date().toISOString() },
+        {
+          id: 1,
+          name: 'brute-force',
+          fileName: '1_brute-force.ts',
+          language: 'typescript',
+          lines: 10,
+          createdAt: new Date().toISOString(),
+        },
       ];
 
       await snapshotDeleteCommand('1', '1');

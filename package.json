@@ -18,7 +18,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint src --ext .ts",
-    "typecheck": "tsc --noEmit"
+    "lint:fix": "eslint src --ext .ts --fix",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write \"**/*.{ts,json,md,yml,yaml}\"",
+    "format:check": "prettier --check \"**/*.{ts,json,md,yml,yaml}\""
   },
   "keywords": [
     "leetcode",
@@ -61,6 +64,7 @@
     "@typescript-eslint/parser": "^8.53.0",
     "@vitest/coverage-v8": "^4.0.16",
     "eslint": "^9.39.2",
+    "prettier": "^3.8.0",
     "tsup": "^8.3.5",
     "typescript": "^5.7.2",
     "vitest": "^4.0.16"

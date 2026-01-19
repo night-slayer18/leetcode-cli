@@ -131,7 +131,7 @@ export interface ProblemListFilters {
   skip?: number;
 }
 
-export type SupportedLanguage = 
+export type SupportedLanguage =
   | 'typescript'
   | 'javascript'
   | 'python3'

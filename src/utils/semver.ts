@@ -3,7 +3,7 @@
 export function isNewerVersion(v1: string, v2: string): boolean {
   const v1Parts = v1.replace('v', '').split('.').map(Number);
   const v2Parts = v2.replace('v', '').split('.').map(Number);
-  
+
   for (let i = 0; i < 3; i++) {
     const p1 = v1Parts[i] || 0;
     const p2 = v2Parts[i] || 0;

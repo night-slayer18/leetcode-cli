@@ -1,4 +1,3 @@
-
 import ora from 'ora';
 import chalk from 'chalk';
 import { leetcodeClient } from '../api/client.js';
@@ -47,7 +46,7 @@ export async function randomCommand(options: RandomOptions): Promise<void> {
     }
 
     const titleSlug = await leetcodeClient.getRandomProblem(filters);
-    
+
     spinner.succeed('Found random problem!');
     console.log();
 
@@ -57,11 +56,10 @@ export async function randomCommand(options: RandomOptions): Promise<void> {
     } else {
       // Forward to show command
       await showCommand(titleSlug);
-      
+
       console.log(chalk.gray('Run following to start solving:'));
       console.log(chalk.cyan(`  leetcode pick ${titleSlug}`));
     }
-
   } catch (error) {
     spinner.fail('Failed to fetch random problem');
     if (error instanceof Error) {

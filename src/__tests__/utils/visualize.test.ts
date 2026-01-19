@@ -48,11 +48,13 @@ describe('Visualize Utilities', () => {
     });
 
     it('should pick first matching tag when multiple present', () => {
-      expect(detectVisualizationType([
-        { name: 'Dynamic Programming' },
-        { name: 'Array' },
-        { name: 'Hash Table' },
-      ])).toBe('array');
+      expect(
+        detectVisualizationType([
+          { name: 'Dynamic Programming' },
+          { name: 'Array' },
+          { name: 'Hash Table' },
+        ])
+      ).toBe('array');
     });
   });
 
@@ -107,7 +109,9 @@ describe('Visualize Utilities', () => {
     });
 
     it('should auto-detect matrix without tag', () => {
-      const result = visualizeTestOutput('[[1,2],[3,4]]', '[[1,2],[3,4]]', [{ name: 'Dynamic Programming' }]);
+      const result = visualizeTestOutput('[[1,2],[3,4]]', '[[1,2],[3,4]]', [
+        { name: 'Dynamic Programming' },
+      ]);
       // Should render as matrix even though tag is DP
       expect(result.outputVis).toContain('│');
       expect(result.unsupported).toBeUndefined();

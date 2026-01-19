@@ -11,17 +11,46 @@ export const mockProblem = {
   content: '<p>Given an array of integers nums...</p>',
   topicTags: [{ name: 'Array' }, { name: 'Hash Table' }],
   codeSnippets: [
-    { lang: 'TypeScript', langSlug: 'typescript', code: 'function twoSum(nums: number[], target: number): number[] {\n\n}' },
-    { lang: 'Java', langSlug: 'java', code: 'class Solution {\n    public int[] twoSum(int[] nums, int target) {\n\n    }\n}' },
+    {
+      lang: 'TypeScript',
+      langSlug: 'typescript',
+      code: 'function twoSum(nums: number[], target: number): number[] {\n\n}',
+    },
+    {
+      lang: 'Java',
+      langSlug: 'java',
+      code: 'class Solution {\n    public int[] twoSum(int[] nums, int target) {\n\n    }\n}',
+    },
   ],
   exampleTestcases: '[2,7,11,15]\n9',
   sampleTestCase: '[2,7,11,15]\n9',
 };
 
 export const mockProblems = [
-  { questionId: '1', questionFrontendId: '1', title: 'Two Sum', titleSlug: 'two-sum', difficulty: 'Easy', status: 'ac' },
-  { questionId: '2', questionFrontendId: '2', title: 'Add Two Numbers', titleSlug: 'add-two-numbers', difficulty: 'Medium', status: null },
-  { questionId: '3', questionFrontendId: '3', title: 'Longest Substring', titleSlug: 'longest-substring-without-repeating-characters', difficulty: 'Medium', status: 'notac' },
+  {
+    questionId: '1',
+    questionFrontendId: '1',
+    title: 'Two Sum',
+    titleSlug: 'two-sum',
+    difficulty: 'Easy',
+    status: 'ac',
+  },
+  {
+    questionId: '2',
+    questionFrontendId: '2',
+    title: 'Add Two Numbers',
+    titleSlug: 'add-two-numbers',
+    difficulty: 'Medium',
+    status: null,
+  },
+  {
+    questionId: '3',
+    questionFrontendId: '3',
+    title: 'Longest Substring',
+    titleSlug: 'longest-substring-without-repeating-characters',
+    difficulty: 'Medium',
+    status: 'notac',
+  },
 ];
 
 export const mockDailyChallenge = {
