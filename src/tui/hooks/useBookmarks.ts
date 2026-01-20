@@ -15,6 +15,7 @@ interface UseBookmarksResult {
   addBookmark: (problemId: string) => boolean;
   removeBookmark: (problemId: string) => boolean;
   hasBookmark: (problemId: string) => boolean;
+  clearAll: () => void;
   refetch: () => void;
 }
 
@@ -101,6 +102,11 @@ export function useBookmarks(): UseBookmarksResult {
     return bookmarkStorage.has(problemId);
   }, []);
 
+  const clearAll = useCallback(() => {
+    bookmarkStorage.clear();
+    setBookmarks([]);
+  }, []);
+
   return {
     bookmarks,
     loading,
@@ -108,6 +114,7 @@ export function useBookmarks(): UseBookmarksResult {
     addBookmark,
     removeBookmark,
     hasBookmark,
+    clearAll,
     refetch: fetchBookmarks,
   };
 }

@@ -1,6 +1,7 @@
 /**
  * Bookmarks Screen
- * Display and manage REAL bookmarked problems
+ * Display and manage bookmarked problems
+ * Matches CLI `bookmark` command functionality
  */
 import { Box, Text, useInput } from 'ink';
 import Spinner from 'ink-spinner';
@@ -16,22 +17,51 @@ interface BookmarksScreenProps {
 }
 
 export function BookmarksScreen({ onSelectProblem, onBack }: BookmarksScreenProps) {
-  const { bookmarks, loading, error, removeBookmark, refetch } = useBookmarks();
+  const { bookmarks, loading, error, removeBookmark, clearAll, refetch } = useBookmarks();
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [confirmClear, setConfirmClear] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useInput((input, key) => {
+    // Clear messages on input
+    if (message) setMessage(null);
+    
     if (key.escape) {
-      onBack();
+      if (confirmClear) {
+        setConfirmClear(false);
+      } else {
+        onBack();
+      }
+      return;
     }
+    
+    // Confirm clear dialog
+    if (confirmClear) {
+      if (input === 'y' || input === 'Y') {
+        const count = bookmarks.length;
+        clearAll();
+        setMessage({ type: 'success', text: `Cleared ${count} bookmark${count !== 1 ? 's' : ''}` });
+        setConfirmClear(false);
+        setSelectedIndex(0);
+      } else {
+        setConfirmClear(false);
+      }
+      return;
+    }
+    
     if ((input === 'x' || input === 'd') && bookmarks.length > 0) {
       // Remove bookmark
       const problem = bookmarks[selectedIndex];
       if (problem) {
         removeBookmark(problem.id.toString());
+        setMessage({ type: 'success', text: `Removed bookmark for #${problem.id}` });
         if (selectedIndex >= bookmarks.length - 1) {
           setSelectedIndex(Math.max(0, bookmarks.length - 2));
         }
       }
+    }
+    if (input === 'C' && bookmarks.length > 0) {
+      setConfirmClear(true);
     }
     if (input === 'R') {
       refetch();
@@ -71,6 +101,24 @@ export function BookmarksScreen({ onSelectProblem, onBack }: BookmarksScreenProp
         <Text color={colors.textMuted}> — {bookmarks.length} saved</Text>
       </Box>
 
+      {/* Confirm Clear Dialog */}
+      {confirmClear && (
+        <Box marginBottom={1}>
+          <Text color={colors.warning}>
+            Clear all {bookmarks.length} bookmarks? <Text color={colors.primary}>[y/N]</Text>
+          </Text>
+        </Box>
+      )}
+
+      {/* Message */}
+      {message && (
+        <Box marginBottom={1}>
+          <Text color={message.type === 'success' ? colors.success : colors.error}>
+            {message.type === 'success' ? icons.check : icons.cross} {message.text}
+          </Text>
+        </Box>
+      )}
+
       {/* Bookmarks Table */}
       {bookmarks.length > 0 ? (
         <ProblemTable
@@ -99,6 +147,7 @@ export function BookmarksScreen({ onSelectProblem, onBack }: BookmarksScreenProp
           <Text color={colors.primary}>[j/k]</Text> Navigate{' '}
           <Text color={colors.primary}>[Enter]</Text> View{' '}
           <Text color={colors.primary}>[x]</Text> Remove{' '}
+          {bookmarks.length > 0 && <><Text color={colors.primary}>[C]</Text> Clear all{' '}</>}
           <Text color={colors.primary}>[R]</Text> Refresh{' '}
           <Text color={colors.primary}>[Esc]</Text> Back
         </Text>
