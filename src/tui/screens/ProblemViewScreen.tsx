@@ -22,6 +22,8 @@ interface ProblemViewProps {
   onHints?: (problem: Problem) => void;
   onSubmissions?: (problem: Problem) => void;
   onNotes?: (problem: Problem) => void;
+  onDiff?: (problem: Problem) => void;
+  onSnapshot?: (problem: Problem) => void;
 }
 
 /**
@@ -86,6 +88,8 @@ export function ProblemViewScreen({
   onHints,
   onSubmissions,
   onNotes,
+  onDiff,
+  onSnapshot,
 }: ProblemViewProps) {
   const { stdout } = useStdout();
   const terminalWidth = stdout?.columns || 80;
@@ -158,6 +162,8 @@ export function ProblemViewScreen({
     if (input === 'h' && onHints) onHints(problem);
     if (input === 's' && onSubmissions) onSubmissions(problem);
     if (input === 'n' && onNotes) onNotes(problem);
+    if (input === 'D' && onDiff) onDiff(problem);
+    if (input === 'S' && onSnapshot) onSnapshot(problem);
   });
 
   // Loading state

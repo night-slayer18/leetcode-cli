@@ -23,6 +23,11 @@ import { SubmissionsScreen } from './screens/SubmissionsScreen.js';
 import { NotesScreen } from './screens/NotesScreen.js';
 import { LoginScreen } from './screens/LoginScreen.js';
 import { ConfigScreen } from './screens/ConfigScreen.js';
+import { DiffScreen } from './screens/DiffScreen.js';
+import { SyncScreen } from './screens/SyncScreen.js';
+import { SnapshotScreen } from './screens/SnapshotScreen.js';
+import { ChangelogScreen } from './screens/ChangelogScreen.js';
+import { UpdateScreen } from './screens/UpdateScreen.js';
 import type { Problem } from './components/ProblemTable.js';
 import { leetcodeClient } from '../api/client.js';
 import { credentials } from '../storage/credentials.js';
@@ -45,7 +50,12 @@ type Screen =
   | 'submit-result'
   | 'hints'
   | 'submissions'
-  | 'notes';
+  | 'notes'
+  | 'diff'
+  | 'sync'
+  | 'snapshot'
+  | 'changelog'
+  | 'update';
 
 interface AppProps {
   username?: string;
@@ -149,6 +159,9 @@ export function App({ username: initialUsername }: AppProps) {
       's': 'stats',
       'w': 'workspace',
       'c': 'config',
+      'y': 'sync',
+      'g': 'changelog',
+      'u': 'update',
     };
     
     if (key === 'q') {
@@ -275,6 +288,8 @@ export function App({ username: initialUsername }: AppProps) {
               onHints={(p) => handleHints(p)}
               onSubmissions={(p) => handleSubmissions(p)}
               onNotes={(p) => handleNotes(p)}
+              onDiff={() => navigateTo('diff')}
+              onSnapshot={() => navigateTo('snapshot')}
             />
           );
         }
@@ -379,6 +394,37 @@ export function App({ username: initialUsername }: AppProps) {
 
       case 'workspace':
         return <WorkspaceScreen onBack={() => navigateTo('home')} />;
+
+      case 'sync':
+        return <SyncScreen onBack={() => navigateTo('home')} />;
+
+      case 'snapshot':
+        return navState.selectedProblem ? (
+          <SnapshotScreen
+            problemId={navState.selectedProblem.id}
+            problemTitle={navState.selectedProblem.title}
+            onBack={() => navigateTo('problem-view')}
+          />
+        ) : (
+          <Box><Text color={colors.textMuted}>Select a problem first</Text></Box>
+        );
+
+      case 'diff':
+        return navState.selectedProblem ? (
+          <DiffScreen
+            problemId={navState.selectedProblem.id}
+            problemSlug={navState.selectedProblem.titleSlug}
+            onBack={() => navigateTo('problem-view')}
+          />
+        ) : (
+          <Box><Text color={colors.textMuted}>Select a problem first</Text></Box>
+        );
+
+      case 'changelog':
+        return <ChangelogScreen onBack={() => navigateTo('home')} />;
+
+      case 'update':
+        return <UpdateScreen onBack={() => navigateTo('home')} />;
 
       default:
         return (

@@ -19,3 +19,8 @@ export { SubmissionsScreen } from './SubmissionsScreen.js';
 export { NotesScreen } from './NotesScreen.js';
 export { LoginScreen } from './LoginScreen.js';
 export { ConfigScreen } from './ConfigScreen.js';
+export { DiffScreen } from './DiffScreen.js';
+export { SyncScreen } from './SyncScreen.js';
+export { SnapshotScreen } from './SnapshotScreen.js';
+export { ChangelogScreen } from './ChangelogScreen.js';
+export { UpdateScreen } from './UpdateScreen.js';

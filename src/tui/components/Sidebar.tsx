@@ -119,5 +119,8 @@ export const defaultMenuItems: MenuItem[] = [
   { key: 's', label: 'Stats', icon: icons.stats },
   { key: 'w', label: 'Workspace', icon: icons.folder },
   { key: 'c', label: 'Config', icon: icons.gear },
+  { key: 'y', label: 'Sync', icon: '🔄' },
+  { key: 'g', label: 'Changelog', icon: '📋' },
+  { key: 'u', label: 'Update', icon: '🚀' },
   { key: 'q', label: 'Quit', icon: icons.cross },
 ];
