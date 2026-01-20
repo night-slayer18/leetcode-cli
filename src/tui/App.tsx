@@ -22,6 +22,7 @@ import { HintScreen } from './screens/HintScreen.js';
 import { SubmissionsScreen } from './screens/SubmissionsScreen.js';
 import { NotesScreen } from './screens/NotesScreen.js';
 import { LoginScreen } from './screens/LoginScreen.js';
+import { ConfigScreen } from './screens/ConfigScreen.js';
 import type { Problem } from './components/ProblemTable.js';
 import { leetcodeClient } from '../api/client.js';
 import { credentials } from '../storage/credentials.js';
@@ -346,6 +347,7 @@ export function App({ username: initialUsername }: AppProps) {
         return (
           <RandomScreen
             onPick={(id, slug) => handlePick(id, slug)}
+            onViewProblem={(problem) => navigateTo('problem-view', { problem })}
             onBack={() => navigateTo('home')}
           />
         );
@@ -373,19 +375,7 @@ export function App({ username: initialUsername }: AppProps) {
         );
 
       case 'config':
-        return (
-          <Box flexDirection="column">
-            <Text color={colors.primary} bold>
-              {icons.gear} Configuration
-            </Text>
-            <Text color={colors.textMuted}>
-              Use CLI for configuration: <Text color={colors.cyan}>leetcode config -i</Text>
-            </Text>
-            <Text color={colors.textMuted} dimColor>
-              Press <Text color={colors.primary}>[Esc]</Text> to go back
-            </Text>
-          </Box>
-        );
+        return <ConfigScreen onBack={() => navigateTo('home')} />;
 
       case 'workspace':
         return <WorkspaceScreen onBack={() => navigateTo('home')} />;
