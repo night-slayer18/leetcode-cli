@@ -18,3 +18,4 @@ export { HintScreen } from './HintScreen.js';
 export { SubmissionsScreen } from './SubmissionsScreen.js';
 export { NotesScreen } from './NotesScreen.js';
 export { LoginScreen } from './LoginScreen.js';
+export { ConfigScreen } from './ConfigScreen.js';
