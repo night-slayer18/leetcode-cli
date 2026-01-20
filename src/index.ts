@@ -44,6 +44,7 @@ import {
 } from './commands/workspace.js';
 import { updateCommand, checkForUpdatesOnStartup } from './commands/update.js';
 import { changelogCommand } from './commands/changelog.js';
+import { launchTUI } from './tui/index.js';
 
 const program = new Command();
 
@@ -614,12 +615,23 @@ if (shouldCheckUpdates) {
   checkForUpdatesOnStartup().catch(() => {}); // Silent fail
 }
 
-program.parse();
+// Main entry point - detect TUI vs CLI mode
+const args = process.argv.slice(2);
 
-if (!process.argv.slice(2).length) {
+if (args.length === 0 && process.stdout.isTTY) {
+  // No args + interactive terminal → launch TUI
+  launchTUI({ username: 'Guest' }).catch((err) => {
+    console.error('Failed to launch TUI:', err.message);
+    process.exit(1);
+  });
+} else if (args.length === 0) {
+  // No args + non-TTY (piped) → show help
   console.log();
   console.log(chalk.bold.cyan('  🔥 LeetCode CLI'));
   console.log(chalk.gray('  A modern command-line interface for LeetCode'));
   console.log();
   program.outputHelp();
+} else {
+  // Has args → normal CLI mode
+  program.parse();
 }
