@@ -39,7 +39,7 @@ export function useDailyChallenge(): UseDailyResult {
       }
 
       const result = await leetcodeClient.getDailyChallenge();
-      
+
       // Map status from API (ac/notac/null) to our format
       const apiStatus = result.question.status;
       let status: 'solved' | 'attempted' | 'todo' = 'todo';

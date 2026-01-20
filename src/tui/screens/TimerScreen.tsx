@@ -10,7 +10,7 @@ import { timerStorage } from '../../storage/timer.js';
 import { colors, icons } from '../theme.js';
 
 interface TimerScreenProps {
-  problemId?: number;
+  problemId?: string;
   problemTitle?: string;
   difficulty?: 'Easy' | 'Medium' | 'Hard';
   onBack: () => void;
@@ -73,7 +73,7 @@ type ViewMode = 'timer' | 'stats';
 type TimerStatus = 'idle' | 'running' | 'paused' | 'completed' | 'overtime';
 
 // Stats View Component
-function StatsView({ problemId }: { problemId?: number }) {
+function StatsView({ problemId }: { problemId?: string }) {
   const stats = timerStorage.getStats();
   const allTimes = timerStorage.getAllSolveTimes();
   

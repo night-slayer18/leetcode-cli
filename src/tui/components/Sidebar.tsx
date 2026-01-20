@@ -68,6 +68,7 @@ export function Sidebar({
     <Box
       flexDirection="column"
       width={width}
+      height="100%"
       borderStyle="round"
       borderColor={colors.textMuted}
       paddingX={1}
@@ -79,28 +80,33 @@ export function Sidebar({
         </Text>
       </Box>
 
-      <Box flexDirection="column" marginTop={1}>
+      <Box flexDirection="column" marginTop={0} flexGrow={1} justifyContent="flex-start" paddingTop={3} gap={2}>
         {items.map((item, index) => {
           const isActive = item.key === activeKey;
           const isFocused = index === focusedIndex && !disabled;
 
           return (
-            <Box key={item.key} gap={1}>
+            <Box 
+              key={item.key} 
+              flexDirection="row"
+              justifyContent="space-between"
+              paddingX={1}
+              width="100%"
+              backgroundColor={isFocused ? colors.primary : undefined}
+            >
               <Text
                 color={
                   isActive
-                    ? colors.primary
+                    ? (isFocused ? colors.bg : colors.primary)
                     : isFocused
-                      ? colors.textBright
+                      ? colors.bg
                       : colors.text
                 }
                 bold={isActive}
-                inverse={isFocused}
               >
-                {' '}
-                {item.icon} {item.label.padEnd(12)}{' '}
+                {item.icon} {item.label}
               </Text>
-              <Text color={colors.textMuted}>[{item.key}]</Text>
+              <Text color={isFocused ? colors.bg : colors.textMuted}>[{item.key}]</Text>
             </Box>
           );
         })}

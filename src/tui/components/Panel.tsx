@@ -17,7 +17,7 @@ interface PanelProps {
 export function Panel({
   children,
   title,
-  width,
+  width = '100%', // Default to full width for consistency
   height,
   highlight = false,
 }: PanelProps) {

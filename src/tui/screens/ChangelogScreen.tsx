@@ -172,15 +172,26 @@ export function ChangelogScreen({ onBack }: ChangelogScreenProps) {
           {releases.slice(0, 15).map((entry, i) => {
             const isSelected = i === selectedIndex;
             return (
-              <Box key={entry.version} gap={1}>
-                <Text color={isSelected ? colors.primary : colors.textMuted}>
-                  {isSelected ? icons.arrow : ' '}
-                </Text>
-                <Text color={isSelected ? colors.textBright : colors.text} bold={isSelected}>
-                  {entry.version.padEnd(10)}
-                </Text>
+              <Box key={entry.version} flexDirection="row" paddingX={0}>
+                <Box width={3}>
+                  <Text color={isSelected ? colors.primary : colors.textMuted}>
+                    {isSelected ? icons.arrow : ' '}
+                  </Text>
+                </Box>
+                <Box width={12}>
+                  <Text color={isSelected ? colors.textBright : colors.text} bold={isSelected}>
+                    {entry.version}
+                  </Text>
+                </Box>
+                <Box flexGrow={1}>
+                   <Text color={colors.textDim} wrap="truncate">
+                     {entry.content.split('\n')[0]?.replace('###', '').trim() || 'No description'}
+                   </Text>
+                </Box>
                 {entry.hasBreakingChanges && (
-                  <Text color={colors.error}>⚠️ Breaking</Text>
+                  <Box width={12} marginLeft={1}>
+                     <Text color={colors.error}>⚠️ Breaking</Text>
+                  </Box>
                 )}
               </Box>
             );

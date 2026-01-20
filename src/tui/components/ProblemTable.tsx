@@ -8,7 +8,7 @@ import { DifficultyBadge, StatusBadge, AcceptanceRateBadge } from './Badge.js';
 import { colors, icons } from '../theme.js';
 
 export interface Problem {
-  id: number;
+  id: string;  // Changed to string to match API's questionFrontendId
   title: string;
   titleSlug: string;
   difficulty: 'Easy' | 'Medium' | 'Hard';
@@ -34,7 +34,6 @@ export function ProblemTable({
   onNavigate,
   height = 15,
   showHeader = true,
-  width = 80,
 }: ProblemTableProps) {
   // Calculate visible window
   const visibleStart = Math.max(0, selectedIndex - Math.floor(height / 2));
@@ -61,27 +60,12 @@ export function ProblemTable({
     }
   });
 
-  // Calculate responsive column widths based on available width
-  const cols = useMemo(() => {
-    // Fixed widths for structured columns
-    const fixedCols = {
-      status: 3,
-      id: 6,
-      difficulty: 8,
-      acceptance: 8,
-    };
-    // Spacing and padding: 2 chars per gap (6 gaps) + 2 padding = ~16
-    const fixedWidth = Object.values(fixedCols).reduce((a, b) => a + b, 0) + 18;
-    // Title column gets remaining space, min 30 max 60
-    const titleWidth = Math.max(30, Math.min(60, width - fixedWidth));
-    return { ...fixedCols, title: titleWidth };
-  }, [width]);
-
   return (
-    <Box flexDirection="column">
+    <Box flexDirection="column" flexGrow={1} width="100%">
       {/* Header */}
       {showHeader && (
         <Box
+          width="100%"
           borderStyle="single"
           borderBottom={true}
           borderTop={false}
@@ -89,17 +73,37 @@ export function ProblemTable({
           borderRight={false}
           borderColor={colors.textMuted}
           paddingX={1}
+          flexDirection="row"
         >
-          <Text color={colors.textMuted}>
-            {'  '}
-            <Text>{'ID'.padEnd(cols.id)}</Text>
-            {'  '}
-            <Text>{'Title'.padEnd(cols.title)}</Text>
-            {'  '}
-            <Text>{'Diff'.padEnd(cols.difficulty)}</Text>
-            {'  '}
-            <Text>{'Accept'.padEnd(cols.acceptance)}</Text>
-          </Text>
+          {/* Status & Selection Placeholder */}
+          <Box width={3} flexShrink={0} /> 
+          
+          <Box width={3} flexShrink={0}>
+             <Text color={colors.textMuted} bold>St</Text>
+          </Box>
+          
+          {/* ID */}
+          <Box width={6} flexShrink={0}>
+            <Text color={colors.textMuted} bold>ID</Text>
+          </Box>
+
+          {/* Title */}
+          <Box flexGrow={1} marginRight={1}>
+             <Text color={colors.textMuted} bold>Title</Text>
+          </Box>
+
+          {/* Difficulty */}
+          <Box width={8} flexShrink={0}>
+             <Text color={colors.textMuted} bold>Diff</Text>
+          </Box>
+
+          {/* Acceptance */}
+          <Box width={8} flexShrink={0}>
+             <Text color={colors.textMuted} bold>Accept</Text>
+          </Box>
+
+          {/* Paid */}
+          <Box width={2} flexShrink={0} />
         </Box>
       )}
 
@@ -111,55 +115,64 @@ export function ProblemTable({
         return (
           <Box
             key={problem.id}
+            width="100%"
             paddingX={1}
             paddingY={0}
+            flexDirection="row"
+            backgroundColor={isSelected ? colors.bgHighlight : undefined}
           >
-            <Text
-              inverse={isSelected}
-              color={isSelected ? colors.primary : colors.text}
-            >
-              {/* Selection indicator */}
-              <Text color={isSelected ? colors.primary : colors.textMuted}>
-                {isSelected ? icons.arrow : ' '}{' '}
-              </Text>
+            {/* Selection Indicator */}
+            <Box width={3} flexShrink={0}>
+               <Text color={isSelected ? colors.primary : colors.textMuted}>
+                 {isSelected ? icons.arrow : ' '}{' '}
+               </Text>
+            </Box>
 
-              {/* Status */}
+            {/* Status */}
+            <Box width={3} flexShrink={0}>
               <StatusBadge status={problem.status} />
-              {'  '}
+            </Box>
 
-              {/* ID */}
+            {/* ID */}
+            <Box width={6} flexShrink={0}>
               <Text color={isSelected ? colors.textBright : colors.textMuted}>
-                {String(problem.id).padEnd(cols.id)}
+                {problem.id}
               </Text>
-              {'  '}
+            </Box>
 
-              {/* Title */}
-              <Text color={isSelected ? colors.textBright : colors.text} bold={isSelected}>
-                {problem.title.slice(0, cols.title).padEnd(cols.title)}
+            {/* Title */}
+            <Box flexGrow={1} marginRight={1}>
+              <Text color={isSelected ? colors.textBright : colors.text} bold={isSelected} wrap="truncate">
+                {problem.title}
               </Text>
-              {'  '}
+            </Box>
 
-              {/* Difficulty */}
+            {/* Difficulty */}
+            <Box width={8} flexShrink={0}>
               <DifficultyBadge difficulty={problem.difficulty} />
-              {'  '}
+            </Box>
 
-              {/* Acceptance */}
+            {/* Acceptance */}
+            <Box width={8} flexShrink={0}>
               <AcceptanceRateBadge rate={problem.acceptance} />
-
-              {/* Paid indicator */}
+            </Box>
+            
+            {/* Paid */}
+             <Box width={2} flexShrink={0}>
               {problem.isPaidOnly && (
                 <Text color={colors.warning}> {icons.star}</Text>
               )}
-            </Text>
+            </Box>
           </Box>
         );
       })}
 
       {/* Scroll indicator */}
-      <Box marginTop={1} paddingX={1}>
-        <Text color={colors.textMuted}>
+      <Box marginTop={1} paddingX={1} justifyContent="space-between">
+         <Text color={colors.textMuted}>
           {selectedIndex + 1}/{problems.length}
-          {' '}
+        </Text>
+        <Text color={colors.textMuted}>
           {visibleStart > 0 && `${icons.arrowUp} `}
           {visibleEnd < problems.length && `${icons.arrowDown} `}
         </Text>

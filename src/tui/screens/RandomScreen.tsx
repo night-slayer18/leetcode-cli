@@ -14,8 +14,8 @@ import { colors, icons, difficulty as difficultyColors } from '../theme.js';
 import type { ProblemListFilters } from '../../types.js';
 
 interface RandomScreenProps {
-  onPick: (problemId: number, titleSlug: string) => void;
-  onViewProblem: (problem: { id: number; title: string; titleSlug: string; difficulty: 'Easy' | 'Medium' | 'Hard'; status: 'solved' | 'attempted' | 'todo'; acceptance: number; isPaidOnly: boolean }) => void;
+  onPick: (problemId: string, titleSlug: string) => void;
+  onViewProblem: (problem: { id: string; title: string; titleSlug: string; difficulty: 'Easy' | 'Medium' | 'Hard'; status: 'solved' | 'attempted' | 'todo'; acceptance: number; isPaidOnly: boolean }) => void;
   onBack: () => void;
 }
 
@@ -30,7 +30,7 @@ export function RandomScreen({ onPick, onViewProblem, onBack }: RandomScreenProp
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>(null);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [tagPage, setTagPage] = useState(0);
-  const [foundProblem, setFoundProblem] = useState<{ id: number; title: string; slug: string; difficulty: string } | null>(null);
+  const [foundProblem, setFoundProblem] = useState<{ id: string; title: string; slug: string; difficulty: string } | null>(null);
 
   const getRandomProblem = useCallback(async () => {
     setLoading(true);
@@ -57,7 +57,7 @@ export function RandomScreen({ onPick, onViewProblem, onBack }: RandomScreenProp
       const problem = await leetcodeClient.getProblem(slug);
       if (problem) {
         setFoundProblem({
-          id: parseInt(problem.questionFrontendId, 10),
+          id: problem.questionFrontendId,  // Keep as string
           title: problem.title,
           slug: problem.titleSlug,
           difficulty: problem.difficulty,

@@ -16,7 +16,7 @@ import { Panel } from '../components/Panel.js';
 import { colors, icons } from '../theme.js';
 
 interface DiffScreenProps {
-  problemId: number;
+  problemId: string;
   problemSlug: string;
   onBack: () => void;
 }

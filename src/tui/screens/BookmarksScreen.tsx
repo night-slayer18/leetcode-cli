@@ -129,16 +129,16 @@ export function BookmarksScreen({ onSelectProblem, onBack }: BookmarksScreenProp
           height={15}
         />
       ) : (
-        <Panel title="No Bookmarks">
-          <Box flexDirection="column" gap={1}>
-            <Text color={colors.textMuted}>
-              You haven't bookmarked any problems yet.
-            </Text>
-            <Text color={colors.textMuted}>
-              Press <Text color={colors.primary}>[b]</Text> on any problem to bookmark it.
-            </Text>
-          </Box>
-        </Panel>
+        <Box 
+           borderStyle="round" 
+           borderColor={colors.textMuted} 
+           flexDirection="column" 
+           padding={1} 
+           alignItems="center"
+        >
+          <Text color={colors.textMuted}>No bookmarks yet.</Text>
+          <Text color={colors.textMuted}>Press [b] on any problem to bookmark it.</Text>
+        </Box>
       )}
 
       {/* Controls */}

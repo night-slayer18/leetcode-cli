@@ -307,32 +307,44 @@ export function StatsScreen({ onBack }: StatsScreenProps) {
       </Box>
 
       {/* Content based on mode */}
-      <Box flexDirection="column" flexGrow={1}>
+      <Box flexDirection="column" flexGrow={1} width="100%">
         {mode === 'summary' && (
-          <Box flexDirection="row" gap={2}>
-            <Box flexDirection="column" flexGrow={1}>
+          <Box flexDirection="row" gap={1} width="100%">
+            {/* Progress Panel - Grows to fill space */}
+            <Box flexDirection="column" flexGrow={1} flexBasis="50%">
               <Panel title="📊 Progress Overview" highlight>
-                <Box flexDirection="column" gap={1}>
+                <Box flexDirection="column" gap={1} flexGrow={1}>
                   <DifficultyProgress
                     easy={{ solved: easy, total: 600 }}
                     medium={{ solved: medium, total: 1300 }}
                     hard={{ solved: hard, total: 500 }}
-                    width={25}
+                    width={35} // Explicit width for bar, but container flexible
                   />
-                  <Box marginTop={1}>
-                    <Text color={colors.text}>Total Solved: <Text bold color={colors.primary}>{total}</Text></Text>
+                  <Box marginTop={1} justifyContent="space-between">
+                    <Text color={colors.text}>Solved: <Text bold color={colors.primary}>{total}</Text></Text>
                   </Box>
                 </Box>
               </Panel>
-              <Box marginTop={1}>
-                <Panel title="🏆 Ranking">
-                  <Box flexDirection="column" gap={1}>
-                    <Text color={colors.textMuted}>Global Rank: <Text color={colors.purple} bold>#{profile.ranking.toLocaleString()}</Text></Text>
-                    <Text color={colors.textMuted}>Current Streak: <Text color={colors.orange} bold>{profile.streak} days {icons.fire}</Text></Text>
-                    <Text color={colors.textMuted}>Active Days: <Text color={colors.success}>{profile.totalActiveDays}</Text></Text>
+            </Box>
+
+            {/* Ranking Panel - Grows to fill space */}
+            <Box flexDirection="column" flexGrow={1} flexBasis="50%">
+              <Panel title="🏆 Ranking">
+                <Box flexDirection="column" gap={1} flexGrow={1}>
+                  <Box justifyContent="space-between">
+                     <Text color={colors.textMuted}>Rank:</Text>
+                     <Text color={colors.purple} bold>#{profile.ranking.toLocaleString()}</Text>
                   </Box>
-                </Panel>
-              </Box>
+                  <Box justifyContent="space-between">
+                     <Text color={colors.textMuted}>Streak:</Text>
+                     <Text color={colors.orange} bold>{profile.streak} days {icons.fire}</Text>
+                  </Box>
+                  <Box justifyContent="space-between">
+                     <Text color={colors.textMuted}>Active:</Text>
+                     <Text color={colors.success}>{profile.totalActiveDays} days</Text>
+                  </Box>
+                </Box>
+              </Panel>
             </Box>
           </Box>
         )}

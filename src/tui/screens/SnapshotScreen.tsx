@@ -15,7 +15,7 @@ import { Panel } from '../components/Panel.js';
 import { colors, icons } from '../theme.js';
 
 interface SnapshotScreenProps {
-  problemId: number;
+  problemId: string;
   problemTitle: string;
   onBack: () => void;
 }

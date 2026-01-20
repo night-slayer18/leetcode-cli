@@ -202,12 +202,21 @@ export function SyncScreen({ onBack }: SyncScreenProps) {
           <Panel title={`Changed Files (${changes.length})`}>
             <Box flexDirection="column">
               {changes.slice(0, 10).map((file, i) => (
-                <Text key={i} color={colors.textMuted}>
-                  {file.startsWith(' M') ? '📝' : file.startsWith('??') ? '➕' : '📄'} {file.slice(3)}
-                </Text>
+                <Box key={i} flexDirection="row" gap={2}>
+                   <Box width={2}>
+                     <Text color={file.startsWith(' M') ? colors.warning : file.startsWith('??') ? colors.success : colors.textMuted}>
+                       {file.startsWith(' M') ? '📝' : file.startsWith('??') ? '➕' : '📄'}
+                     </Text>
+                   </Box>
+                   <Box flexGrow={1}>
+                      <Text color={colors.textMuted}>{file.slice(3)}</Text>
+                   </Box>
+                </Box>
               ))}
               {changes.length > 10 && (
-                <Text color={colors.textDim}>... and {changes.length - 10} more</Text>
+                <Box marginTop={1}>
+                  <Text color={colors.textDim}>... and {changes.length - 10} more</Text>
+                </Box>
               )}
             </Box>
           </Panel>

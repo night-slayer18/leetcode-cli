@@ -65,7 +65,7 @@ interface NavigationState {
   screen: Screen;
   selectedProblem?: Problem;
   previousScreen?: Screen;
-  timerProblem?: { id: number; title: string; difficulty: 'Easy' | 'Medium' | 'Hard' };
+  timerProblem?: { id: string; title: string; difficulty: 'Easy' | 'Medium' | 'Hard' };
 }
 
 

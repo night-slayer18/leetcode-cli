@@ -198,24 +198,40 @@ export function WorkspaceScreen({ onBack }: WorkspaceScreenProps) {
       </Box>
 
       <Panel title="Available Workspaces">
-        <Box flexDirection="column">
+        <Box flexDirection="column" width="100%">
+           {/* Header Row */}
+           <Box width="100%" flexDirection="row" marginBottom={1} borderStyle="single" borderTop={false} borderLeft={false} borderRight={false} borderBottom={true} borderColor={colors.textMuted}>
+              <Box width={3} />
+              <Box width={3} />
+              <Box width={20}><Text color={colors.textMuted} bold>Name</Text></Box>
+              <Box flexGrow={1}><Text color={colors.textMuted} bold>Path</Text></Box>
+           </Box>
+
           {workspaces.length === 0 ? (
             <Text color={colors.textMuted}>No workspaces found</Text>
           ) : (
             workspaces.map((ws, i) => {
               const isSelected = i === selectedIndex;
               return (
-                <Box key={ws.name} gap={1}>
-                  <Text color={isSelected ? colors.primary : colors.textMuted}>
-                    {isSelected ? icons.arrow : ' '}
-                  </Text>
-                  <Text color={ws.isActive ? colors.success : colors.textMuted}>
-                    {ws.isActive ? icons.check : ' '}
-                  </Text>
-                  <Text color={isSelected ? colors.textBright : colors.text} bold={isSelected}>
-                    {ws.name.padEnd(15)}
-                  </Text>
-                  <Text color={colors.textDim}>{ws.workDir}</Text>
+                <Box key={ws.name} width="100%" flexDirection="row" paddingX={0}>
+                  <Box width={3}>
+                    <Text color={isSelected ? colors.primary : colors.textMuted}>
+                      {isSelected ? icons.arrow : ' '}
+                    </Text>
+                  </Box>
+                  <Box width={3}>
+                     <Text color={ws.isActive ? colors.success : colors.textMuted}>
+                      {ws.isActive ? icons.check : ' '}
+                    </Text>
+                  </Box>
+                  <Box width={20}>
+                    <Text color={isSelected ? colors.textBright : colors.text} bold={isSelected}>
+                      {ws.name}
+                    </Text>
+                  </Box>
+                  <Box flexGrow={1}>
+                     <Text color={colors.textDim}>{ws.workDir}</Text>
+                  </Box>
                 </Box>
               );
             })

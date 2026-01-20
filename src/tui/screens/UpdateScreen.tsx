@@ -10,6 +10,7 @@ import got from 'got';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { isNewerVersion, hasMajorVersionBump } from '../../utils/semver.js';
 import { Panel } from '../components/Panel.js';
 import { colors, icons } from '../theme.js';
 
@@ -24,39 +25,14 @@ const NPM_REGISTRY_URL = 'https://registry.npmjs.org/@night-slayer18/leetcode-cl
 const PACKAGE_NAME = '@night-slayer18/leetcode-cli';
 
 function getCurrentVersion(): string {
-  const candidates = [
-    join(__dirname, '../../../package.json'),
-    join(__dirname, '../../../../package.json'),
-  ];
-
-  for (const path of candidates) {
-    try {
-      const pkg = JSON.parse(readFileSync(path, 'utf-8'));
-      if (pkg.version) return pkg.version;
-    } catch {
-      continue;
-    }
+  // In production, dist/index.js is the bundle - package.json is one level up
+  try {
+    const pkg = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf-8'));
+    if (pkg.version) return pkg.version;
+  } catch {
+    // Ignore errors reading package.json
   }
   return 'unknown';
-}
-
-function isNewerVersion(latest: string, current: string): boolean {
-  const latestParts = latest.replace(/^v/, '').split('.').map(Number);
-  const currentParts = current.replace(/^v/, '').split('.').map(Number);
-
-  for (let i = 0; i < Math.max(latestParts.length, currentParts.length); i++) {
-    const l = latestParts[i] || 0;
-    const c = currentParts[i] || 0;
-    if (l > c) return true;
-    if (l < c) return false;
-  }
-  return false;
-}
-
-function hasMajorBump(current: string, latest: string): boolean {
-  const currentMajor = parseInt(current.replace(/^v/, '').split('.')[0], 10);
-  const latestMajor = parseInt(latest.replace(/^v/, '').split('.')[0], 10);
-  return latestMajor > currentMajor;
 }
 
 export function UpdateScreen({ onBack }: UpdateScreenProps) {
@@ -80,7 +56,7 @@ export function UpdateScreen({ onBack }: UpdateScreenProps) {
 
         const newer = isNewerVersion(latest, current);
         setUpdateAvailable(newer);
-        setHasBreaking(newer && hasMajorBump(current, latest));
+        setHasBreaking(newer && hasMajorVersionBump(current, latest));
       } catch {
         setError('Failed to check for updates');
       } finally {
