@@ -12,6 +12,7 @@ interface DailyChallenge {
   titleSlug: string;
   difficulty: 'Easy' | 'Medium' | 'Hard';
   date: string;
+  status: 'solved' | 'attempted' | 'todo';
 }
 
 interface UseDailyResult {
@@ -38,6 +39,12 @@ export function useDailyChallenge(): UseDailyResult {
       }
 
       const result = await leetcodeClient.getDailyChallenge();
+      
+      // Map status from API (ac/notac/null) to our format
+      const apiStatus = result.question.status;
+      let status: 'solved' | 'attempted' | 'todo' = 'todo';
+      if (apiStatus === 'ac') status = 'solved';
+      else if (apiStatus === 'notac') status = 'attempted';
 
       setDaily({
         id: parseInt(result.question.questionFrontendId, 10),
@@ -45,6 +52,7 @@ export function useDailyChallenge(): UseDailyResult {
         titleSlug: result.question.titleSlug,
         difficulty: result.question.difficulty,
         date: result.date,
+        status,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch daily challenge');

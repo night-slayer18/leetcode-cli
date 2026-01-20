@@ -97,8 +97,17 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
               </Text>
             </Box>
             <Box marginTop={1}>
+              {daily.status === 'solved' ? (
+                <Text color={colors.success}>{icons.check} Completed!</Text>
+              ) : daily.status === 'attempted' ? (
+                <Text color={colors.warning}>○ Attempted</Text>
+              ) : (
+                <Text color={colors.textMuted}>- Not started</Text>
+              )}
+            </Box>
+            <Box marginTop={1}>
               <Text color={colors.textMuted}>
-                Press <Text color={colors.primary}>[d]</Text> to solve today's challenge
+                Press <Text color={colors.primary}>[d]</Text> to {daily.status === 'solved' ? 'view' : 'solve'} today's challenge
               </Text>
             </Box>
           </>
