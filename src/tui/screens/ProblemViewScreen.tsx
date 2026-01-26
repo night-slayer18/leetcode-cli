@@ -35,30 +35,20 @@ function parseContent(html: string): string {
   
   let content = html;
   
-  // Handle superscripts
-  content = content.replace(/<sup>(.*?)<\/sup>/gi, '^$1');
-  
-  // Mark sections
-  content = content.replace(/<strong class="example">Example (\d+):<\/strong>/gi, '\n📌 Example $1:\n');
-  content = content.replace(/Input:/gi, '  Input:');
-  content = content.replace(/Output:/gi, '  Output:');
-  content = content.replace(/Explanation:/gi, '  Explanation:');
-  content = content.replace(/<strong>Constraints:<\/strong>/gi, '\n📋 Constraints:\n');
-  content = content.replace(/Constraints:/gi, '\n📋 Constraints:\n');
-  content = content.replace(/<strong>Follow-up:/gi, '\n💡 Follow-up:');
-  
-  // Handle lists
-  content = content.replace(/<li>/gi, '• ');
-  content = content.replace(/<\/li>/gi, '\n');
-  
-  // Handle breaks
-  content = content.replace(/<\/p>/gi, '\n');
-  content = content.replace(/<br\s*\/?>/gi, '\n');
-  
-  // Strip tags
+  // Pre-process structural tags to preserve layout hints
+  content = content
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>/gi, '\n\n')
+    .replace(/<\/div>/gi, '\n')
+    .replace(/<\/tr>/gi, '\n')
+    .replace(/<\/li>/gi, '\n')
+    .replace(/<\/td>/gi, '  ')
+    .replace(/<\/th>/gi, '  ');
+
+  // Strip all remaining tags
   content = striptags(content);
   
-  // Decode entities
+  // Decode HTML entities
   content = content
     .replace(/&nbsp;/g, ' ')
     .replace(/&lt;/g, '<')
@@ -68,13 +58,17 @@ function parseContent(html: string): string {
     .replace(/&apos;/g, "'")
     .replace(/&le;/g, '≤')
     .replace(/&ge;/g, '≥')
-    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(parseInt(code, 10)))
     .replace(/&amp;/g, '&');
   
-  // Clean up whitespace
-  content = content.replace(/\t/g, ' ');
-  content = content.replace(/ +/g, ' ');
-  content = content.replace(/\n{3,}/g, '\n\n');
+  // Normalize whitespace
+  // 1. Collapse horizontal whitespace (tabs, multiple spaces) to single space
+  content = content.replace(/[ \t]+/g, ' ');
+  
+  // 2. Collapse multiple newlines to max 2
+  content = content.replace(/\n\s*\n\s*\n+/g, '\n\n');
+  
+  // 3. Trim lines
+  content = content.split('\n').map(line => line.trim()).join('\n');
   
   return content.trim();
 }
@@ -98,7 +92,7 @@ export function ProblemViewScreen({
   // Layout - keep it simple
   const sidebarWidth = 24;
   const mainWidth = Math.max(40, terminalWidth - sidebarWidth - 4);
-  const contentWidth = mainWidth - 6; // Safer padding calculation
+  const contentWidth = mainWidth - 8; // width - border(2) - padLeft(2) - padRight(1) - buffer(3)
   const descriptionHeight = Math.max(5, terminalHeight - 8);
   
   const [details, setDetails] = useState<ProblemDetail | null>(null);
@@ -120,12 +114,8 @@ export function ProblemViewScreen({
   const lines = useMemo(() => {
     if (!details?.content) return ['No content available'];
     
-    // Add extra newlines for safety around tables and lists
-    let safeContent = details.content
-      .replace(/<table/g, '\n<table')
-      .replace(/<\/table>/g, '</table>\n');
-      
-    const parsed = parseContent(safeContent);
+    // Use simplified content parsing
+    const parsed = parseContent(details.content);
     const result: string[] = [];
     
     for (const line of parsed.split('\n')) {
@@ -215,7 +205,8 @@ export function ProblemViewScreen({
             borderStyle="round"
             borderColor={colors.textMuted}
             borderTop={false}
-            paddingX={1}
+            paddingLeft={2}
+            paddingRight={1}
           >
             {/* Render lines directly - truncate prevents 2nd line wrapping */}
             {visibleLines.map((line, i) => (
@@ -253,6 +244,7 @@ export function ProblemViewScreen({
             <Text color={colors.text}>{icons.bookmark} Notes [n]</Text>
             <Text> </Text>
             <Text color={colors.textMuted}>{icons.arrowLeft} Back [Esc]</Text>
+            <Text color={colors.textMuted}>{icons.star} Help [?]</Text>
           </Box>
           
           <Box marginTop={1}>

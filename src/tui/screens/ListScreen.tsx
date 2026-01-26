@@ -32,17 +32,29 @@ const PAGE_SIZE = 50;
 function ProblemRow({ 
   problem, 
   isSelected,
-  titleWidth
+  widths
 }: { 
   problem: Problem; 
   isSelected: boolean;
-  titleWidth: number; 
+  widths: {
+    selector: number;
+    id: number;
+    title: number;
+    diff: number;
+    acc: number;
+    premium: number;
+  };
 }) {
   const statusIcon = problem.status === 'solved' ? '✓' : problem.status === 'attempted' ? '○' : ' ';
   const statusColor = problem.status === 'solved' ? colors.success : problem.status === 'attempted' ? colors.warning : colors.textMuted;
   const diffColor = problem.difficulty === 'Easy' ? colors.success : problem.difficulty === 'Medium' ? colors.warning : colors.error;
   
   const selector = isSelected ? '▶' : ' ';
+  // Manual truncation
+  const truncatedTitle = problem.title.length > widths.title - 2
+    ? problem.title.slice(0, widths.title - 5) + '...'
+    : problem.title;
+
   const id = problem.id.padEnd(6, ' ');
   const diff = problem.difficulty.padEnd(8, ' ');
   const acc = `${Math.round(problem.acceptance)}%`.padStart(6, ' ');
@@ -50,7 +62,7 @@ function ProblemRow({
   const paidPadded = premium.padEnd(4, ' ');
 
   return (
-    <Box paddingX={1} marginBottom={0}>
+    <Box paddingX={1} marginBottom={0} width="100%" flexShrink={0}>
        <Box 
           flexDirection="row" 
           alignItems="flex-start" 
@@ -59,36 +71,36 @@ function ProblemRow({
           paddingY={0}
           backgroundColor={isSelected ? colors.bgHighlight : undefined}
        >
-        {/* Selector & Status: Fixed Width 6 */}
-        <Box width={6} flexShrink={0}>
+        {/* Selector & Status */}
+        <Box width={widths.selector} flexShrink={0}>
           <Text color={isSelected ? colors.primary : colors.textMuted}>{selector} </Text>
           <Text color={statusColor}>{statusIcon}</Text>
         </Box>
 
-        {/* ID: Fixed Width 6 */}
-        <Box width={6} flexShrink={0}>
+        {/* ID */}
+        <Box width={widths.id} flexShrink={0}>
           <Text color={colors.textMuted}>{id}</Text>
         </Box>
 
-        {/* Title: Explicit Width to ensure clearing */}
-        <Box width={titleWidth} marginRight={1}>
-          <Text color={isSelected ? colors.textBright : colors.text} wrap="wrap">
-            {problem.title}
+        {/* Title */}
+        <Box width={widths.title} flexShrink={0}>
+          <Text color={isSelected ? colors.textBright : colors.text}>
+            {truncatedTitle}
           </Text>
         </Box>
 
-        {/* Difficulty: Fixed Width 8 */}
-        <Box width={8} flexShrink={0}>
+        {/* Difficulty */}
+        <Box width={widths.diff} flexShrink={0}>
           <Text color={diffColor}>{diff}</Text>
         </Box>
 
-        {/* Acceptance: Fixed Width 6 */}
-        <Box width={6} flexShrink={0} justifyContent="flex-end">
+        {/* Acceptance */}
+        <Box width={widths.acc} flexShrink={0} justifyContent="flex-end">
           <Text color={colors.textMuted}>{acc}</Text>
         </Box>
 
-        {/* Premium: Fixed Width 4 */}
-        <Box width={4} flexShrink={0} marginLeft={1}>
+        {/* Premium */}
+        <Box width={widths.premium} flexShrink={0} marginLeft={1}>
           <Text>{paidPadded}</Text>
         </Box>
       </Box>
@@ -101,15 +113,21 @@ export function ListScreen({ onSelectProblem, onBack }: ListScreenProps) {
   const terminalWidth = stdout?.columns || 80;
   const terminalHeight = stdout?.rows || 24;
   
-  // Layout calculations
-  // Fixed columns: selector/stat(6) + id(6) + diff(8) + acc(6) + premium(4) = 30
-  // Spacing: titleMargin(1) + premiumMargin(1) = 2
-  // Total Fixed Content = 32.
-  // Paddings: ListScreen(2) + ProblemRow(2) = 4.
-  // Total Reserved = 36.
-  const titleWidth = Math.max(20, terminalWidth - 36);
-  const chromeHeight = 8;
-  const listHeight = Math.max(5, terminalHeight - chromeHeight - 2);
+  const FIXED_WIDTHS = {
+    selector: 6,
+    status: 0, // Included in selector
+    id: 6,
+    diff: 8,
+    acc: 6,
+    premium: 4,
+  };
+  
+  const fixedTotal = Object.values(FIXED_WIDTHS).reduce((a, b) => a + b, 0);
+  const chromeWidth = 4;
+  const titleWidth = Math.max(20, terminalWidth - fixedTotal - chromeWidth);
+  
+  const chromeHeight = 15;
+  const listHeight = Math.max(5, terminalHeight - chromeHeight);
 
   const [problems, setProblems] = useState<Problem[]>([]);
   const [total, setTotal] = useState(0);
@@ -199,7 +217,7 @@ export function ListScreen({ onSelectProblem, onBack }: ListScreenProps) {
 
   const hasMore = problems.length < total;
 
-  // Input handling (unchanged)
+  // Input handling
   useInput((input, key) => {
     if (searchMode) {
       if (key.escape) { setSearchMode(false); setSearchBuffer(''); return; }
@@ -240,12 +258,12 @@ export function ListScreen({ onSelectProblem, onBack }: ListScreenProps) {
     if (input === 'R') { fetchProblems(0, false); return; }
   });
 
-  // Loading/Error states (simplified for brevity of view/replace)
+  // Loading/Error states
   if (loading && problems.length === 0) return <Box padding={2}><Text color={colors.primary}><Spinner type="dots"/> Loading...</Text></Box>;
   if (error && problems.length === 0) return <Box padding={2}><Text color={colors.error}>✗ {error}</Text></Box>;
 
   return (
-    <Box flexDirection="column" paddingX={1} flexGrow={1}>
+    <Box flexDirection="column" paddingX={1} width={terminalWidth}>
       {/* Header & Search Sections */}
       <Box marginBottom={1} justifyContent="space-between">
         <Box>
@@ -265,7 +283,7 @@ export function ListScreen({ onSelectProblem, onBack }: ListScreenProps) {
         </Box>
       </Box>
       
-      {/* Filters (unchanged) */}
+      {/* Filters */}
       <Box gap={1} marginBottom={1}>
         <Text color={colors.textMuted} dimColor>Filters:</Text>
         <FilterPill label="1:Easy" active={diffFilter === 'Easy'} color={colors.success} />
@@ -279,14 +297,24 @@ export function ListScreen({ onSelectProblem, onBack }: ListScreenProps) {
         )}
       </Box>
 
-      {/* Table Header - Using Flexbox Grid */}
-      <Box borderStyle="single" borderBottom={true} borderTop={false} borderLeft={false} borderRight={false} borderColor={colors.textMuted} paddingX={1}>
-        <Box width={6} flexShrink={0}><Text color={colors.textMuted} bold>Stat</Text></Box>
-        <Box width={6} flexShrink={0}><Text color={colors.textMuted} bold>ID</Text></Box>
-        <Box flexGrow={1} marginRight={1}><Text color={colors.textMuted} bold>Title</Text></Box>
-        <Box width={8} flexShrink={0}><Text color={colors.textMuted} bold>Diff</Text></Box>
-        <Box width={6} flexShrink={0} justifyContent="flex-end"><Text color={colors.textMuted} bold>Acc</Text></Box>
-        <Box width={4} flexShrink={0} marginLeft={1}><Text color={colors.textMuted} bold>Paid</Text></Box>
+      {/* Table Header - Using EXACT Widths */}
+      <Box 
+        borderStyle="single" 
+        borderBottom={true} 
+        borderTop={false} 
+        borderLeft={false} 
+        borderRight={false} 
+        borderColor={colors.textMuted} 
+        paddingX={1}
+        width={terminalWidth - 2}
+        flexShrink={0}
+      >
+        <Box width={FIXED_WIDTHS.selector} flexShrink={0}><Text color={colors.textMuted} bold>Stat</Text></Box>
+        <Box width={FIXED_WIDTHS.id} flexShrink={0}><Text color={colors.textMuted} bold>ID</Text></Box>
+        <Box width={titleWidth} flexShrink={0}><Text color={colors.textMuted} bold>Title</Text></Box>
+        <Box width={FIXED_WIDTHS.diff} flexShrink={0}><Text color={colors.textMuted} bold>Diff</Text></Box>
+        <Box width={FIXED_WIDTHS.acc} flexShrink={0}><Text color={colors.textMuted} bold>Acc</Text></Box>
+        <Box width={FIXED_WIDTHS.premium} flexShrink={0} marginLeft={1}><Text color={colors.textMuted} bold>Paid</Text></Box>
       </Box>
 
       {/* Problem List */}
@@ -296,18 +324,25 @@ export function ListScreen({ onSelectProblem, onBack }: ListScreenProps) {
             <Text color={colors.textMuted}>No matching problems found.</Text>
           </Box>
         ) : (
-          visibleProblems.map((problem, idx) => (
+          visibleProblems.map((problem) => (
             <ProblemRow
-              key={`row-${scrollOffset + idx}`}
+              key={problem.id}
               problem={problem}
-              isSelected={scrollOffset + idx === selectedIndex}
-              titleWidth={titleWidth}
+              isSelected={problem.id === problems[selectedIndex]?.id}
+              widths={{
+                selector: FIXED_WIDTHS.selector,
+                id: FIXED_WIDTHS.id,
+                title: titleWidth,
+                diff: FIXED_WIDTHS.diff,
+                acc: FIXED_WIDTHS.acc,
+                premium: FIXED_WIDTHS.premium,
+              }}
             />
           ))
         )}
       </Box>
 
-      {/* Footer (unchanged) */}
+      {/* Footer */}
       <Box marginTop={1} borderStyle="single" borderTop={true} borderBottom={false} borderLeft={false} borderRight={false} borderColor={colors.textMuted}>
         <Box justifyContent="space-between" width="100%">
           <Text color={colors.textMuted}>

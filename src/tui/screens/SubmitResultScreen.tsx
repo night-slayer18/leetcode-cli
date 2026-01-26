@@ -45,7 +45,7 @@ export function SubmitResultScreen({ problem, onBack }: SubmitResultScreenProps)
       // Find solution file
       const filePath = await findSolutionFile(workDir, problemId);
       if (!filePath) {
-        setError(`No solution file found for problem ${problemId}. Run 'pick' first.`);
+        setError(`No solution file found for problem ${problemId}. Run 'pick' to create it, or check your file naming.`);
         setState('error');
         return;
       }

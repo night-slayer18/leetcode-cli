@@ -10,6 +10,7 @@ import { StatusBar } from './components/StatusBar.js';
 import { HomeScreen } from './screens/HomeScreen.js';
 import { ListScreen } from './screens/ListScreen.js';
 import { ProblemViewScreen } from './screens/ProblemViewScreen.js';
+import { HelpScreen } from './screens/HelpScreen.js';
 import { TimerScreen } from './screens/TimerScreen.js';
 import { StatsScreen } from './screens/StatsScreen.js';
 import { BookmarksScreen } from './screens/BookmarksScreen.js';
@@ -45,6 +46,7 @@ type Screen =
   | 'stats'
   | 'workspace'
   | 'config'
+  | 'help'
   | 'problem-view'
   | 'test-result'
   | 'submit-result'
@@ -261,6 +263,13 @@ export function App({ username: initialUsername }: AppProps) {
     if (input === 'q' && navState.screen === 'home') {
       exit();
     }
+    if (input === '?') {
+        if (navState.screen === 'help') {
+            goBack();
+        } else {
+            navigateTo('help');
+        }
+    }
   });
 
   const renderScreen = () => {
@@ -391,6 +400,9 @@ export function App({ username: initialUsername }: AppProps) {
 
       case 'config':
         return <ConfigScreen onBack={() => navigateTo('home')} />;
+
+      case 'help':
+        return <HelpScreen onBack={goBack} />;
 
       case 'workspace':
         return <WorkspaceScreen onBack={() => navigateTo('home')} />;
