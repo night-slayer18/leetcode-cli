@@ -9,6 +9,7 @@ import { leetcodeClient } from '../../api/client.js';
 import { Panel } from '../components/Panel.js';
 import { colors, icons } from '../theme.js';
 import type { Problem } from '../components/ProblemTable.js';
+import striptags from 'striptags';
 
 interface HintScreenProps {
   problem: Problem;
@@ -50,21 +51,28 @@ export function HintScreen({ problem, onBack }: HintScreenProps) {
     fetchHints();
   }, [problem.titleSlug]);
 
-  // Clean HTML from hints
+  // Clean HTML from hints (CodeQL fix)
   const cleanHtml = (html: string): string => {
-    return html
-      .replace(/<code>/g, '`')
-      .replace(/<\/code>/g, '`')
-      .replace(/<br\s*\/?>/g, '\n')
-      .replace(/<p>/g, '')
-      .replace(/<\/p>/g, '\n')
-      .replace(/<[^>]*>/g, '')
+    // 1. Handle code blocks first to preserve content
+    let content = html.replace(/<[/\s]*code[^>]*>/gi, '`');
+    
+    // 2. Handle line breaks
+    content = content
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<\/p>/gi, '\n');
+
+    // 3. Strip all other tags securely
+    content = striptags(content);
+
+    // 4. Decode entities safely
+    content = content
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')
       .replace(/&nbsp;/g, ' ')
       .replace(/&quot;/g, '"')
-      .replace(/&amp;/g, '&')
-      .trim();
+      .replace(/&amp;/g, '&');
+
+    return content.trim();
   };
 
   if (loading) {
