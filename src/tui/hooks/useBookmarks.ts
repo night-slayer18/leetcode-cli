@@ -50,7 +50,7 @@ export function useBookmarks(): UseBookmarksResult {
         try {
           const detail = await leetcodeClient.getProblemById(id);
           problems.push({
-            id: parseInt(detail.questionFrontendId, 10),
+            id: detail.questionFrontendId,
             title: detail.title,
             titleSlug: detail.titleSlug,
             difficulty: detail.difficulty,

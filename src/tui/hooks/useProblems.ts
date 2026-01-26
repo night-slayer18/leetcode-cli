@@ -27,7 +27,7 @@ interface UseProblemsResult {
 // Map API problem to TUI problem format
 function mapProblem(apiProblem: APIProblem): Problem {
   return {
-    id: parseInt(apiProblem.questionFrontendId, 10),
+    id: apiProblem.questionFrontendId,
     title: apiProblem.title,
     titleSlug: apiProblem.titleSlug,
     difficulty: apiProblem.difficulty,
