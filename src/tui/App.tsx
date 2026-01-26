@@ -2,7 +2,7 @@
  * TUI App - Main Application Component
  * Root component that handles navigation and layout
  */
-import { Box, Text, useApp, useInput, useStdout } from 'ink';
+import { Box, Text, useApp, useInput } from 'ink';
 import { useState, useEffect, useCallback } from 'react';
 import { Header } from './components/Header.js';
 import { Sidebar, defaultMenuItems } from './components/Sidebar.js';
@@ -73,10 +73,7 @@ interface NavigationState {
 
 export function App({ username: initialUsername }: AppProps) {
   const { exit } = useApp();
-  const { stdout } = useStdout();
   const [navState, setNavState] = useState<NavigationState>({ screen: 'home' });
-  const [terminalWidth, setTerminalWidth] = useState(stdout?.columns || 80);
-  const [terminalHeight, setTerminalHeight] = useState(stdout?.rows || 24);
   const [currentUsername, setCurrentUsername] = useState(initialUsername || 'Guest');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
@@ -112,20 +109,6 @@ export function App({ username: initialUsername }: AppProps) {
     setCurrentUsername(username);
     setIsLoggedIn(true);
   };
-
-  // Update terminal dimensions on resize
-  useEffect(() => {
-    const handleResize = () => {
-      if (stdout) {
-        setTerminalWidth(stdout.columns);
-        setTerminalHeight(stdout.rows);
-      }
-    };
-    stdout?.on('resize', handleResize);
-    return () => {
-      stdout?.off('resize', handleResize);
-    };
-  }, [stdout]);
 
   // Navigate to a screen
   const navigateTo = useCallback((screen: Screen, options?: { problem?: Problem }) => {
@@ -497,7 +480,7 @@ export function App({ username: initialUsername }: AppProps) {
   // Show loading screen while checking auth
   if (isCheckingAuth) {
     return (
-      <Box flexDirection="column" width={terminalWidth} height={terminalHeight - 1} alignItems="center" justifyContent="center">
+      <Box flexDirection="column" width="100%" height="100%" alignItems="center" justifyContent="center">
         <Text color={colors.primary}>
           <Spinner type="dots" /> Checking authentication...
         </Text>
@@ -508,14 +491,14 @@ export function App({ username: initialUsername }: AppProps) {
   // Show login screen if not logged in
   if (!isLoggedIn) {
     return (
-      <Box flexDirection="column" width={terminalWidth} height={terminalHeight - 1}>
+      <Box flexDirection="column" width="100%" height="100%">
         <LoginScreen onLoginSuccess={handleLoginSuccess} />
       </Box>
     );
   }
 
   return (
-    <Box flexDirection="column" width={terminalWidth} height={terminalHeight - 1}>
+    <Box flexDirection="column" width="100%" height="100%">
       {/* Header */}
       <Header username={currentUsername} connectionStatus="connected" />
 

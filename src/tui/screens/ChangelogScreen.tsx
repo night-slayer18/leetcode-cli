@@ -142,8 +142,8 @@ export function ChangelogScreen({ onBack }: ChangelogScreenProps) {
               };
               
               return (
-                <Text key={i} color={getColor()}>
-                  {line.replace('### ', '').replace('- **', '• ').substring(0, 70)}
+                <Text key={i} color={getColor()} wrap="wrap">
+                  {line.replace('### ', '').replace('- **', '• ')}
                 </Text>
               );
             })}

@@ -107,20 +107,22 @@ export function HintScreen({ problem, onBack }: HintScreenProps) {
   }
 
   return (
-    <Box flexDirection="column" padding={1}>
+    <Box flexDirection="column" padding={1} flexGrow={1}>
       <Box marginBottom={1}>
         <Text color={colors.primary} bold>
           {icons.star} Hints: {problem.title}
         </Text>
       </Box>
 
-      {hints.slice(0, visibleCount).map((hint, idx) => (
-        <Box key={idx} marginBottom={1}>
-          <Panel title={`Hint ${idx + 1}/${hints.length}`}>
-            <Text color={colors.text}>{cleanHtml(hint)}</Text>
-          </Panel>
-        </Box>
-      ))}
+      <Box flexGrow={1} flexDirection="column" justifyContent={visibleCount === 1 ? "center" : "flex-start"}>
+        {hints.slice(0, visibleCount).map((hint, idx) => (
+            <Box key={idx} marginBottom={1} flexGrow={visibleCount === 1 ? 1 : 0}>
+            <Panel title={`Hint ${idx + 1}/${hints.length}`}>
+                <Text color={colors.text}>{cleanHtml(hint)}</Text>
+            </Panel>
+            </Box>
+        ))}
+      </Box>
 
       <Box marginTop={1}>
         {visibleCount < hints.length ? (

@@ -251,15 +251,23 @@ export function SnapshotScreen({ problemId, problemTitle, onBack }: SnapshotScre
             {snapshots.map((snap, i) => {
               const isSelected = i === selectedIndex;
               return (
-                <Box key={snap.id} gap={1}>
-                  <Text color={isSelected ? colors.primary : colors.textMuted}>
-                    {isSelected ? icons.arrow : ' '}
-                  </Text>
-                  <Text color={isSelected ? colors.textBright : colors.text} bold={isSelected}>
-                    {snap.id}. {snap.name.padEnd(25)}
-                  </Text>
-                  <Text color={colors.textDim}>{snap.lines} lines</Text>
-                  <Text color={colors.textDim}>· {formatTimeAgo(snap.createdAt)}</Text>
+                <Box key={snap.id} gap={1} width="100%" flexDirection="row">
+                  <Box width={3}>
+                    <Text color={isSelected ? colors.primary : colors.textMuted}>
+                      {isSelected ? icons.arrow : ' '}
+                    </Text>
+                  </Box>
+                  <Box flexGrow={1} minWidth={0}>
+                    <Text color={isSelected ? colors.textBright : colors.text} bold={isSelected} wrap="truncate-end">
+                      {snap.id}. {snap.name}
+                    </Text>
+                  </Box>
+                  <Box width={12}>
+                     <Text color={colors.textDim}>{snap.lines} lines</Text>
+                  </Box>
+                  <Box width={15}>
+                     <Text color={colors.textDim}>· {formatTimeAgo(snap.createdAt)}</Text>
+                  </Box>
                 </Box>
               );
             })}

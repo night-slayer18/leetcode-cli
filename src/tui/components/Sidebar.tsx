@@ -68,6 +68,7 @@ export function Sidebar({
     <Box
       flexDirection="column"
       width={width}
+      flexShrink={0}
       height="100%"
       borderStyle="round"
       borderColor={colors.textMuted}

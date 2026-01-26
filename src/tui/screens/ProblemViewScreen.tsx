@@ -90,9 +90,11 @@ export function ProblemViewScreen({
   const terminalHeight = stdout?.rows || 24;
   
   // Layout - keep it simple
+  // Layout - keep it simple
   const sidebarWidth = 24;
-  const mainWidth = Math.max(40, terminalWidth - sidebarWidth - 4);
-  const contentWidth = mainWidth - 8; // width - border(2) - padLeft(2) - padRight(1) - buffer(3)
+  // Calculate available width for text wrapping, considering layout overhead
+  // width - sidebar - padding(2) - border(2) - layout overhead
+  const contentWidth = Math.max(40, terminalWidth - sidebarWidth - 12); 
   const descriptionHeight = Math.max(5, terminalHeight - 8);
   
   const [details, setDetails] = useState<ProblemDetail | null>(null);
@@ -192,7 +194,7 @@ export function ProblemViewScreen({
       {/* Main content area */}
       <Box flexDirection="row" flexGrow={1}>
         {/* Description */}
-        <Box flexDirection="column" width={mainWidth} paddingX={1}>
+        <Box flexDirection="column" flexGrow={1} paddingX={1}>
           {/* Title bar */}
           <Box>
             <Text color={colors.primary} bold>{borders.roundTopLeft}{borders.horizontal} Description {scrollInfo} {borders.horizontal.repeat(Math.max(0, contentWidth - 18 - scrollInfo.length))}{borders.roundTopRight}</Text>
@@ -227,7 +229,7 @@ export function ProblemViewScreen({
         </Box>
 
         {/* Actions sidebar */}
-        <Box flexDirection="column" width={sidebarWidth} paddingLeft={1}>
+        <Box flexDirection="column" width={sidebarWidth} flexShrink={0} paddingLeft={1}>
           <Text color={colors.primary} bold>{borders.roundTopLeft}{borders.horizontal} Actions {borders.horizontal.repeat(sidebarWidth - 14)}{borders.roundTopRight}</Text>
           <Box 
             flexDirection="column" 

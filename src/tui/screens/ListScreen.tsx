@@ -2,9 +2,9 @@
  * List Screen - Clean, Professional Design
  * Problem list with search, filters, and proper item rendering
  */
-import { Box, Text, useInput, useStdout } from 'ink';
+import { Box, Text, useInput } from 'ink';
 import Spinner from 'ink-spinner';
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { leetcodeClient } from '../../api/client.js';
 import { credentials } from '../../storage/credentials.js';
 import type { ProblemListFilters } from '../../types.js';
@@ -28,32 +28,18 @@ interface ListScreenProps {
 
 const PAGE_SIZE = 50;
 
-// Single row component for each problem
-function ProblemRow({ 
+const ProblemRow = React.memo(function ProblemRow({ 
   problem, 
   isSelected,
-  widths
 }: { 
   problem: Problem; 
   isSelected: boolean;
-  widths: {
-    selector: number;
-    id: number;
-    title: number;
-    diff: number;
-    acc: number;
-    premium: number;
-  };
 }) {
   const statusIcon = problem.status === 'solved' ? '✓' : problem.status === 'attempted' ? '○' : ' ';
   const statusColor = problem.status === 'solved' ? colors.success : problem.status === 'attempted' ? colors.warning : colors.textMuted;
   const diffColor = problem.difficulty === 'Easy' ? colors.success : problem.difficulty === 'Medium' ? colors.warning : colors.error;
   
   const selector = isSelected ? '▶' : ' ';
-  // Manual truncation
-  const truncatedTitle = problem.title.length > widths.title - 2
-    ? problem.title.slice(0, widths.title - 5) + '...'
-    : problem.title;
 
   const id = problem.id.padEnd(6, ' ');
   const diff = problem.difficulty.padEnd(8, ' ');
@@ -72,62 +58,56 @@ function ProblemRow({
           backgroundColor={isSelected ? colors.bgHighlight : undefined}
        >
         {/* Selector & Status */}
-        <Box width={widths.selector} flexShrink={0}>
+        <Box width={6} flexShrink={0}>
           <Text color={isSelected ? colors.primary : colors.textMuted}>{selector} </Text>
           <Text color={statusColor}>{statusIcon}</Text>
         </Box>
 
         {/* ID */}
-        <Box width={widths.id} flexShrink={0}>
+        <Box width={6} flexShrink={0}>
           <Text color={colors.textMuted}>{id}</Text>
         </Box>
 
-        {/* Title */}
-        <Box width={widths.title} flexShrink={0}>
-          <Text color={isSelected ? colors.textBright : colors.text}>
-            {truncatedTitle}
+        {/* Title: Flexible, takes remaining space */}
+        <Box flexGrow={1} minWidth={0}>
+          <Text color={isSelected ? colors.textBright : colors.text} wrap="truncate-end">
+            {problem.title}
           </Text>
         </Box>
 
         {/* Difficulty */}
-        <Box width={widths.diff} flexShrink={0}>
+        <Box width={8} flexShrink={0}>
           <Text color={diffColor}>{diff}</Text>
         </Box>
 
         {/* Acceptance */}
-        <Box width={widths.acc} flexShrink={0} justifyContent="flex-end">
+        <Box width={6} flexShrink={0} justifyContent="flex-end">
           <Text color={colors.textMuted}>{acc}</Text>
         </Box>
 
         {/* Premium */}
-        <Box width={widths.premium} flexShrink={0} marginLeft={1}>
+        <Box width={4} flexShrink={0} marginLeft={1}>
           <Text>{paidPadded}</Text>
         </Box>
       </Box>
     </Box>
   );
-}
+}, (prev, next) => {
+  return prev.problem === next.problem && prev.isSelected === next.isSelected;
+});
 
 export function ListScreen({ onSelectProblem, onBack }: ListScreenProps) {
-  const { stdout } = useStdout();
-  const terminalWidth = stdout?.columns || 80;
-  const terminalHeight = stdout?.rows || 24;
-  
-  const FIXED_WIDTHS = {
-    selector: 6,
-    status: 0, // Included in selector
-    id: 6,
-    diff: 8,
-    acc: 6,
-    premium: 4,
-  };
-  
-  const fixedTotal = Object.values(FIXED_WIDTHS).reduce((a, b) => a + b, 0);
-  const chromeWidth = 4;
-  const titleWidth = Math.max(20, terminalWidth - fixedTotal - chromeWidth);
-  
-  const chromeHeight = 15;
-  const listHeight = Math.max(5, terminalHeight - chromeHeight);
+  // Use stable height to prevent blinking on resize/scroll
+  // const { stdout } = useStdout(); // Causing instability?
+  const [terminalHeight, setTerminalHeight] = useState(process.stdout.rows || 24);
+
+  useEffect(() => {
+    const onResize = () => setTerminalHeight(process.stdout.rows || 24);
+    process.stdout.on('resize', onResize);
+    return () => { process.stdout.off('resize', onResize); };
+  }, []);
+
+  const listHeight = Math.max(5, terminalHeight - 15);
 
   const [problems, setProblems] = useState<Problem[]>([]);
   const [total, setTotal] = useState(0);
@@ -263,7 +243,7 @@ export function ListScreen({ onSelectProblem, onBack }: ListScreenProps) {
   if (error && problems.length === 0) return <Box padding={2}><Text color={colors.error}>✗ {error}</Text></Box>;
 
   return (
-    <Box flexDirection="column" paddingX={1} width={terminalWidth}>
+    <Box flexDirection="column" paddingX={1} width="100%">
       {/* Header & Search Sections */}
       <Box marginBottom={1} justifyContent="space-between">
         <Box>
@@ -297,7 +277,7 @@ export function ListScreen({ onSelectProblem, onBack }: ListScreenProps) {
         )}
       </Box>
 
-      {/* Table Header - Using EXACT Widths */}
+      {/* Table Header - Using Flexbox Grid */}
       <Box 
         borderStyle="single" 
         borderBottom={true} 
@@ -306,15 +286,15 @@ export function ListScreen({ onSelectProblem, onBack }: ListScreenProps) {
         borderRight={false} 
         borderColor={colors.textMuted} 
         paddingX={1}
-        width={terminalWidth - 2}
+        width="100%"
         flexShrink={0}
       >
-        <Box width={FIXED_WIDTHS.selector} flexShrink={0}><Text color={colors.textMuted} bold>Stat</Text></Box>
-        <Box width={FIXED_WIDTHS.id} flexShrink={0}><Text color={colors.textMuted} bold>ID</Text></Box>
-        <Box width={titleWidth} flexShrink={0}><Text color={colors.textMuted} bold>Title</Text></Box>
-        <Box width={FIXED_WIDTHS.diff} flexShrink={0}><Text color={colors.textMuted} bold>Diff</Text></Box>
-        <Box width={FIXED_WIDTHS.acc} flexShrink={0}><Text color={colors.textMuted} bold>Acc</Text></Box>
-        <Box width={FIXED_WIDTHS.premium} flexShrink={0} marginLeft={1}><Text color={colors.textMuted} bold>Paid</Text></Box>
+        <Box width={6} flexShrink={0}><Text color={colors.textMuted} bold>Stat</Text></Box>
+        <Box width={6} flexShrink={0}><Text color={colors.textMuted} bold>ID</Text></Box>
+        <Box flexGrow={1} minWidth={0}><Text color={colors.textMuted} bold>Title</Text></Box>
+        <Box width={8} flexShrink={0}><Text color={colors.textMuted} bold>Diff</Text></Box>
+        <Box width={6} flexShrink={0} justifyContent="flex-end"><Text color={colors.textMuted} bold>Acc</Text></Box>
+        <Box width={4} flexShrink={0} marginLeft={1}><Text color={colors.textMuted} bold>Paid</Text></Box>
       </Box>
 
       {/* Problem List */}
@@ -329,14 +309,6 @@ export function ListScreen({ onSelectProblem, onBack }: ListScreenProps) {
               key={problem.id}
               problem={problem}
               isSelected={problem.id === problems[selectedIndex]?.id}
-              widths={{
-                selector: FIXED_WIDTHS.selector,
-                id: FIXED_WIDTHS.id,
-                title: titleWidth,
-                diff: FIXED_WIDTHS.diff,
-                acc: FIXED_WIDTHS.acc,
-                premium: FIXED_WIDTHS.premium,
-              }}
             />
           ))
         )}

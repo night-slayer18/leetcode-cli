@@ -203,13 +203,13 @@ export function SyncScreen({ onBack }: SyncScreenProps) {
             <Box flexDirection="column">
               {changes.slice(0, 10).map((file, i) => (
                 <Box key={i} flexDirection="row" gap={2}>
-                   <Box width={2}>
+                   <Box width={2} flexShrink={0}>
                      <Text color={file.startsWith(' M') ? colors.warning : file.startsWith('??') ? colors.success : colors.textMuted}>
                        {file.startsWith(' M') ? '📝' : file.startsWith('??') ? '➕' : '📄'}
                      </Text>
                    </Box>
-                   <Box flexGrow={1}>
-                      <Text color={colors.textMuted}>{file.slice(3)}</Text>
+                   <Box flexGrow={1} minWidth={0}>
+                      <Text color={colors.textMuted} wrap="truncate-start">{file.slice(3)}</Text>
                    </Box>
                 </Box>
               ))}

@@ -170,10 +170,10 @@ export function DiffScreen({ problemId, problemSlug, onBack }: DiffScreenProps) 
       <Panel title={`Lines ${scrollOffset + 1}-${Math.min(scrollOffset + 20, diffResult.length)} of ${diffResult.length}`}>
         <Box flexDirection="column">
           {visibleLines.map((line, i) => (
-            <Box key={i}>
-              <Text color={line.type === 'added' ? colors.success : line.type === 'removed' ? colors.error : colors.textDim}>
+            <Box key={i} width="100%">
+              <Text color={line.type === 'added' ? colors.success : line.type === 'removed' ? colors.error : colors.textDim} wrap="truncate-end">
                 {line.type === 'added' ? '+ ' : line.type === 'removed' ? '- ' : '  '}
-                {line.content.substring(0, 70)}
+                {line.content}
               </Text>
             </Box>
           ))}

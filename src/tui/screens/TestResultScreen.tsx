@@ -146,7 +146,7 @@ export function TestResultScreen({ problem, onBack }: TestResultScreenProps) {
   const hasRuntimeError = !!result?.runtime_error;
 
   return (
-    <Box flexDirection="column" padding={1}>
+    <Box flexDirection="column" gap={1} padding={1} flexGrow={1}>
       {/* Header */}
       <Box marginBottom={1}>
         <Text color={allPassed ? colors.success : colors.error} bold>
@@ -169,35 +169,37 @@ export function TestResultScreen({ problem, onBack }: TestResultScreenProps) {
         </Panel>
       )}
 
-      {/* Test Cases Results */}
+      {/* Test Cases Results - Fills available space */}
       {!hasCompileError && !hasRuntimeError && result && (
-        <Panel title="Test Results">
-          <Box flexDirection="column" gap={1}>
-            {(result.code_answer ?? []).map((output, idx) => {
-              const expected = result.expected_code_answer?.[idx] ?? '';
-              const passed = output === expected;
-              return (
-                <Box key={idx} flexDirection="column" marginBottom={1}>
-                  <Text color={colors.textBright} bold>
-                    Test Case {idx + 1}: {passed ? (
-                      <Text color={colors.success}>{icons.check} Passed</Text>
-                    ) : (
-                      <Text color={colors.error}>{icons.cross} Failed</Text>
-                    )}
-                  </Text>
-                  <Box marginLeft={2} flexDirection="column">
-                    <Text color={colors.textMuted}>
-                      Output: <Text color={passed ? colors.success : colors.error}>{output}</Text>
+        <Box flexGrow={1} flexDirection="column">
+            <Panel title="Test Results" flexGrow={1}>
+            <Box flexDirection="column" gap={1}>
+                {(result.code_answer ?? []).map((output, idx) => {
+                const expected = result.expected_code_answer?.[idx] ?? '';
+                const passed = output === expected;
+                return (
+                    <Box key={idx} flexDirection="column" marginBottom={1}>
+                    <Text color={colors.textBright} bold>
+                        Test Case {idx + 1}: {passed ? (
+                        <Text color={colors.success}>{icons.check} Passed</Text>
+                        ) : (
+                        <Text color={colors.error}>{icons.cross} Failed</Text>
+                        )}
                     </Text>
-                    <Text color={colors.textMuted}>
-                      Expected: <Text color={colors.success}>{expected}</Text>
-                    </Text>
-                  </Box>
-                </Box>
-              );
-            })}
-          </Box>
-        </Panel>
+                    <Box marginLeft={2} flexDirection="column">
+                        <Text color={colors.textMuted}>
+                        Output: <Text color={passed ? colors.success : colors.error}>{output}</Text>
+                        </Text>
+                        <Text color={colors.textMuted}>
+                        Expected: <Text color={colors.success}>{expected}</Text>
+                        </Text>
+                    </Box>
+                    </Box>
+                );
+                })}
+            </Box>
+            </Panel>
+        </Box>
       )}
 
       {/* Stdout */}

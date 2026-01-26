@@ -67,47 +67,73 @@ export function DailyScreen({ onPick, onBack }: DailyScreenProps) {
   }[daily.difficulty];
 
   return (
-    <Box flexDirection="column" alignItems="center" justifyContent="center" flexGrow={1}>
-      {/* Header */}
-      <Box marginBottom={2}>
+    <Box flexDirection="column" gap={1} flexGrow={1} paddingX={1}>
+      {/* Header - Left Aligned now */}
+      <Box marginBottom={1}>
         <Text color={colors.primary} bold>
           {icons.fire} Daily Challenge
         </Text>
         <Text color={colors.textMuted}> — {daily.date}</Text>
       </Box>
 
-      {/* Problem Card */}
-      <Panel title="Today's Problem" highlight>
-        <Box flexDirection="column" gap={1} paddingX={2} paddingY={1}>
-          <Box gap={2}>
-            <Text color={colors.textMuted}>#{daily.id}</Text>
-            <Text color={colors.textBright} bold>
-              {daily.title}
-            </Text>
-          </Box>
-          <Box gap={2}>
-            <Text color={colors.textMuted}>Difficulty:</Text>
-            <DifficultyBadge difficulty={daily.difficulty} />
-          </Box>
-        </Box>
-      </Panel>
+      {/* Main Content Grid */}
+      <Box flexDirection="row" gap={1}>
+         {/* Left Col: Problem Details - Grows */}
+         <Box flexGrow={1} flexDirection="column">
+            <Panel title="Today's Problem" highlight flexGrow={1}>
+              <Box flexDirection="column" gap={2} paddingX={1} paddingY={1}>
+                <Box gap={2} alignItems="center">
+                  <Text color={colors.textMuted}>#{daily.id}</Text>
+                  <Text color={colors.textBright} bold>
+                    {daily.title}
+                  </Text>
+                  <DifficultyBadge difficulty={daily.difficulty} />
+                </Box>
+                
+                <Box marginTop={1}>
+                  <Text color={colors.textMuted}>
+                     Solve today's challenge to keep your streak alive!
+                  </Text>
+                </Box>
 
-      {/* Actions */}
-      <Box marginTop={2} gap={2}>
-        <Box
-          borderStyle="round"
-          borderColor={colors.success}
-          paddingX={2}
-          paddingY={0}
-        >
-          <Text color={colors.success} bold>
-            [p] Pick & Start Solving
-          </Text>
-        </Box>
+                <Box marginTop={2}>
+                    <Text color={colors.textBright} underline>
+                      {`https://leetcode.com/problems/${daily.titleSlug}/`}
+                    </Text>
+                </Box>
+              </Box>
+            </Panel>
+         </Box>
+
+         {/* Right Col: Status & Actions - Fixed Width */}
+         <Box width={30} flexDirection="column" gap={1}>
+            <Panel title="Status">
+               <Box flexDirection="column" gap={1} alignItems="center" justifyContent="center" height={6}>
+                  {daily.status === 'solved' ? (
+                    <Text color={colors.success} bold>{icons.check} Completed</Text>
+                  ) : daily.status === 'attempted' ? (
+                    <Text color={colors.warning} bold>○ Attempted</Text>
+                  ) : (
+                    <Text color={colors.textMuted}>Not Started</Text>
+                  )}
+               </Box>
+            </Panel>
+
+            <Box 
+              borderStyle="round" 
+              borderColor={colors.success} 
+              flexDirection="column"
+              alignItems="center"
+              justifyContent="center"
+              paddingY={1}
+            >
+              <Text color={colors.success} bold>[p] Pick</Text>
+            </Box>
+         </Box>
       </Box>
 
-      {/* Hints */}
-      <Box marginTop={2}>
+      {/* Footer / Hints */}
+      <Box marginTop={1}>
         <Text color={colors.textMuted} dimColor>
           <Text color={colors.primary}>[p]</Text> Pick problem{' '}
           <Text color={colors.primary}>[r]</Text> Refresh{' '}

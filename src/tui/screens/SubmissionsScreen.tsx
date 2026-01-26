@@ -91,12 +91,12 @@ export function SubmissionsScreen({ problem, onBack }: SubmissionsScreenProps) {
       <Panel title="Submission History">
         <Box flexDirection="column">
           {/* Header */}
-          <Box marginBottom={1}>
+          <Box marginBottom={1} flexDirection="row" width="100%">
             <Box width={12}><Text color={colors.textMuted} bold>Status</Text></Box>
             <Box width={12}><Text color={colors.textMuted} bold>Language</Text></Box>
             <Box width={10}><Text color={colors.textMuted} bold>Runtime</Text></Box>
             <Box width={10}><Text color={colors.textMuted} bold>Memory</Text></Box>
-            <Box><Text color={colors.textMuted} bold>Date</Text></Box>
+            <Box flexGrow={1}><Text color={colors.textMuted} bold>Date</Text></Box>
           </Box>
 
           {/* Submissions List */}
@@ -106,7 +106,7 @@ export function SubmissionsScreen({ problem, onBack }: SubmissionsScreenProps) {
             const date = new Date(parseInt(sub.timestamp) * 1000).toLocaleDateString();
 
             return (
-              <Box key={sub.id}>
+              <Box key={sub.id} flexDirection="row" width="100%">
                 <Box width={12}>
                   <Text color={isAC ? colors.success : colors.error} inverse={isSelected}>
                     {isAC ? icons.check : icons.cross} {isAC ? 'AC' : 'WA'}
@@ -121,7 +121,7 @@ export function SubmissionsScreen({ problem, onBack }: SubmissionsScreenProps) {
                 <Box width={10}>
                   <Text color={colors.text} inverse={isSelected}>{sub.memory}</Text>
                 </Box>
-                <Box>
+                <Box flexGrow={1}>
                   <Text color={colors.textMuted} inverse={isSelected}>{date}</Text>
                 </Box>
               </Box>

@@ -74,7 +74,7 @@ export function UpdateScreen({ onBack }: UpdateScreenProps) {
 
   if (loading) {
     return (
-      <Box flexDirection="column" alignItems="center" justifyContent="center" flexGrow={1}>
+      <Box flexDirection="column" gap={1} padding={1} flexGrow={1}>
         <Text color={colors.primary}><Spinner type="dots" /></Text>
         <Text color={colors.textMuted}> Checking for updates...</Text>
       </Box>
@@ -83,7 +83,7 @@ export function UpdateScreen({ onBack }: UpdateScreenProps) {
 
   if (error) {
     return (
-      <Box flexDirection="column" alignItems="center" justifyContent="center" flexGrow={1}>
+      <Box flexDirection="column" gap={1} padding={1} flexGrow={1}>
         <Text color={colors.error}>{icons.cross} {error}</Text>
         <Text color={colors.textMuted}>Press [Esc] to go back</Text>
       </Box>
@@ -91,7 +91,7 @@ export function UpdateScreen({ onBack }: UpdateScreenProps) {
   }
 
   return (
-    <Box flexDirection="column" flexGrow={1}>
+    <Box flexDirection="column" flexGrow={1} padding={1}>
       <Box marginBottom={1}>
         <Text color={colors.primary} bold>🚀 Update Check</Text>
       </Box>

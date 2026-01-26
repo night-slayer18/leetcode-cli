@@ -146,7 +146,7 @@ export function NotesScreen({ problem, onBack }: NotesScreenProps) {
   }
 
   return (
-    <Box flexDirection="column" padding={1}>
+    <Box flexDirection="column" padding={1} flexGrow={1}>
       <Box marginBottom={1}>
         <Text color={colors.primary} bold>
           {icons.code} Notes: {problem.title}
@@ -154,14 +154,16 @@ export function NotesScreen({ problem, onBack }: NotesScreenProps) {
       </Box>
 
       {content ? (
-        <Panel title="Your Notes">
-          <Box flexDirection="column">
-            <Text color={colors.text}>
-              {content.slice(0, 1500)}
-              {content.length > 1500 && '...'}
-            </Text>
-          </Box>
-        </Panel>
+        <Box flexGrow={1} flexDirection="column">
+            <Panel title="Your Notes" flexGrow={1}>
+            <Box flexDirection="column">
+                <Text color={colors.text}>
+                {content.slice(0, 1500)}
+                {content.length > 1500 && '...'}
+                </Text>
+            </Box>
+            </Panel>
+        </Box>
       ) : (
         <Box flexDirection="column">
           <Text color={colors.warning}>No notes yet for this problem.</Text>

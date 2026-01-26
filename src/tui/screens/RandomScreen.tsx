@@ -139,102 +139,100 @@ export function RandomScreen({ onPick, onViewProblem, onBack }: RandomScreenProp
   const visibleTags = POPULAR_TAGS.slice(tagPage * 5, tagPage * 5 + 5);
 
   return (
-    <Box flexDirection="column" alignItems="center" justifyContent="center" flexGrow={1}>
-      {/* Header */}
-      <Box marginBottom={2}>
-        <Text color={colors.primary} bold>
-          {icons.target} Random Problem
-        </Text>
-      </Box>
+    <Box flexDirection="row" flexGrow={1} gap={1} padding={1}>
+        
+        {/* LEFT COL: Filters */}
+        <Box width={40} flexDirection="column">
+            <Panel title="Difficulty" flexGrow={0}>
+                <Box gap={1} paddingX={1} marginBottom={1}>
+                    <FilterPill label="Any" active={selectedDifficulty === null} />
+                    {difficultyFilters.map((f) => (
+                    <FilterPill
+                        key={f.key}
+                        label={f.label}
+                        active={selectedDifficulty === f.key}
+                        color={f.color}
+                    />
+                    ))}
+                </Box>
+            </Panel>
 
-      {/* Difficulty Filter */}
-      <Panel title="Difficulty">
-        <Box gap={1} paddingX={1}>
-          <FilterPill label="Any" active={selectedDifficulty === null} />
-          {difficultyFilters.map((f) => (
-            <FilterPill
-              key={f.key}
-              label={f.label}
-              active={selectedDifficulty === f.key}
-              color={f.color}
-            />
-          ))}
-        </Box>
-      </Panel>
-
-      {/* Tag Filter */}
-      <Box marginTop={1}>
-        <Panel title={`Tags [t=more] (page ${tagPage + 1}/2)`}>
-          <Box gap={1} paddingX={1} flexWrap="wrap">
-            <FilterPill label="Any" active={selectedTag === null} />
-            {visibleTags.map((tag, i) => (
-              <FilterPill
-                key={tag}
-                label={`${tag} [${i + 4}]`}
-                active={selectedTag === tag}
-                color={colors.cyan}
-              />
-            ))}
-          </Box>
-        </Panel>
-      </Box>
-
-      {/* Result or Action */}
-      <Box marginTop={2}>
-        {loading ? (
-          <Box gap={1}>
-            <Text color={colors.primary}><Spinner type="dots" /></Text>
-            <Text color={colors.textMuted}>Finding a random problem...</Text>
-          </Box>
-        ) : error ? (
-          <Text color={colors.error}>{icons.cross} {error}</Text>
-        ) : foundProblem ? (
-          <Panel title="Found Problem" highlight>
-            <Box flexDirection="column" gap={1}>
-              <Box gap={2}>
-                <Text color={colors.textMuted}>#{foundProblem.id}</Text>
-                <Text color={colors.textBright} bold>{foundProblem.title}</Text>
-                <Text color={foundProblem.difficulty === 'Easy' ? colors.success : foundProblem.difficulty === 'Medium' ? colors.warning : colors.error}>
-                  [{foundProblem.difficulty}]
-                </Text>
-              </Box>
-              <Box gap={2} marginTop={1}>
-                <Text color={colors.success}>[p] Pick & Open</Text>
-                <Text color={colors.primary}>[v/Enter] View Details</Text>
-                <Text color={colors.cyan}>[n] Next Random</Text>
-              </Box>
+            <Box marginTop={1} flexGrow={1}>
+                <Panel title={`Tags [t=more] (page ${tagPage + 1}/2)`} flexGrow={1}>
+                    <Box gap={1} paddingX={1} flexWrap="wrap">
+                    <FilterPill label="Any" active={selectedTag === null} />
+                    {visibleTags.map((tag, i) => (
+                        <FilterPill
+                        key={tag}
+                        label={`${tag} [${i + 4}]`}
+                        active={selectedTag === tag}
+                        color={colors.cyan}
+                        />
+                    ))}
+                    </Box>
+                </Panel>
             </Box>
-          </Panel>
-        ) : (
-          <Box borderStyle="round" borderColor={colors.success} paddingX={3} paddingY={1}>
-            <Text color={colors.success} bold>
-              {icons.target} [Enter/r] Get Random Problem
-            </Text>
-          </Box>
-        )}
-      </Box>
 
-      {/* Active Filters */}
-      {(selectedDifficulty || selectedTag) && (
-        <Box marginTop={1}>
-          <Text color={colors.textMuted}>
-            Active: 
-            {selectedDifficulty && <Text color={colors.primary}> {selectedDifficulty}</Text>}
-            {selectedTag && <Text color={colors.cyan}> #{selectedTag}</Text>}
-            <Text color={colors.textDim}> [c] clear</Text>
-          </Text>
+             {/* Hints */}
+             <Box marginTop={1}>
+                <Text color={colors.textMuted} dimColor>
+                <Text color={colors.primary}>[1-3]</Text> Diff{' '}
+                <Text color={colors.primary}>[4-8]</Text> Tags{' '}
+                <Text color={colors.primary}>[t]</Text> More{' '}
+                <Text color={colors.primary}>[Esc]</Text> Back
+                </Text>
+            </Box>
         </Box>
-      )}
 
-      {/* Hints */}
-      <Box marginTop={2}>
-        <Text color={colors.textMuted} dimColor>
-          <Text color={colors.primary}>[1/2/3]</Text> Difficulty{' '}
-          <Text color={colors.primary}>[4-8]</Text> Tags{' '}
-          <Text color={colors.primary}>[t]</Text> More tags{' '}
-          <Text color={colors.primary}>[Esc]</Text> Back
-        </Text>
-      </Box>
+        {/* RIGHT COL: Results (Grows to fill screen) */}
+        <Box flexGrow={1} flexDirection="column">
+             <Panel title="Result" flexGrow={1} highlight={!!foundProblem}>
+                {foundProblem ? (
+                     <Box flexDirection="column" gap={1} flexGrow={1}>
+                        <Box gap={2} alignItems="center">
+                            <Text color={colors.textMuted}>#{foundProblem.id}</Text>
+                            <Text color={colors.textBright} bold>{foundProblem.title}</Text>
+                            <Text color={foundProblem.difficulty === 'Easy' ? colors.success : foundProblem.difficulty === 'Medium' ? colors.warning : colors.error}>
+                            [{foundProblem.difficulty}]
+                            </Text>
+                        </Box>
+                        
+                        <Box flexGrow={1} justifyContent="center" alignItems="center">
+                             <Text color={colors.textBright} bold>{foundProblem.title}</Text>
+                        </Box>
+
+                        <Box gap={2} marginTop={1} justifyContent="flex-end">
+                            <Text color={colors.success}>[p] Pick & Open</Text>
+                            <Text color={colors.primary}>[v/Enter] View Details</Text>
+                            <Text color={colors.cyan}>[n] Next Random</Text>
+                        </Box>
+                    </Box>
+                ) : loading ? (
+                    <Box justifyContent="center" alignItems="center" flexGrow={1} gap={1}>
+                         <Text color={colors.primary}><Spinner type="dots" /></Text>
+                         <Text color={colors.textMuted}>Finding a random problem...</Text>
+                    </Box>
+                ) : error ? (
+                    <Box justifyContent="center" alignItems="center" flexGrow={1}>
+                        <Text color={colors.error}>{icons.cross} {error}</Text>
+                    </Box>
+                ) : (
+                    <Box justifyContent="center" alignItems="center" flexGrow={1} flexDirection="column" gap={1}>
+                        <Text color={colors.success} bold>
+                            {icons.target} Press [Enter] or [r] to roll
+                        </Text>
+                        {(selectedDifficulty || selectedTag) && (
+                            <Text color={colors.textMuted}>
+                                Filter: 
+                                {selectedDifficulty && <Text color={colors.primary}> {selectedDifficulty}</Text>}
+                                {selectedTag && <Text color={colors.cyan}> #{selectedTag}</Text>}
+                            </Text>
+                        )}
+                    </Box>
+                )}
+             </Panel>
+        </Box>
+
     </Box>
   );
 }

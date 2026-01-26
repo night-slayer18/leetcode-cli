@@ -12,6 +12,7 @@ interface PanelProps {
   width?: number | string;
   height?: number;
   highlight?: boolean;
+  flexGrow?: number;
 }
 
 export function Panel({
@@ -20,12 +21,14 @@ export function Panel({
   width = '100%', // Default to full width for consistency
   height,
   highlight = false,
+  flexGrow = 0,
 }: PanelProps) {
   return (
     <Box
       flexDirection="column"
       width={width}
       height={height}
+      flexGrow={flexGrow}
       borderStyle="round"
       borderColor={highlight ? colors.primary : colors.textMuted}
       paddingX={spacing.sm}

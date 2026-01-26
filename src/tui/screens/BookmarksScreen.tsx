@@ -15,54 +15,39 @@ interface BookmarksScreenProps {
 }
 
 // Fixed widths to prevent overlap
-const COL_WIDTHS = {
-  selector: 2,
-  status: 2,
-  id: 6,
-  difficulty: 8,
-  acceptance: 7,
-  premium: 3,
-} as const;
+
 
 function BookmarkRow({ 
   problem, 
   isSelected,
-  titleWidth 
 }: { 
   problem: Problem; 
   isSelected: boolean;
-  titleWidth: number;
 }) {
   const statusIcon = problem.status === 'solved' ? '✓' : problem.status === 'attempted' ? '○' : ' ';
   const statusColor = problem.status === 'solved' ? colors.success : problem.status === 'attempted' ? colors.warning : colors.textMuted;
   const diffColor = problem.difficulty === 'Easy' ? colors.success : problem.difficulty === 'Medium' ? colors.warning : colors.error;
   
-  const truncatedTitle = problem.title.length > titleWidth 
-    ? problem.title.substring(0, titleWidth - 3) + '...'
-    : problem.title.padEnd(titleWidth);
-
   return (
     <Box width="100%" backgroundColor={isSelected ? colors.bgHighlight : undefined}>
-      <Text>
+      <Box width={6} flexShrink={0}>
         <Text color={isSelected ? colors.primary : colors.textMuted}>{isSelected ? '▶' : ' '} </Text>
         <Text color={statusColor}>{statusIcon} </Text>
-        <Text color={colors.textMuted}>{problem.id.toString().padEnd(COL_WIDTHS.id)}</Text>
-        <Text color={isSelected ? colors.textBright : colors.text} bold={isSelected}>{truncatedTitle}</Text>
-        <Text color={diffColor}>{problem.difficulty.padEnd(COL_WIDTHS.difficulty)}</Text>
-        <Text color={colors.textMuted}>{`${Math.round(problem.acceptance)}%`.padStart(COL_WIDTHS.acceptance)}</Text>
-        <Text>{problem.isPaidOnly ? ' 💎' : '   '}</Text>
-      </Text>
+      </Box>
+      <Box width={6} flexShrink={0}><Text color={colors.textMuted}>{problem.id.toString()}</Text></Box>
+      <Box flexGrow={1} minWidth={0}>
+        <Text color={isSelected ? colors.textBright : colors.text} bold={isSelected} wrap="truncate-end">{problem.title}</Text>
+      </Box>
+      <Box width={8} flexShrink={0}><Text color={diffColor}>{problem.difficulty}</Text></Box>
+      <Box width={7} flexShrink={0}><Text color={colors.textMuted}>{Math.round(problem.acceptance)}%</Text></Box>
+      <Box width={3} flexShrink={0}><Text>{problem.isPaidOnly ? ' 💎' : '   '}</Text></Box>
     </Box>
   );
 }
 
 export function BookmarksScreen({ onSelectProblem, onBack }: BookmarksScreenProps) {
   const { stdout } = useStdout();
-  const terminalWidth = stdout?.columns || 80;
   const terminalHeight = stdout?.rows || 24;
-  
-  const totalFixed = Object.values(COL_WIDTHS).reduce((s, w) => s + w, 0);
-  const titleWidth = Math.max(20, terminalWidth - totalFixed - 6);
   const listHeight = Math.max(5, terminalHeight - 12);
 
   const { bookmarks, loading, error, removeBookmark, clearAll, refetch } = useBookmarks();
@@ -210,14 +195,14 @@ export function BookmarksScreen({ onSelectProblem, onBack }: BookmarksScreenProp
             borderColor={colors.textMuted}
             width="100%"
           >
-            <Text>
-              <Text color={colors.textMuted} bold>{'St'.padEnd(COL_WIDTHS.selector + COL_WIDTHS.status + 2)}</Text>
-              <Text color={colors.textMuted} bold>{'ID'.padEnd(COL_WIDTHS.id)}</Text>
-              <Text color={colors.textMuted} bold>{'Title'.padEnd(titleWidth)}</Text>
-              <Text color={colors.textMuted} bold>{'Diff'.padEnd(COL_WIDTHS.difficulty)}</Text>
-              <Text color={colors.textMuted} bold>{'Accept'.padStart(COL_WIDTHS.acceptance)}</Text>
-              <Text color={colors.textMuted} bold> 💎</Text>
-            </Text>
+            <Box flexDirection="row" width="100%">
+              <Box width={6} flexShrink={0}><Text color={colors.textMuted} bold>Stat</Text></Box>
+              <Box width={6} flexShrink={0}><Text color={colors.textMuted} bold>ID</Text></Box>
+              <Box flexGrow={1} minWidth={0}><Text color={colors.textMuted} bold>Title</Text></Box>
+              <Box width={8} flexShrink={0}><Text color={colors.textMuted} bold>Diff</Text></Box>
+              <Box width={7} flexShrink={0}><Text color={colors.textMuted} bold>Accept</Text></Box>
+              <Box width={3} flexShrink={0}><Text color={colors.textMuted} bold> 💎</Text></Box>
+            </Box>
           </Box>
 
           {/* Rows */}
@@ -227,7 +212,6 @@ export function BookmarksScreen({ onSelectProblem, onBack }: BookmarksScreenProp
                 key={`${problem.id}-${scrollOffset + idx}`}
                 problem={problem}
                 isSelected={scrollOffset + idx === selectedIndex}
-                titleWidth={titleWidth}
               />
             ))}
           </Box>

@@ -204,7 +204,7 @@ export function WorkspaceScreen({ onBack }: WorkspaceScreenProps) {
               <Box width={3} />
               <Box width={3} />
               <Box width={20}><Text color={colors.textMuted} bold>Name</Text></Box>
-              <Box flexGrow={1}><Text color={colors.textMuted} bold>Path</Text></Box>
+              <Box flexGrow={1} minWidth={0}><Text color={colors.textMuted} bold>Path</Text></Box>
            </Box>
 
           {workspaces.length === 0 ? (
@@ -229,8 +229,8 @@ export function WorkspaceScreen({ onBack }: WorkspaceScreenProps) {
                       {ws.name}
                     </Text>
                   </Box>
-                  <Box flexGrow={1}>
-                     <Text color={colors.textDim}>{ws.workDir}</Text>
+                  <Box flexGrow={1} minWidth={0}>
+                     <Text color={colors.textDim} wrap="truncate-end">{ws.workDir}</Text>
                   </Box>
                 </Box>
               );

@@ -2,7 +2,7 @@
  * Login Screen
  * Handles user authentication within the TUI
  */
-import { Box, Text, useInput, useApp, useStdout } from 'ink';
+import { Box, Text, useInput, useApp } from 'ink';
 import { useState, useEffect, useRef } from 'react';
 import Spinner from 'ink-spinner';
 import Gradient from 'ink-gradient';
@@ -29,15 +29,11 @@ type LoginStep = 'welcome' | 'session' | 'csrf' | 'verifying' | 'success' | 'err
 
 export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
   const { exit } = useApp();
-  const { stdout } = useStdout();
   const [step, setStep] = useState<LoginStep>('welcome');
   const [session, setSession] = useState('');
   const [csrfToken, setCsrfToken] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [username, setUsername] = useState('');
-
-  const terminalWidth = stdout?.columns || 80;
-  const terminalHeight = stdout?.rows || 24;
 
   // Use stdin directly for proper paste support (useInput has buffer limits)
   useEffect(() => {
@@ -138,8 +134,7 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
     return (
       <Box
         flexDirection="column"
-        width={terminalWidth}
-        height={terminalHeight - 2}
+        flexGrow={1}
         alignItems="center"
         justifyContent="center"
       >
@@ -210,8 +205,7 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
     return (
       <Box
         flexDirection="column"
-        width={terminalWidth}
-        height={terminalHeight - 2}
+        flexGrow={1}
         alignItems="center"
         justifyContent="center"
       >
@@ -264,8 +258,7 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
     return (
       <Box
         flexDirection="column"
-        width={terminalWidth}
-        height={terminalHeight - 2}
+        flexGrow={1}
         alignItems="center"
         justifyContent="center"
       >
@@ -307,8 +300,7 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
     return (
       <Box
         flexDirection="column"
-        width={terminalWidth}
-        height={terminalHeight - 2}
+        flexGrow={1}
         alignItems="center"
         justifyContent="center"
       >
@@ -327,8 +319,7 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
     return (
       <Box
         flexDirection="column"
-        width={terminalWidth}
-        height={terminalHeight - 2}
+        flexGrow={1}
         alignItems="center"
         justifyContent="center"
       >
@@ -356,8 +347,7 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
     return (
       <Box
         flexDirection="column"
-        width={terminalWidth}
-        height={terminalHeight - 2}
+        flexGrow={1}
         alignItems="center"
         justifyContent="center"
       >

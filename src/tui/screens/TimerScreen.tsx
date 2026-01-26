@@ -261,9 +261,9 @@ export function TimerScreen({
 
   // Timer view
   return (
-    <Box flexDirection="column" alignItems="center" justifyContent="center" flexGrow={1}>
+    <Box flexDirection="column" flexGrow={1} paddingX={1}>
       {/* Problem Info */}
-      <Box marginBottom={2}>
+      <Box marginBottom={1} justifyContent="center">
         {problemId && (
           <Text color={colors.textMuted}>#{problemId} </Text>
         )}
@@ -273,43 +273,49 @@ export function TimerScreen({
         <Text color={difficultyColor}> [{difficulty}]</Text>
       </Box>
 
-      {/* Status */}
-      <Box marginBottom={1}>
-        <Text color={timerColor} bold>
-          {status === 'idle' && `${icons.clock} Ready to start`}
-          {status === 'running' && `${icons.lightning} Running`}
-          {status === 'paused' && `⏸ Paused`}
-          {status === 'overtime' && `${icons.fire} OVERTIME!`}
-          {status === 'completed' && `${icons.check} Completed!`}
-        </Text>
+      {/* Main Timer Panel - Fills vertical space */}
+      <Box flexGrow={1} flexDirection="column">
+        <Panel title={status === 'overtime' ? '⚠️ Time Exceeded' : '⏱ Time Remaining'} flexGrow={1}>
+           <Box flexDirection="column" alignItems="center" justifyContent="center" flexGrow={1}>
+              {/* Status Text - Inside the panel logic */}
+              <Box marginBottom={1}>
+                <Text color={timerColor} bold>
+                  {status === 'idle' && `${icons.clock} Ready to start`}
+                  {status === 'running' && `${icons.lightning} Running`}
+                  {status === 'paused' && `⏸ Paused`}
+                  {status === 'overtime' && `${icons.fire} OVERTIME!`}
+                  {status === 'completed' && `${icons.check} Completed!`}
+                </Text>
+              </Box>
+
+              {/* ASCII Art */}
+              <Box flexDirection="column" alignItems="center" paddingX={2} paddingY={1}>
+                {renderAsciiTime(displayTime.replace('-', ''), timerColor)}
+              </Box>
+              
+              {/* Elapsed time */}
+              <Box marginTop={1}>
+                <Text color={colors.textMuted}>
+                  Elapsed: {formatTime(elapsedSeconds)} / {formatTime(totalSeconds)}
+                </Text>
+              </Box>
+           </Box>
+        </Panel>
       </Box>
 
-      {/* Large ASCII Timer */}
-      <Panel title={status === 'overtime' ? '⚠️ Time Exceeded' : '⏱ Time Remaining'}>
-        <Box flexDirection="column" alignItems="center" paddingX={2} paddingY={1}>
-          {renderAsciiTime(displayTime.replace('-', ''), timerColor)}
-        </Box>
-      </Panel>
-
-      {/* Elapsed time */}
-      <Box marginTop={2}>
-        <Text color={colors.textMuted}>
-          Elapsed: {formatTime(elapsedSeconds)} / {formatTime(totalSeconds)}
-        </Text>
-      </Box>
-
-      {/* Progress bar */}
-      <Box marginTop={1} width={50}>
-        <Text color={timerColor}>
-          {'█'.repeat(Math.floor((1 - remainingSeconds / totalSeconds) * 50))}
-        </Text>
-        <Text color={colors.textDim}>
-          {'░'.repeat(Math.ceil((remainingSeconds / totalSeconds) * 50))}
-        </Text>
+      {/* Progress bar - Full Width */}
+      <Box marginTop={1} width="100%" flexDirection="column">
+         <Box width="100%">
+            {/* Native Ink Text-based progress bar since we don't depend on ink-progress-bar yet */}
+            <Text wrap="truncate">
+              <Text color={timerColor}>{'█'.repeat(Math.max(0, Math.floor((remainingSeconds / totalSeconds) * 100)))}</Text>
+              <Text color={colors.textDim}>{'░'.repeat(Math.max(0, 100 - Math.floor((remainingSeconds / totalSeconds) * 100)))}</Text>
+            </Text>
+         </Box>
       </Box>
 
       {/* Controls */}
-      <Box marginTop={2} flexDirection="column" alignItems="center">
+      <Box marginTop={1} flexDirection="column" alignItems="center">
         <Text color={colors.textMuted}>
           {status === 'idle' || status === 'paused' ? (
             <>
