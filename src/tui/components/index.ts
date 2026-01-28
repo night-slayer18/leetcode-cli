@@ -3,7 +3,6 @@
  * Re-export all components for easy imports
  */
 
-export { Box } from './Box.js';
 export { Panel } from './Panel.js';
 export { StatusBar } from './StatusBar.js';
 export { ProgressBar, DifficultyProgress } from './ProgressBar.js';

@@ -24,8 +24,6 @@ export async function launchTUI(options: LaunchOptions = {}) {
   process.stdout.write(ENTER_ALT_SCREEN);
   process.stdout.write(HIDE_CURSOR);
   process.stdout.write(CLEAR_SCREEN);
-
-  // Handle cleanup on exit
   const cleanup = () => {
     process.stdout.write(SHOW_CURSOR);
     process.stdout.write(EXIT_ALT_SCREEN);
@@ -45,6 +43,7 @@ export async function launchTUI(options: LaunchOptions = {}) {
   try {
     const { waitUntilExit } = render(React.createElement(App, { username }), {
       exitOnCtrlC: true,
+      patchConsole: false,
     });
 
     await waitUntilExit();

@@ -1,7 +1,7 @@
 /**
  * Problem View Screen
  * Detailed problem display with scrollable description
- * Uses simple layout to avoid Ink height calculation issues
+ * Uses responsive layout for proper terminal adaptation
  */
 import { Box, Text, useInput, useStdout } from 'ink';
 import { useState, useEffect, useMemo } from 'react';
@@ -10,7 +10,7 @@ import striptags from 'striptags';
 import { leetcodeClient } from '../../api/client.js';
 import type { ProblemDetail } from '../../types.js';
 import { DifficultyBadge, StatusBadge } from '../components/Badge.js';
-import { colors, icons, borders } from '../theme.js';
+import { colors, icons, borders, layout } from '../theme.js';
 import type { Problem } from '../components/ProblemTable.js';
 
 interface ProblemViewProps {
@@ -89,12 +89,11 @@ export function ProblemViewScreen({
   const terminalWidth = stdout?.columns || 80;
   const terminalHeight = stdout?.rows || 24;
   
-  // Layout - keep it simple
-  // Layout - keep it simple
-  const sidebarWidth = 24;
-  // Calculate available width for text wrapping, considering layout overhead
-  // width - sidebar - padding(2) - border(2) - layout overhead
-  const contentWidth = Math.max(40, terminalWidth - sidebarWidth - 12); 
+  // Layout Constants with proper accounting for all UI elements
+  const sidebarWidth = layout.problemSidebarWidth;
+  // Content width: terminal - sidebar - borders(2) - padding(2) - gap(2)
+  const contentWidth = Math.max(40, terminalWidth - sidebarWidth - 6);
+  // Description height: terminal - header(3) - footer/scroll hints(2) - margins(3)
   const descriptionHeight = Math.max(5, terminalHeight - 8);
   
   const [details, setDetails] = useState<ProblemDetail | null>(null);
@@ -112,19 +111,17 @@ export function ProblemViewScreen({
       .finally(() => setLoading(false));
   }, [problem.titleSlug]);
 
-  // Parse content and split into lines with word wrap
+  // Optimized line rendering (Memoized)
   const lines = useMemo(() => {
     if (!details?.content) return ['No content available'];
-    
-    // Use simplified content parsing
     const parsed = parseContent(details.content);
     const result: string[] = [];
     
+    // Manual wrap logic (Stable)
     for (const line of parsed.split('\n')) {
       if (line.length <= contentWidth) {
         result.push(line);
       } else {
-        // Word wrap
         let remaining = line;
         while (remaining.length > contentWidth) {
           let breakAt = remaining.lastIndexOf(' ', contentWidth);
@@ -135,11 +132,10 @@ export function ProblemViewScreen({
         if (remaining) result.push(remaining);
       }
     }
-    
     return result;
   }, [details?.content, contentWidth]);
 
-  const maxScroll = Math.max(0, lines.length - descriptionHeight + 2); // +2 buffer
+  const maxScroll = Math.max(0, lines.length - descriptionHeight);
   const visibleLines = lines.slice(scrollOffset, scrollOffset + descriptionHeight);
 
   useInput((input, key) => {
@@ -207,12 +203,12 @@ export function ProblemViewScreen({
             borderStyle="round"
             borderColor={colors.textMuted}
             borderTop={false}
-            paddingLeft={2}
+            paddingLeft={1}
             paddingRight={1}
           >
-            {/* Render lines directly - truncate prevents 2nd line wrapping */}
+            {/* Render lines directly */}
             {visibleLines.map((line, i) => (
-              <Text key={i} color={colors.text} wrap="truncate">{line || ' '}</Text>
+              <Text key={i} color={colors.text}>{line || ' '}</Text>
             ))}
           </Box>
           

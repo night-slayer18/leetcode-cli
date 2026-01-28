@@ -36,6 +36,19 @@ export function DiffScreen({ problemId, problemSlug, onBack }: DiffScreenProps) 
   const [scrollOffset, setScrollOffset] = useState(0);
   const [stats, setStats] = useState({ added: 0, removed: 0 });
 
+  // Calculate dynamic height
+  const [terminalHeight, setTerminalHeight] = useState(process.stdout.rows || 24);
+
+  useEffect(() => {
+    const onResize = () => setTerminalHeight(process.stdout.rows || 24);
+    process.stdout.on('resize', onResize);
+    return () => { process.stdout.off('resize', onResize); };
+  }, []);
+
+  // Header = 1, Stats = 1, Panel Border = 2, Controls = 2. Total approx 6-8 overhead.
+  const diffContentHeight = Math.max(5, terminalHeight - 10);
+  const visibleLines = diffResult.slice(scrollOffset, scrollOffset + diffContentHeight);
+
   useEffect(() => {
     const fetchDiff = async () => {
       setLoading(true);
@@ -119,7 +132,7 @@ export function DiffScreen({ problemId, problemSlug, onBack }: DiffScreenProps) 
     }
     // Scroll
     if (input === 'j' || key.downArrow) {
-      setScrollOffset(prev => Math.min(prev + 1, Math.max(0, diffResult.length - 15)));
+      setScrollOffset(prev => Math.min(prev + 1, Math.max(0, diffResult.length - diffContentHeight)));
     }
     if (input === 'k' || key.upArrow) {
       setScrollOffset(prev => Math.max(0, prev - 1));
@@ -128,7 +141,7 @@ export function DiffScreen({ problemId, problemSlug, onBack }: DiffScreenProps) 
       setScrollOffset(0);
     }
     if (input === 'G') {
-      setScrollOffset(Math.max(0, diffResult.length - 15));
+      setScrollOffset(Math.max(0, diffResult.length - diffContentHeight));
     }
   });
 
@@ -149,8 +162,6 @@ export function DiffScreen({ problemId, problemSlug, onBack }: DiffScreenProps) 
       </Box>
     );
   }
-
-  const visibleLines = diffResult.slice(scrollOffset, scrollOffset + 20);
 
   return (
     <Box flexDirection="column" flexGrow={1}>

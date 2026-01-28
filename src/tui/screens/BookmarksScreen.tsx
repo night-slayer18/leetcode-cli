@@ -6,7 +6,7 @@ import { Box, Text, useInput, useStdout } from 'ink';
 import Spinner from 'ink-spinner';
 import { useState, useMemo } from 'react';
 import { useBookmarks } from '../hooks/useBookmarks.js';
-import { colors, icons } from '../theme.js';
+import { colors, icons, layout } from '../theme.js';
 import type { Problem } from '../components/ProblemTable.js';
 
 interface BookmarksScreenProps {
@@ -14,8 +14,8 @@ interface BookmarksScreenProps {
   onBack: () => void;
 }
 
-// Fixed widths to prevent overlap
-
+// Use standardized column widths from theme (same as ListScreen)
+const COL = layout.tableColumns;
 
 function BookmarkRow({ 
   problem, 
@@ -29,18 +29,49 @@ function BookmarkRow({
   const diffColor = problem.difficulty === 'Easy' ? colors.success : problem.difficulty === 'Medium' ? colors.warning : colors.error;
   
   return (
-    <Box width="100%" backgroundColor={isSelected ? colors.bgHighlight : undefined}>
-      <Box width={6} flexShrink={0}>
-        <Text color={isSelected ? colors.primary : colors.textMuted}>{isSelected ? '▶' : ' '} </Text>
+    <Box width="100%" backgroundColor={isSelected ? colors.bgHighlight : undefined} paddingX={1}>
+      {/* Selector */}
+      <Box width={COL.selector} flexShrink={0}>
+        <Text color={isSelected ? colors.primary : colors.textMuted}>
+          {isSelected ? '▶ ' : '  '}
+        </Text>
+      </Box>
+
+      {/* Status */}
+      <Box width={COL.status} flexShrink={0}>
         <Text color={statusColor}>{statusIcon} </Text>
       </Box>
-      <Box width={6} flexShrink={0}><Text color={colors.textMuted}>{problem.id.toString()}</Text></Box>
-      <Box flexGrow={1} minWidth={0}>
-        <Text color={isSelected ? colors.textBright : colors.text} bold={isSelected} wrap="truncate-end">{problem.title}</Text>
+
+      {/* ID */}
+      <Box width={COL.id} flexShrink={0}>
+        <Text color={colors.textMuted}>{problem.id.toString().padEnd(COL.id)}</Text>
       </Box>
-      <Box width={8} flexShrink={0}><Text color={diffColor}>{problem.difficulty}</Text></Box>
-      <Box width={7} flexShrink={0}><Text color={colors.textMuted}>{Math.round(problem.acceptance)}%</Text></Box>
-      <Box width={3} flexShrink={0}><Text>{problem.isPaidOnly ? ' 💎' : '   '}</Text></Box>
+
+      {/* Title - Flexible */}
+      <Box flexGrow={1} minWidth={0} marginRight={1}>
+        <Text 
+          color={isSelected ? colors.textBright : colors.text} 
+          bold={isSelected} 
+          wrap="truncate-end"
+        >
+          {problem.title}
+        </Text>
+      </Box>
+
+      {/* Difficulty */}
+      <Box width={COL.difficulty} flexShrink={0}>
+        <Text color={diffColor}>{problem.difficulty.padEnd(COL.difficulty)}</Text>
+      </Box>
+
+      {/* Acceptance */}
+      <Box width={COL.acceptance} flexShrink={0} justifyContent="flex-end">
+        <Text color={colors.textMuted}>{`${Math.round(problem.acceptance)}%`.padStart(COL.acceptance - 1)}</Text>
+      </Box>
+
+      {/* Premium */}
+      <Box width={COL.premium} flexShrink={0}>
+        <Text>{problem.isPaidOnly ? ' 💎' : '   '}</Text>
+      </Box>
     </Box>
   );
 }
@@ -185,7 +216,7 @@ export function BookmarksScreen({ onSelectProblem, onBack }: BookmarksScreenProp
       {/* Bookmarks Table */}
       {bookmarks.length > 0 ? (
         <>
-          {/* Table Header */}
+          {/* Table Header - Using same widths as rows */}
           <Box 
             borderStyle="single" 
             borderBottom={true} 
@@ -194,14 +225,26 @@ export function BookmarksScreen({ onSelectProblem, onBack }: BookmarksScreenProp
             borderRight={false} 
             borderColor={colors.textMuted}
             width="100%"
+            paddingX={1}
           >
-            <Box flexDirection="row" width="100%">
-              <Box width={6} flexShrink={0}><Text color={colors.textMuted} bold>Stat</Text></Box>
-              <Box width={6} flexShrink={0}><Text color={colors.textMuted} bold>ID</Text></Box>
-              <Box flexGrow={1} minWidth={0}><Text color={colors.textMuted} bold>Title</Text></Box>
-              <Box width={8} flexShrink={0}><Text color={colors.textMuted} bold>Diff</Text></Box>
-              <Box width={7} flexShrink={0}><Text color={colors.textMuted} bold>Accept</Text></Box>
-              <Box width={3} flexShrink={0}><Text color={colors.textMuted} bold> 💎</Text></Box>
+            <Box width={COL.selector} flexShrink={0} />
+            <Box width={COL.status} flexShrink={0}>
+              <Text color={colors.textMuted} bold>St</Text>
+            </Box>
+            <Box width={COL.id} flexShrink={0}>
+              <Text color={colors.textMuted} bold>ID</Text>
+            </Box>
+            <Box flexGrow={1} minWidth={0} marginRight={1}>
+              <Text color={colors.textMuted} bold>Title</Text>
+            </Box>
+            <Box width={COL.difficulty} flexShrink={0}>
+              <Text color={colors.textMuted} bold>Diff</Text>
+            </Box>
+            <Box width={COL.acceptance} flexShrink={0} justifyContent="flex-end">
+              <Text color={colors.textMuted} bold>Acc</Text>
+            </Box>
+            <Box width={COL.premium} flexShrink={0}>
+              <Text color={colors.textMuted} bold> 💎</Text>
             </Box>
           </Box>
 

@@ -3,7 +3,7 @@
  * Interview timer with live countdown, problem context, and stats
  * Matches CLI `timer` command functionality
  */
-import { Box, Text, useInput } from 'ink';
+import { Box, Text, useInput, useStdout } from 'ink';
 import { useState, useEffect, useCallback, JSX } from 'react';
 import { Panel } from '../components/Panel.js';
 import { timerStorage } from '../../storage/timer.js';
@@ -155,6 +155,7 @@ export function TimerScreen({
   onBack,
   onComplete,
 }: TimerScreenProps) {
+  const { stdout } = useStdout();
   const [viewMode, setViewMode] = useState<ViewMode>('timer');
   const [status, setStatus] = useState<TimerStatus>('idle');
   const [totalSeconds, setTotalSeconds] = useState(DEFAULT_TIMES[difficulty] * 60);
@@ -303,15 +304,22 @@ export function TimerScreen({
         </Panel>
       </Box>
 
-      {/* Progress bar - Full Width */}
-      <Box marginTop={1} width="100%" flexDirection="column">
-         <Box width="100%">
-            {/* Native Ink Text-based progress bar since we don't depend on ink-progress-bar yet */}
-            <Text wrap="truncate">
-              <Text color={timerColor}>{'█'.repeat(Math.max(0, Math.floor((remainingSeconds / totalSeconds) * 100)))}</Text>
-              <Text color={colors.textDim}>{'░'.repeat(Math.max(0, 100 - Math.floor((remainingSeconds / totalSeconds) * 100)))}</Text>
-            </Text>
-         </Box>
+      {/* Progress bar - Responsive Width */}
+      <Box marginTop={1} width="100%" flexDirection="column" paddingX={1}>
+        <Box width="100%">
+          {/* Progress bar uses 60% of remaining time as bar length */}
+          {(() => {
+            const barWidth = Math.max(20, Math.floor((stdout?.columns || 80) * 0.8));
+            const filled = Math.floor((remainingSeconds / totalSeconds) * barWidth);
+            const empty = barWidth - filled;
+            return (
+              <Text>
+                <Text color={timerColor}>{'█'.repeat(Math.max(0, filled))}</Text>
+                <Text color={colors.textDim}>{'░'.repeat(Math.max(0, empty))}</Text>
+              </Text>
+            );
+          })()}
+        </Box>
       </Box>
 
       {/* Controls */}

@@ -25,7 +25,7 @@ export function HelpScreen({ onBack }: HelpScreenProps) {
 
       <Box flexDirection="row" gap={2} flexGrow={1}>
         {/* Left Column: Global & Navigation */}
-        <Box flexDirection="column" width="50%">
+        <Box flexDirection="column" flexGrow={1} flexBasis={0}>
           <Panel title="Global Shortcuts">
             <Box flexDirection="column">
               <Box><Text color={colors.primary} bold>?      </Text><Text color={colors.text}> Toggle this help screen</Text></Box>
@@ -49,7 +49,7 @@ export function HelpScreen({ onBack }: HelpScreenProps) {
         </Box>
 
         {/* Right Column: Problem & Lists */}
-        <Box flexDirection="column" width="50%">
+        <Box flexDirection="column" flexGrow={1} flexBasis={0}>
           <Panel title="List Navigation">
             <Box flexDirection="column">
               <Box><Text color={colors.primary} bold>j / ↓  </Text><Text color={colors.text}> Move down</Text></Box>

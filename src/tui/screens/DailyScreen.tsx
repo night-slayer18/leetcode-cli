@@ -80,7 +80,7 @@ export function DailyScreen({ onPick, onBack }: DailyScreenProps) {
       <Box flexDirection="row" gap={1}>
          {/* Left Col: Problem Details - Grows */}
          <Box flexGrow={1} flexDirection="column">
-            <Panel title="Today's Problem" highlight flexGrow={1}>
+            <Panel title="Today's Problem" highlight>
               <Box flexDirection="column" gap={2} paddingX={1} paddingY={1}>
                 <Box gap={2} alignItems="center">
                   <Text color={colors.textMuted}>#{daily.id}</Text>

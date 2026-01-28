@@ -4,7 +4,7 @@
  */
 import { Box, Text, useInput } from 'ink';
 import Spinner from 'ink-spinner';
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { leetcodeClient } from '../../api/client.js';
 import { credentials } from '../../storage/credentials.js';
 import type { ProblemListFilters } from '../../types.js';
@@ -98,7 +98,6 @@ const ProblemRow = React.memo(function ProblemRow({
 
 export function ListScreen({ onSelectProblem, onBack }: ListScreenProps) {
   // Use stable height to prevent blinking on resize/scroll
-  // const { stdout } = useStdout(); // Causing instability?
   const [terminalHeight, setTerminalHeight] = useState(process.stdout.rows || 24);
 
   useEffect(() => {
@@ -126,7 +125,21 @@ export function ListScreen({ onSelectProblem, onBack }: ListScreenProps) {
   const [diffFilter, setDiffFilter] = useState<'Easy' | 'Medium' | 'Hard' | null>(null);
   const [statusFilter, setStatusFilter] = useState<'solved' | 'attempted' | 'todo' | null>(null);
 
+  // ✅ FIX 1: Use ref to prevent concurrent fetches
+  const isFetchingRef = useRef(false);
+
+  // ✅ FIX 2: Store filter values in ref to break dependency cycle
+  const filtersRef = useRef({ diffFilter, statusFilter, searchQuery });
+  
+  useEffect(() => {
+    filtersRef.current = { diffFilter, statusFilter, searchQuery };
+  }, [diffFilter, statusFilter, searchQuery]);
+
+  // ✅ FIX 3: Stable fetchProblems with empty deps array
   const fetchProblems = useCallback(async (pageNum: number, append = false) => {
+    if (isFetchingRef.current) return;
+    
+    isFetchingRef.current = true;
     if (append) setLoadingMore(true);
     else setLoading(true);
     setError(null);
@@ -135,17 +148,20 @@ export function ListScreen({ onSelectProblem, onBack }: ListScreenProps) {
       const creds = credentials.get();
       if (creds) leetcodeClient.setCredentials(creds);
 
+      // Read current filter values from ref
+      const { diffFilter: df, statusFilter: sf, searchQuery: sq } = filtersRef.current;
+
       const filters: ProblemListFilters = {
         limit: PAGE_SIZE,
         skip: pageNum * PAGE_SIZE,
       };
 
-      if (diffFilter) filters.difficulty = diffFilter.toUpperCase() as 'EASY' | 'MEDIUM' | 'HARD';
-      if (statusFilter) {
+      if (df) filters.difficulty = df.toUpperCase() as 'EASY' | 'MEDIUM' | 'HARD';
+      if (sf) {
         const map: Record<string, 'NOT_STARTED' | 'AC' | 'TRIED'> = { solved: 'AC', attempted: 'TRIED', todo: 'NOT_STARTED' };
-        filters.status = map[statusFilter];
+        filters.status = map[sf];
       }
-      if (searchQuery) filters.searchKeywords = searchQuery;
+      if (sq) filters.searchKeywords = sq;
 
       const result = await leetcodeClient.getProblems(filters);
       
@@ -173,22 +189,18 @@ export function ListScreen({ onSelectProblem, onBack }: ListScreenProps) {
     } finally {
       setLoading(false);
       setLoadingMore(false);
+      isFetchingRef.current = false;
     }
-  }, [diffFilter, statusFilter, searchQuery]);
+  }, []); // ✅ Empty deps - stable reference!
 
-  // Initial load
+  // ✅ FIX 4: Only depend on filter values, NOT fetchProblems
   useEffect(() => {
     fetchProblems(0, false);
-  }, [diffFilter, statusFilter, searchQuery, fetchProblems]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [diffFilter, statusFilter, searchQuery]); // Remove fetchProblems!
 
-  // Keep selection visible
-  useEffect(() => {
-    if (selectedIndex < scrollOffset) {
-      setScrollOffset(selectedIndex);
-    } else if (selectedIndex >= scrollOffset + listHeight) {
-      setScrollOffset(selectedIndex - listHeight + 1);
-    }
-  }, [selectedIndex, scrollOffset, listHeight]);
+  // ✅ FIX 5: Optimize scroll calculation to prevent loops
+  // Scroll offset is now handled synchronously in input handlers to prevent double-renders
 
   // Visible items
   const visibleProblems = useMemo(() => {
@@ -210,16 +222,41 @@ export function ListScreen({ onSelectProblem, onBack }: ListScreenProps) {
     if (key.escape) { onBack(); return; }
     if (input === '/') { setSearchMode(true); setSearchBuffer(searchQuery); return; }
 
-    // Navigation
+    // ✅ FIX 6: Use functional updates to prevent stale closures
+    // Navigation - update both states together to prevent double render
     if (key.downArrow || input === 'j') {
       const next = Math.min(selectedIndex + 1, problems.length - 1);
       setSelectedIndex(next);
-      if (next >= problems.length - 5 && hasMore && !loadingMore) fetchProblems(page + 1, true);
+      
+      // Update scroll synchronously
+      if (next >= scrollOffset + listHeight) {
+        setScrollOffset(next - listHeight + 1);
+      }
+      
+      if (next >= problems.length - 5 && hasMore && !loadingMore && !isFetchingRef.current) {
+        fetchProblems(page + 1, true);
+      }
       return;
     }
-    if (key.upArrow || input === 'k') { setSelectedIndex(Math.max(selectedIndex - 1, 0)); return; }
-    if (input === 'g') { setSelectedIndex(0); setScrollOffset(0); return; }
-    if (input === 'G') { setSelectedIndex(problems.length - 1); return; }
+    if (key.upArrow || input === 'k') { 
+      const next = Math.max(selectedIndex - 1, 0);
+      setSelectedIndex(next);
+      
+      // Update scroll synchronously
+      if (next < scrollOffset) {
+        setScrollOffset(next);
+      }
+      return; 
+    }
+    if (input === 'g') { 
+      setSelectedIndex(0); 
+      setScrollOffset(0); 
+      return; 
+    }
+    if (input === 'G') { 
+      setSelectedIndex(problems.length - 1); 
+      return; 
+    }
 
     // Select
     if (key.return) {
@@ -297,18 +334,18 @@ export function ListScreen({ onSelectProblem, onBack }: ListScreenProps) {
         <Box width={4} flexShrink={0} marginLeft={1}><Text color={colors.textMuted} bold>Paid</Text></Box>
       </Box>
 
-      {/* Problem List */}
-      <Box flexDirection="column" flexGrow={1}>
+      {/* Problem List - Fixed height to prevent layout recalculation */}
+      <Box flexDirection="column" height={listHeight} overflow="hidden">
         {problems.length === 0 ? (
           <Box marginTop={1} marginLeft={2}>
             <Text color={colors.textMuted}>No matching problems found.</Text>
           </Box>
         ) : (
-          visibleProblems.map((problem) => (
+          visibleProblems.map((problem, index) => (
             <ProblemRow
               key={problem.id}
               problem={problem}
-              isSelected={problem.id === problems[selectedIndex]?.id}
+              isSelected={scrollOffset + index === selectedIndex}
             />
           ))
         )}

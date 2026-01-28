@@ -2,7 +2,7 @@
  * Home Screen
  * Dashboard with real stats from LeetCode API
  */
-import { Box, Text, useInput } from 'ink';
+import { Box, Text, useInput, useStdout } from 'ink';
 import Spinner from 'ink-spinner';
 import { Panel } from '../components/Panel.js';
 import { DifficultyProgress } from '../components/ProgressBar.js';
@@ -16,6 +16,15 @@ interface HomeScreenProps {
 }
 
 export function HomeScreen({ onNavigate }: HomeScreenProps) {
+  const { stdout } = useStdout();
+  const terminalHeight = stdout?.rows || 24;
+  
+  // Calculate responsive panel heights
+  // Total available: terminal height - header(3) - statusbar(2) - gaps(2) - footer(2)
+  const availableHeight = Math.max(12, terminalHeight - 9);
+  // Stats row gets 45% of available space, minimum 8 lines
+  const statsRowHeight = Math.max(8, Math.floor(availableHeight * 0.45));
+  
   const { stats, loading: statsLoading, error: statsError } = useUserStats();
   const { daily, loading: dailyLoading, error: dailyError } = useDailyChallenge();
 
@@ -37,12 +46,12 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
   return (
 
     <Box flexDirection="column" gap={1} flexGrow={1}>
-      {/* ROW 1: Stats & Streak (Side by Side) */}
-      <Box flexDirection="row" gap={1} height={12}>
+      {/* ROW 1: Stats & Streak (Side by Side) - Responsive Height */}
+      <Box flexDirection="row" gap={1} height={statsRowHeight} flexShrink={0}>
         
         {/* Left Col: Progress - Grows */}
         <Box flexGrow={1} flexDirection="column">
-          <Panel title="📊 Progress" highlight height={12} flexGrow={1}>
+          <Panel title="📊 Progress" highlight flexGrow={1}>
             <Box flexDirection="column" gap={1}>
               {statsLoading ? (
                 <Box>
@@ -82,7 +91,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
 
         {/* Right Col: Streak - Fixed Width */}
         <Box width={35} flexDirection="column"> 
-          <Panel title="🔥 Streak" height={12} flexGrow={1}>
+          <Panel title="🔥 Streak" flexGrow={1}>
             {statsLoading ? (
               <Box>
                 <Text color={colors.primary}>

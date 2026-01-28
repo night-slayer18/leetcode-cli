@@ -134,7 +134,56 @@ export const defaultDimensions = {
   headerHeight: 3,
 } as const;
 
+// Layout configuration for consistent screen structure
+export const layout = {
+  // Standard padding values (in characters)
+  padding: {
+    none: 0,
+    xs: 1,
+    sm: 2,
+    md: 3,
+    lg: 4,
+  },
+
+  // Standard gaps between elements
+  gap: {
+    none: 0,
+    xs: 1,
+    sm: 2,
+    md: 3,
+  },
+
+  // Minimum dimensions
+  minWidth: 80,
+  minHeight: 24,
+
+  // Sidebar dimensions
+  sidebarWidth: 22,
+
+  // Problem view sidebar
+  problemSidebarWidth: 24,
+
+  // Header and status bar heights
+  headerHeight: 3,
+  statusBarHeight: 2,
+
+  // Panel height constraints
+  panelMinHeight: 6,
+
+  // Table column widths for problem lists
+  tableColumns: {
+    selector: 3,
+    status: 3,
+    id: 6,
+    difficulty: 8,
+    acceptance: 7,
+    premium: 4,
+    // Total fixed: 31 characters, title is flexible
+  },
+} as const;
+
 // Type exports for TypeScript
 export type ColorKey = keyof typeof colors;
 export type DifficultyKey = keyof typeof difficulty;
 export type StatusKey = keyof typeof status;
+export type LayoutKey = keyof typeof layout;
