@@ -44,7 +44,8 @@ import {
 } from './commands/workspace.js';
 import { updateCommand, checkForUpdatesOnStartup } from './commands/update.js';
 import { changelogCommand } from './commands/changelog.js';
-import { launchTUI } from './tui/index.js';
+
+import { launchTUI as launchNewTUI } from './tui/index.js';
 
 const program = new Command();
 
@@ -620,7 +621,7 @@ const args = process.argv.slice(2);
 
 if (args.length === 0 && process.stdout.isTTY) {
   // No args + interactive terminal → launch TUI
-  launchTUI({ username: 'Guest' }).catch((err) => {
+  launchNewTUI({ username: '' }).catch((err) => {
     console.error('Failed to launch TUI:', err.message);
     process.exit(1);
   });

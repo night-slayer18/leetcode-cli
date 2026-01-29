@@ -11,10 +11,12 @@ import { isProblemId } from '../utils/validation.js';
 
 type NoteAction = 'view' | 'edit';
 
-export async function notesCommand(problemId: string, action?: string): Promise<void> {
+export async function notesCommand(problemId: string, action?: string, options: { silent?: boolean } = {}): Promise<void> {
   if (!isProblemId(problemId)) {
-    console.log(chalk.red(`Invalid problem ID: ${problemId}`));
-    console.log(chalk.gray('Problem ID must be a positive integer'));
+    if (!options.silent) {
+      console.log(chalk.red(`Invalid problem ID: ${problemId}`));
+      console.log(chalk.gray('Problem ID must be a positive integer'));
+    }
     return;
   }
 
@@ -30,7 +32,7 @@ export async function notesCommand(problemId: string, action?: string): Promise<
   if (noteAction === 'view') {
     await viewNote(notePath, problemId);
   } else {
-    await editNote(notePath, problemId);
+    await editNote(notePath, problemId, options);
   }
 }
 
@@ -56,14 +58,14 @@ async function viewNote(notePath: string, problemId: string): Promise<void> {
   }
 }
 
-async function editNote(notePath: string, problemId: string): Promise<void> {
+async function editNote(notePath: string, problemId: string, options: { silent?: boolean } = {}): Promise<void> {
   if (!existsSync(notePath)) {
     const template = await generateNoteTemplate(problemId);
     await writeFile(notePath, template, 'utf-8');
-    console.log(chalk.green(`✓ Created notes file for problem ${problemId}`));
+    if (!options.silent) console.log(chalk.green(`✓ Created notes file for problem ${problemId}`));
   }
 
-  console.log(chalk.gray(`Opening: ${notePath}`));
+  if (!options.silent) console.log(chalk.gray(`Opening: ${notePath}`));
   await openInEditor(notePath);
 }
 

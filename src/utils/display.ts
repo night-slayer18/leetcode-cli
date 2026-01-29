@@ -78,6 +78,11 @@ export function displayProblemDetail(problem: ProblemDetail): void {
     return;
   }
 
+  console.log(formatProblemContent(content));
+  console.log();
+}
+
+export function formatProblemContent(content: string): string {
   content = content.replace(/<sup>(.*?)<\/sup>/gi, '^$1');
 
   content = content.replace(/<strong class="example">Example (\d+):<\/strong>/gi, '§EXAMPLE§$1§');
@@ -120,8 +125,7 @@ export function displayProblemDetail(problem: ProblemDetail): void {
   content = content.replace(/§CONSTRAINTS§/g, chalk.cyan.bold('\n📋 Constraints:'));
   content = content.replace(/§FOLLOWUP§/g, chalk.magenta.bold('\n💡 Follow-up:'));
 
-  console.log(content);
-  console.log();
+  return content;
 }
 
 export function displayTestResult(result: TestResult, topicTags?: TopicTag[]): void {

@@ -24,11 +24,24 @@ export async function openInEditor(filePath: string, workDir?: string): Promise<
   const editor = config.getEditor() ?? process.env.EDITOR ?? 'code';
   const workspace = workDir ?? config.getWorkDir();
 
-  // Terminal editors need to run in foreground - print command for user
+  // Terminal editors need to run in foreground with inherited stdio
   if (TERMINAL_EDITORS.includes(editor)) {
-    console.log();
-    console.log(chalk.gray(`Open with: ${editor} ${filePath}`));
-    return;
+    // We assume the TUI has been suspended by the caller (runtime.ts)
+    // and stdin is paused. We need to unpause stdin for the editor if we want it to work?
+    // Actually, spawn with 'inherit' passes the real FD.
+    const child = spawn(editor, [filePath], {
+        stdio: 'inherit'
+    });
+    
+    return new Promise((resolve, reject) => {
+        child.on('exit', (code) => {
+            if (code === 0) resolve();
+            else reject(new Error(`Editor exited with code ${code}`));
+        });
+        child.on('error', (err) => {
+             reject(new Error(`Failed to start editor: ${err.message}`));
+        });
+    });
   }
 
   try {
@@ -44,7 +57,7 @@ export async function openInEditor(filePath: string, workDir?: string): Promise<
 
     // Other GUI editors: use cross-platform `open` package
     await open(filePath, { app: { name: editor } });
-  } catch {
-    // Silently fail if editor cannot be opened
+  } catch (error) {
+    throw new Error(`Failed to open editor '${editor}'. Make sure it is installed and in your PATH.`);
   }
 }
