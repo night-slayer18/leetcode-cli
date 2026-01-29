@@ -1,5 +1,3 @@
-
-
 import chalk from 'chalk';
 import type { HomeScreenModel } from '../../types.js';
 import { colors, borders, icons } from '../../theme.js';
@@ -8,10 +6,10 @@ import { MENU_ITEMS } from './index.js';
 
 export function view(model: HomeScreenModel, width: number, height: number): string {
   const lines: string[] = [];
-  const contentHeight = height - 4; 
+  const contentHeight = height - 4;
 
   const logoHeight = width >= 80 ? 6 : 3;
-  const menuHeight = MENU_ITEMS.length + 4; 
+  const menuHeight = MENU_ITEMS.length + 4;
   const totalContentHeight = logoHeight + 2 + menuHeight + 4;
   const topPadding = Math.max(0, Math.floor((contentHeight - totalContentHeight) / 2));
 
@@ -34,9 +32,7 @@ export function view(model: HomeScreenModel, width: number, height: number): str
     const item = MENU_ITEMS[i];
     const isSelected = i === model.menuIndex;
 
-    const selector = isSelected
-      ? chalk.hex(colors.primary)(' ▶ ')
-      : '   ';
+    const selector = isSelected ? chalk.hex(colors.primary)(' ▶ ') : '   ';
 
     const key = chalk.hex(colors.primary)(`[${item.key}]`);
 

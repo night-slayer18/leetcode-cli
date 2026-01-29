@@ -1,6 +1,9 @@
-
-
-import type { Problem as RootProblem, ProblemDetail as RootProblemDetail, ProblemListFilters as RootProblemListFilters, DailyChallenge } from '../types.js';
+import type {
+  Problem as RootProblem,
+  ProblemDetail as RootProblemDetail,
+  ProblemListFilters as RootProblemListFilters,
+  DailyChallenge,
+} from '../types.js';
 
 export type Problem = RootProblem;
 export type ProblemDetail = RootProblemDetail;
@@ -52,16 +55,16 @@ export interface ProblemScreenModel {
   readonly activeHintIndex: number | null;
   readonly hintScrollOffset: number;
   readonly isBookmarked: boolean;
-  
+
   readonly showSubmissions: boolean;
   readonly submissionsHistory: readonly import('../types.js').Submission[] | null;
   readonly submissionsLoading: boolean;
   readonly submissionScrollOffset: number;
-  
+
   readonly showSnapshots: boolean;
   readonly snapshotsList: readonly import('../storage/snapshots.js').Snapshot[] | null;
   readonly snapshotCursor: number;
-  
+
   readonly currentNote: string | null;
   readonly noteScrollOffset: number;
   readonly showDiff: boolean;
@@ -106,8 +109,8 @@ export interface SkillStats {
 export interface ConfigScreenModel {
   readonly selectedOption: number;
   readonly options: readonly { id: string; label: string; description: string; value: string }[];
-  readonly editMode: boolean; 
-  readonly config: import('../types.js').UserConfig | null; 
+  readonly editMode: boolean;
+  readonly config: import('../types.js').UserConfig | null;
 }
 
 export interface HelpScreenModel {
@@ -160,7 +163,6 @@ export type ScreenState =
   | { readonly screen: 'changelog'; readonly model: ChangelogScreenModel };
 
 export interface AppModel {
-  
   readonly screenState: ScreenState;
 
   readonly history: readonly ScreenState[];
@@ -210,13 +212,21 @@ export type ListMsg =
   | { readonly type: 'LIST_SEARCH_BACKSPACE' }
   | { readonly type: 'LIST_SEARCH_SUBMIT' }
   | { readonly type: 'LIST_SEARCH_CANCEL' }
-  | { readonly type: 'LIST_FILTER_DIFFICULTY'; readonly difficulty: 'Easy' | 'Medium' | 'Hard' | null }
+  | {
+      readonly type: 'LIST_FILTER_DIFFICULTY';
+      readonly difficulty: 'Easy' | 'Medium' | 'Hard' | null;
+    }
   | { readonly type: 'LIST_FILTER_STATUS'; readonly status: 'solved' | 'attempted' | 'todo' | null }
   | { readonly type: 'LIST_FILTER_BOOKMARKS' }
   | { readonly type: 'LIST_CLEAR_FILTERS' }
   | { readonly type: 'LIST_REFRESH' }
   | { readonly type: 'LIST_FETCH_START' }
-  | { readonly type: 'LIST_FETCH_SUCCESS'; readonly problems: Problem[]; readonly total: number; readonly append: boolean }
+  | {
+      readonly type: 'LIST_FETCH_SUCCESS';
+      readonly problems: Problem[];
+      readonly total: number;
+      readonly append: boolean;
+    }
   | { readonly type: 'LIST_FETCH_ERROR'; readonly error: string };
 
 export type ProblemMsg =
@@ -233,8 +243,14 @@ export type ProblemMsg =
   | { readonly type: 'PROBLEM_DETAIL_LOADED'; readonly detail: ProblemDetail }
   | { readonly type: 'PROBLEM_DETAIL_ERROR'; readonly error: string }
   | { readonly type: 'PROBLEM_TEST_RESULT'; readonly result: import('../types.js').TestResult }
-  | { readonly type: 'PROBLEM_SUBMIT_RESULT'; readonly result: import('../types.js').SubmissionResult }
-  | { readonly type: 'PROBLEM_SUBMIT_RESULT'; readonly result: import('../types.js').SubmissionResult }
+  | {
+      readonly type: 'PROBLEM_SUBMIT_RESULT';
+      readonly result: import('../types.js').SubmissionResult;
+    }
+  | {
+      readonly type: 'PROBLEM_SUBMIT_RESULT';
+      readonly result: import('../types.js').SubmissionResult;
+    }
   | { readonly type: 'PROBLEM_ACTION_ERROR'; readonly error: string }
   | { readonly type: 'PROBLEM_ACTION_SUCCESS'; readonly message: string }
   | { readonly type: 'PROBLEM_CLOSE_RESULT' }
@@ -245,7 +261,10 @@ export type ProblemMsg =
   | { readonly type: 'PROBLEM_HINT_SCROLL_DOWN' }
   | { readonly type: 'PROBLEM_NOTES' }
   | { readonly type: 'PROBLEM_SHOW_SUBMISSIONS' }
-  | { readonly type: 'PROBLEM_SUBMISSIONS_LOADED'; readonly submissions: readonly import('../types.js').Submission[] }
+  | {
+      readonly type: 'PROBLEM_SUBMISSIONS_LOADED';
+      readonly submissions: readonly import('../types.js').Submission[];
+    }
   | { readonly type: 'PROBLEM_SUBMISSIONS_ERROR'; readonly error: string }
   | { readonly type: 'PROBLEM_CLOSE_SUBMISSIONS' }
   | { readonly type: 'PROBLEM_SUBMISSIONS_SCROLL_UP' }
@@ -276,7 +295,12 @@ export type TimerMsg =
 
 export type StatsMsg =
   | { readonly type: 'STATS_FETCH_START' }
-  | { readonly type: 'STATS_FETCH_SUCCESS'; readonly stats: UserProfile; readonly daily: DailyChallenge; readonly skills: SkillStats }
+  | {
+      readonly type: 'STATS_FETCH_SUCCESS';
+      readonly stats: UserProfile;
+      readonly daily: DailyChallenge;
+      readonly skills: SkillStats;
+    }
   | { readonly type: 'STATS_REFRESH' }
   | { readonly type: 'STATS_FETCH_ERROR'; readonly error: string };
 
@@ -289,9 +313,7 @@ export type ConfigMsg =
   | { readonly type: 'CONFIG_SAVE_VALUE' }
   | { readonly type: 'CONFIG_CANCEL_EDIT' };
 
-export type HelpMsg =
-  | { readonly type: 'HELP_SCROLL_UP' }
-  | { readonly type: 'HELP_SCROLL_DOWN' };
+export type HelpMsg = { readonly type: 'HELP_SCROLL_UP' } | { readonly type: 'HELP_SCROLL_DOWN' };
 
 export type LoginMsg =
   | { readonly type: 'LOGIN_SESSION_INPUT'; readonly value: string }
@@ -339,7 +361,11 @@ export type AppMsg =
 export type Command =
   | { readonly type: 'CMD_NONE' }
   | { readonly type: 'CMD_BATCH'; readonly commands: readonly Command[] }
-  | { readonly type: 'CMD_FETCH_PROBLEMS'; readonly filters: ProblemListFilters; readonly append: boolean }
+  | {
+      readonly type: 'CMD_FETCH_PROBLEMS';
+      readonly filters: ProblemListFilters;
+      readonly append: boolean;
+    }
   | { readonly type: 'CMD_FETCH_PROBLEM_DETAIL'; readonly slug: string }
   | { readonly type: 'CMD_FETCH_STATS' }
   | { readonly type: 'CMD_FETCH_DAILY' }
@@ -369,10 +395,12 @@ export type Command =
 export const Cmd = {
   none: (): Command => ({ type: 'CMD_NONE' }),
   batch: (...cmds: Command[]): Command => ({ type: 'CMD_BATCH', commands: cmds }),
-  fetchProblems: (filters: ProblemListFilters, append = false): Command =>
-    ({ type: 'CMD_FETCH_PROBLEMS', filters, append }),
-  fetchProblemDetail: (slug: string): Command =>
-    ({ type: 'CMD_FETCH_PROBLEM_DETAIL', slug }),
+  fetchProblems: (filters: ProblemListFilters, append = false): Command => ({
+    type: 'CMD_FETCH_PROBLEMS',
+    filters,
+    append,
+  }),
+  fetchProblemDetail: (slug: string): Command => ({ type: 'CMD_FETCH_PROBLEM_DETAIL', slug }),
   fetchStats: (): Command => ({ type: 'CMD_FETCH_STATS' }),
   fetchDaily: (): Command => ({ type: 'CMD_FETCH_DAILY' }),
   fetchRandom: (): Command => ({ type: 'CMD_FETCH_RANDOM' }),
@@ -380,16 +408,26 @@ export const Cmd = {
   pickProblem: (slug: string, lang?: string): Command => ({ type: 'CMD_PICK_PROBLEM', slug, lang }),
   testSolution: (slug: string): Command => ({ type: 'CMD_TEST_SOLUTION', slug }),
   submitSolution: (slug: string): Command => ({ type: 'CMD_SUBMIT_SOLUTION', slug }),
-  startTimer: (intervalMs = 1000): Command =>
-    ({ type: 'CMD_START_TIMER_SUBSCRIPTION', intervalMs }),
+  startTimer: (intervalMs = 1000): Command => ({
+    type: 'CMD_START_TIMER_SUBSCRIPTION',
+    intervalMs,
+  }),
   stopTimer: (): Command => ({ type: 'CMD_STOP_TIMER_SUBSCRIPTION' }),
   saveConfig: (key: string, value: string): Command => ({ type: 'CMD_SAVE_CONFIG', key, value }),
   openEditor: (id: string): Command => ({ type: 'CMD_OPEN_EDITOR', id }),
   fetchSubmissions: (slug: string): Command => ({ type: 'CMD_FETCH_SUBMISSIONS', slug }),
   exit: (): Command => ({ type: 'CMD_EXIT' }),
   loadNote: (problemId: string): Command => ({ type: 'CMD_LOAD_NOTE', problemId }),
-  diffSnapshot: (slug: string, snapshotId: string): Command => ({ type: 'CMD_DIFF_SNAPSHOT', slug, snapshotId }),
-  restoreSnapshot: (slug: string, snapshotId: string): Command => ({ type: 'CMD_RESTORE_SNAPSHOT', slug, snapshotId }),
+  diffSnapshot: (slug: string, snapshotId: string): Command => ({
+    type: 'CMD_DIFF_SNAPSHOT',
+    slug,
+    snapshotId,
+  }),
+  restoreSnapshot: (slug: string, snapshotId: string): Command => ({
+    type: 'CMD_RESTORE_SNAPSHOT',
+    slug,
+    snapshotId,
+  }),
   loadWorkspaces: (): Command => ({ type: 'CMD_LOAD_WORKSPACES' }),
   createWorkspace: (name: string): Command => ({ type: 'CMD_CREATE_WORKSPACE', name }),
   deleteWorkspace: (name: string): Command => ({ type: 'CMD_DELETE_WORKSPACE', name }),

@@ -1,5 +1,3 @@
-
-
 import type { StatsScreenModel, StatsMsg, Command } from '../../types.js';
 import { Cmd } from '../../types.js';
 

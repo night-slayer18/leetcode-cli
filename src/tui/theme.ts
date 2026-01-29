@@ -1,13 +1,11 @@
-
-
 export const colors = {
-  primary: '#00B8D4',    
+  primary: '#00B8D4',
   primaryDark: '#006064',
-  secondary: '#FF4081',  
-  success: '#00E676',    
-  warning: '#FFEA00',    
-  error: '#FF1744',      
-  info: '#2979FF',       
+  secondary: '#FF4081',
+  success: '#00E676',
+  warning: '#FFEA00',
+  error: '#FF1744',
+  info: '#2979FF',
   text: '#FFFFFF',
   textMuted: '#90A4AE',
   textDim: '#546E7A',
@@ -17,7 +15,7 @@ export const colors = {
   borderFocus: '#00B8D4',
   textBright: '#FFFFFF',
   bgHighlight: '#263238',
-  cyan: '#00E5FF', 
+  cyan: '#00E5FF',
   orange: '#FF9800',
   purple: '#9C27B0',
 };
@@ -61,12 +59,12 @@ export const borders = {
   topT: '┬',
   bottomT: '┴',
   cross: '┼',
-  
+
   roundTopLeft: '╭',
   roundTopRight: '╮',
   roundBottomLeft: '╰',
   roundBottomRight: '╯',
-  
+
   heavyHorizontal: '━',
   heavyVertical: '┃',
 };
@@ -85,9 +83,7 @@ export const layout = {
   },
 };
 
-export const fonts = {
-    
-};
+export const fonts = {};
 
 export const progressChars = {
   bar: ['░', '▒', '▓', '█'],

@@ -1,5 +1,3 @@
-
-
 import chalk from 'chalk';
 import { colors, icons, borders } from '../theme.js';
 import { stripAnsi } from '../lib/layout.js';

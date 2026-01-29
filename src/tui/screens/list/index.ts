@@ -1,5 +1,3 @@
-
-
 import type { ListScreenModel, ListMsg, Command, Problem } from '../../types.js';
 import { Cmd } from '../../types.js';
 import { bookmarks } from '../../../storage/bookmarks.js';
@@ -36,11 +34,9 @@ export function update(
   model: ListScreenModel,
   terminalHeight: number
 ): [ListScreenModel, Command] {
-  
   const listHeight = Math.max(3, terminalHeight - 13);
 
   switch (msg.type) {
-
     case 'LIST_CURSOR_DOWN': {
       if (model.problems.length === 0) return [model, Cmd.none()];
 
@@ -83,7 +79,10 @@ export function update(
 
     case 'LIST_PAGE_DOWN': {
       const nextCursor = Math.min(model.cursor + listHeight, model.problems.length - 1);
-      const nextOffset = Math.min(model.scrollOffset + listHeight, Math.max(0, model.problems.length - listHeight));
+      const nextOffset = Math.min(
+        model.scrollOffset + listHeight,
+        Math.max(0, model.problems.length - listHeight)
+      );
       return [{ ...model, cursor: nextCursor, scrollOffset: nextOffset }, Cmd.none()];
     }
 
@@ -103,7 +102,6 @@ export function update(
     }
 
     case 'LIST_SELECT':
-      
       return [model, Cmd.none()];
 
     case 'LIST_SEARCH_START':
@@ -118,7 +116,14 @@ export function update(
     case 'LIST_SEARCH_SUBMIT': {
       const filters = buildFilters({ ...model, searchQuery: model.searchBuffer }, 0);
       return [
-        { ...model, searchMode: false, searchQuery: model.searchBuffer, loading: true, cursor: 0, scrollOffset: 0 },
+        {
+          ...model,
+          searchMode: false,
+          searchQuery: model.searchBuffer,
+          loading: true,
+          cursor: 0,
+          scrollOffset: 0,
+        },
         Cmd.fetchProblems(filters, false),
       ];
     }
@@ -156,7 +161,16 @@ export function update(
     case 'LIST_CLEAR_FILTERS': {
       const filters = { limit: PAGE_SIZE, skip: 0 };
       return [
-        { ...model, difficultyFilter: null, statusFilter: null, searchQuery: '', bookmarkFilter: false, loading: true, cursor: 0, scrollOffset: 0 },
+        {
+          ...model,
+          difficultyFilter: null,
+          statusFilter: null,
+          searchQuery: '',
+          bookmarkFilter: false,
+          loading: true,
+          cursor: 0,
+          scrollOffset: 0,
+        },
         Cmd.fetchProblems(filters, false),
       ];
     }
@@ -173,12 +187,10 @@ export function update(
       return [{ ...model, loading: true, error: null }, Cmd.none()];
 
     case 'LIST_FETCH_SUCCESS': {
-      let newProblems = msg.append
-        ? [...model.problems, ...msg.problems]
-        : msg.problems;
+      let newProblems = msg.append ? [...model.problems, ...msg.problems] : msg.problems;
 
       if (model.bookmarkFilter) {
-        newProblems = newProblems.filter(p => bookmarks.has(p.questionFrontendId));
+        newProblems = newProblems.filter((p) => bookmarks.has(p.questionFrontendId));
       }
 
       return [
@@ -203,7 +215,10 @@ export function update(
   }
 }
 
-function buildFilters(model: ListScreenModel, page: number): import('../../types.js').ProblemListFilters {
+function buildFilters(
+  model: ListScreenModel,
+  page: number
+): import('../../types.js').ProblemListFilters {
   const filters: import('../../types.js').ProblemListFilters = {
     limit: PAGE_SIZE,
     skip: page * PAGE_SIZE,

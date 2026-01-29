@@ -11,7 +11,11 @@ import { isProblemId } from '../utils/validation.js';
 
 type NoteAction = 'view' | 'edit';
 
-export async function notesCommand(problemId: string, action?: string, options: { silent?: boolean } = {}): Promise<void> {
+export async function notesCommand(
+  problemId: string,
+  action?: string,
+  options: { silent?: boolean } = {}
+): Promise<void> {
   if (!isProblemId(problemId)) {
     if (!options.silent) {
       console.log(chalk.red(`Invalid problem ID: ${problemId}`));
@@ -58,7 +62,11 @@ async function viewNote(notePath: string, problemId: string): Promise<void> {
   }
 }
 
-async function editNote(notePath: string, problemId: string, options: { silent?: boolean } = {}): Promise<void> {
+async function editNote(
+  notePath: string,
+  problemId: string,
+  options: { silent?: boolean } = {}
+): Promise<void> {
   if (!existsSync(notePath)) {
     const template = await generateNoteTemplate(problemId);
     await writeFile(notePath, template, 'utf-8');

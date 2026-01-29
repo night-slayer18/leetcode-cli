@@ -1,5 +1,3 @@
-
-
 import type { HomeScreenModel, HomeMsg, Command } from '../../types.js';
 import { Cmd } from '../../types.js';
 
@@ -35,7 +33,6 @@ export function update(msg: HomeMsg, model: HomeScreenModel): [HomeScreenModel, 
     }
 
     case 'HOME_MENU_SELECT':
-      
       return [model, Cmd.none()];
 
     default:

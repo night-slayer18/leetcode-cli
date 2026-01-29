@@ -1,5 +1,3 @@
-
-
 import type { Command, AppMsg, ProblemListFilters } from '../types.js';
 import type { SupportedLanguage } from '../../types.js';
 import { leetcodeClient } from '../../api/client.js';
@@ -10,7 +8,6 @@ import {
   generateSolutionFile,
   getSolutionFileName,
   LANG_SLUG_MAP,
-  LANGUAGE_EXTENSIONS,
 } from '../../utils/templates.js';
 import { snapshotStorage } from '../../storage/snapshots.js';
 import { diffLines } from 'diff';
@@ -20,7 +17,8 @@ import * as path from 'path';
 import { forceExit } from '../runtime.js';
 import got from 'got';
 
-const RELEASES_URL = 'https://raw.githubusercontent.com/night-slayer18/leetcode-cli/main/docs/releases.md';
+const RELEASES_URL =
+  'https://raw.githubusercontent.com/night-slayer18/leetcode-cli/main/docs/releases.md';
 
 type Dispatch = (msg: AppMsg) => void;
 
@@ -213,14 +211,14 @@ async function fetchStats(dispatch: Dispatch): Promise<void> {
     const [profile, skills, daily] = await Promise.all([
       leetcodeClient.getUserProfile(status.username),
       leetcodeClient.getSkillStats(status.username),
-      leetcodeClient.getDailyChallenge()
+      leetcodeClient.getDailyChallenge(),
     ]);
 
-    dispatch({ 
-      type: 'STATS_FETCH_SUCCESS', 
-      stats: profile, 
+    dispatch({
+      type: 'STATS_FETCH_SUCCESS',
+      stats: profile,
       skills: skills,
-      daily: daily 
+      daily: daily,
     });
   } catch (err) {
     dispatch({
@@ -247,35 +245,38 @@ function saveConfig(key: string, value: string): void {
   }
 }
 
-async function getSolutionCode(slug: string): Promise<{ code: string; lang: string; questionId: string }> {
-    
-    const configLang = config.getLanguage();
+async function getSolutionCode(
+  slug: string
+): Promise<{ code: string; lang: string; questionId: string }> {
+  const configLang = config.getLanguage();
 
-    const problem = await leetcodeClient.getProblem(slug);
-    
-    const fileName = getSolutionFileName(problem.questionFrontendId, problem.titleSlug, configLang);
+  const problem = await leetcodeClient.getProblem(slug);
 
-    const workDir = config.getWorkDir();
-    const difficulty = problem.difficulty; 
-    const category = problem.topicTags.length > 0
-        ? problem.topicTags[0].name.replace(/[^\w\s-]/g, '').trim()
-        : 'Uncategorized';
-        
-    const filePath = path.join(workDir, difficulty, category, fileName);
-    
+  const fileName = getSolutionFileName(problem.questionFrontendId, problem.titleSlug, configLang);
+
+  const workDir = config.getWorkDir();
+  const difficulty = problem.difficulty;
+  const category =
+    problem.topicTags.length > 0
+      ? problem.topicTags[0].name.replace(/[^\w\s-]/g, '').trim()
+      : 'Uncategorized';
+
+  const filePath = path.join(workDir, difficulty, category, fileName);
+
+  try {
+    const code = await fs.readFile(filePath, 'utf-8');
+    return { code, lang: configLang, questionId: problem.questionId };
+  } catch (e) {
+    const rootPath = path.join(workDir, fileName);
     try {
-        const code = await fs.readFile(filePath, 'utf-8');
-        return { code, lang: configLang, questionId: problem.questionId };
-    } catch (e) {
-        
-        const rootPath = path.join(workDir, fileName);
-        try {
-             const code = await fs.readFile(rootPath, 'utf-8');
-             return { code, lang: configLang, questionId: problem.questionId };
-        } catch {
-             throw new Error(`Could not read solution file at ${filePath}. Make sure you have picked the problem first.`);
-        }
+      const code = await fs.readFile(rootPath, 'utf-8');
+      return { code, lang: configLang, questionId: problem.questionId };
+    } catch {
+      throw new Error(
+        `Could not read solution file at ${filePath}. Make sure you have picked the problem first.`
+      );
     }
+  }
 }
 
 async function pickProblem(slug: string, dispatch: Dispatch): Promise<void> {
@@ -283,7 +284,8 @@ async function pickProblem(slug: string, dispatch: Dispatch): Promise<void> {
     const problem = await leetcodeClient.getProblem(slug);
 
     const langInput = config.getLanguage();
-    const language: SupportedLanguage = (LANG_SLUG_MAP[langInput] ?? langInput) as SupportedLanguage;
+    const language: SupportedLanguage = (LANG_SLUG_MAP[langInput] ??
+      langInput) as SupportedLanguage;
 
     const snippets = problem.codeSnippets ?? [];
     const template = getCodeTemplate(snippets, language);
@@ -304,70 +306,69 @@ async function pickProblem(slug: string, dispatch: Dispatch): Promise<void> {
 
     const workDir = config.getWorkDir();
     const difficulty = problem.difficulty;
-    const category = problem.topicTags.length > 0
+    const category =
+      problem.topicTags.length > 0
         ? problem.topicTags[0].name.replace(/[^\w\s-]/g, '').trim()
         : 'Uncategorized';
 
     const targetDir = path.join(workDir, difficulty, category);
 
     try {
-        await fs.mkdir(targetDir, { recursive: true });
-    } catch (e) {
-        
-    }
+      await fs.mkdir(targetDir, { recursive: true });
+    } catch (e) {}
 
     const fileName = getSolutionFileName(problem.questionFrontendId, problem.titleSlug, language);
     const filePath = path.join(targetDir, fileName);
 
     if (!existsSync(filePath)) {
-       await fs.writeFile(filePath, content, 'utf-8');
-       dispatch({ type: 'PROBLEM_ACTION_SUCCESS', message: `Created ${fileName}` }); 
+      await fs.writeFile(filePath, content, 'utf-8');
+      dispatch({ type: 'PROBLEM_ACTION_SUCCESS', message: `Created ${fileName}` });
     } else {
-       dispatch({ type: 'PROBLEM_ACTION_SUCCESS', message: `File ready: ${fileName}` });
+      dispatch({ type: 'PROBLEM_ACTION_SUCCESS', message: `File ready: ${fileName}` });
     }
-    
   } catch (err) {
-    dispatch({ 
-        type: 'PROBLEM_ACTION_ERROR', 
-        error: err instanceof Error ? err.message : 'Failed to pick problem' 
+    dispatch({
+      type: 'PROBLEM_ACTION_ERROR',
+      error: err instanceof Error ? err.message : 'Failed to pick problem',
     });
   }
 }
 
 async function testSolution(slug: string, dispatch: Dispatch): Promise<void> {
   try {
-     const { code, lang } = await getSolutionCode(slug);
-     const problem = await leetcodeClient.getProblem(slug);
+    const { code, lang } = await getSolutionCode(slug);
+    const problem = await leetcodeClient.getProblem(slug);
 
-     const result = await leetcodeClient.testSolution(
-         slug, 
-         code, 
-         lang, 
-         problem.exampleTestcases, 
-         problem.questionId
-     );
-     
-     dispatch({ type: 'PROBLEM_TEST_RESULT', result });
+    const result = await leetcodeClient.testSolution(
+      slug,
+      code,
+      lang,
+      problem.exampleTestcases,
+      problem.questionId
+    );
+
+    dispatch({ type: 'PROBLEM_TEST_RESULT', result });
   } catch (err) {
-      dispatch({ type: 'PROBLEM_ACTION_ERROR', error: err instanceof Error ? err.message : 'Test failed' });
+    dispatch({
+      type: 'PROBLEM_ACTION_ERROR',
+      error: err instanceof Error ? err.message : 'Test failed',
+    });
   }
 }
 
 async function submitSolution(slug: string, dispatch: Dispatch): Promise<void> {
   try {
-     const { code, lang } = await getSolutionCode(slug);
-     const problem = await leetcodeClient.getProblem(slug);
+    const { code, lang } = await getSolutionCode(slug);
+    const problem = await leetcodeClient.getProblem(slug);
 
-     const result = await leetcodeClient.submitSolution(
-         slug,
-         code,
-         lang,
-         problem.questionId
-     );
-     
-     dispatch({ type: 'PROBLEM_SUBMIT_RESULT', result });
+    const result = await leetcodeClient.submitSolution(slug, code, lang, problem.questionId);
+
+    dispatch({ type: 'PROBLEM_SUBMIT_RESULT', result });
   } catch (err) {
-      dispatch({ type: 'PROBLEM_ACTION_ERROR', error: err instanceof Error ? err.message : 'Submit failed' });
+    dispatch({
+      type: 'PROBLEM_ACTION_ERROR',
+      error: err instanceof Error ? err.message : 'Submit failed',
+    });
   }
 }
 
@@ -391,7 +392,7 @@ async function fetchRandom(dispatch: Dispatch): Promise<void> {
   try {
     const slug = await leetcodeClient.getRandomProblem();
     if (slug) {
-       dispatch({ type: 'FETCH_RANDOM_SUCCESS', slug: slug });
+      dispatch({ type: 'FETCH_RANDOM_SUCCESS', slug: slug });
     } else {
       throw new Error('No random problem found');
     }
@@ -404,79 +405,93 @@ async function fetchRandom(dispatch: Dispatch): Promise<void> {
 }
 
 async function loadNote(problemId: string, dispatch: Dispatch): Promise<void> {
-    try {
-        const notesDir = path.join(config.getWorkDir(), '.notes');
-        const notePath = path.join(notesDir, `${problemId}.md`);
-        
-        if (existsSync(notePath)) {
-            const content = await fs.readFile(notePath, 'utf-8');
-            dispatch({ type: 'PROBLEM_NOTE_LOADED', content });
-        } else {
-            dispatch({ type: 'PROBLEM_NOTE_LOADED', content: 'No notes found. Press "n" again to create/edit.' });
-        }
-    } catch (err) {
-        dispatch({ type: 'PROBLEM_ACTION_ERROR', error: 'Failed to load note' });
+  try {
+    const notesDir = path.join(config.getWorkDir(), '.notes');
+    const notePath = path.join(notesDir, `${problemId}.md`);
+
+    if (existsSync(notePath)) {
+      const content = await fs.readFile(notePath, 'utf-8');
+      dispatch({ type: 'PROBLEM_NOTE_LOADED', content });
+    } else {
+      dispatch({
+        type: 'PROBLEM_NOTE_LOADED',
+        content: 'No notes found. Press "n" again to create/edit.',
+      });
     }
+  } catch (err) {
+    dispatch({ type: 'PROBLEM_ACTION_ERROR', error: 'Failed to load note' });
+  }
 }
 
 async function diffSnapshot(slug: string, snapshotId: string, dispatch: Dispatch): Promise<void> {
-    try {
-        
-        const { code: currentCode } = await getSolutionCode(slug);
+  try {
+    const { code: currentCode } = await getSolutionCode(slug);
 
-        const problem = await leetcodeClient.getProblem(slug);
-        const problemId = problem.questionFrontendId;
-        
-        const snapshot = snapshotStorage.get(problemId, snapshotId);
-        if (!snapshot) throw new Error('Snapshot not found');
+    const problem = await leetcodeClient.getProblem(slug);
+    const problemId = problem.questionFrontendId;
 
-        const snapshotCode = snapshotStorage.getCode(problemId, snapshot);
+    const snapshot = snapshotStorage.get(problemId, snapshotId);
+    if (!snapshot) throw new Error('Snapshot not found');
 
-        const diff = diffLines(currentCode, snapshotCode);
+    const snapshotCode = snapshotStorage.getCode(problemId, snapshot);
 
-        let output = '';
-        diff.forEach((part: any) => {
-             const color = part.added ? '[green]' : part.removed ? '[red]' : '[grey]';
-             const prefix = part.added ? '+ ' : part.removed ? '- ' : '  ';
-             part.value.split('\n').forEach((line: string) => {
-                 if(line) output += `${color}${prefix}${line}\n`;
-             });
-        });
-        
-        dispatch({ type: 'PROBLEM_DIFF_LOADED', content: output });
-        
-    } catch (err) {
-        dispatch({ type: 'PROBLEM_ACTION_ERROR', error: err instanceof Error ? err.message : 'Diff failed' });
-    }
+    const diff = diffLines(currentCode, snapshotCode);
+
+    let output = '';
+    diff.forEach((part: any) => {
+      const color = part.added ? '[green]' : part.removed ? '[red]' : '[grey]';
+      const prefix = part.added ? '+ ' : part.removed ? '- ' : '  ';
+      part.value.split('\n').forEach((line: string) => {
+        if (line) output += `${color}${prefix}${line}\n`;
+      });
+    });
+
+    dispatch({ type: 'PROBLEM_DIFF_LOADED', content: output });
+  } catch (err) {
+    dispatch({
+      type: 'PROBLEM_ACTION_ERROR',
+      error: err instanceof Error ? err.message : 'Diff failed',
+    });
+  }
 }
 
-async function restoreSnapshot(slug: string, snapshotId: string, dispatch: Dispatch): Promise<void> {
-    try {
-        const problem = await leetcodeClient.getProblem(slug);
-        const problemId = problem.questionFrontendId;
-        
-        const snapshot = snapshotStorage.get(problemId, snapshotId);
-        if (!snapshot) throw new Error('Snapshot not found');
-        
-        const snapshotCode = snapshotStorage.getCode(problemId, snapshot);
+async function restoreSnapshot(
+  slug: string,
+  snapshotId: string,
+  dispatch: Dispatch
+): Promise<void> {
+  try {
+    const problem = await leetcodeClient.getProblem(slug);
+    const problemId = problem.questionFrontendId;
 
-        const configLang = config.getLanguage(); 
-        const fileName = getSolutionFileName(problem.questionFrontendId, problem.titleSlug, (snapshot.language as any) || configLang);
-        const workDir = config.getWorkDir();
-        const difficulty = problem.difficulty;
-        const category = problem.topicTags.length > 0 ? problem.topicTags[0].name.replace(/[^\w\s-]/g, '').trim() : 'Uncategorized';
-        const targetDir = path.join(workDir, difficulty, category);
-        const filePath = path.join(targetDir, fileName);
-        
-        await fs.writeFile(filePath, snapshotCode, 'utf-8');
-        
-        dispatch({ type: 'PROBLEM_ACTION_SUCCESS', message: `Restored snapshot '${snapshot.name}'` });
-        
-    } catch (err) {
-        dispatch({ type: 'PROBLEM_ACTION_ERROR', error: 'Restore failed' });
-    }
+    const snapshot = snapshotStorage.get(problemId, snapshotId);
+    if (!snapshot) throw new Error('Snapshot not found');
+
+    const snapshotCode = snapshotStorage.getCode(problemId, snapshot);
+
+    const configLang = config.getLanguage();
+    const fileName = getSolutionFileName(
+      problem.questionFrontendId,
+      problem.titleSlug,
+      (snapshot.language as any) || configLang
+    );
+    const workDir = config.getWorkDir();
+    const difficulty = problem.difficulty;
+    const category =
+      problem.topicTags.length > 0
+        ? problem.topicTags[0].name.replace(/[^\w\s-]/g, '').trim()
+        : 'Uncategorized';
+    const targetDir = path.join(workDir, difficulty, category);
+    const filePath = path.join(targetDir, fileName);
+
+    await fs.writeFile(filePath, snapshotCode, 'utf-8');
+
+    dispatch({ type: 'PROBLEM_ACTION_SUCCESS', message: `Restored snapshot '${snapshot.name}'` });
+  } catch (err) {
+    dispatch({ type: 'PROBLEM_ACTION_ERROR', error: 'Restore failed' });
+  }
 }
- async function fetchSubmissions(slug: string, dispatch: Dispatch): Promise<void> {
+async function fetchSubmissions(slug: string, dispatch: Dispatch): Promise<void> {
   try {
     const submissions = await leetcodeClient.getSubmissionList(slug, 20);
     dispatch({ type: 'PROBLEM_SUBMISSIONS_LOADED', submissions });
@@ -489,41 +504,44 @@ async function restoreSnapshot(slug: string, snapshotId: string, dispatch: Dispa
 }
 
 async function fetchChangelog(dispatch: Dispatch): Promise<void> {
-    console.log('Fetching changelog...');
-    dispatch({ type: 'CHANGELOG_FETCH_START' });
-    try {
-        const content = await got(RELEASES_URL).text();
-        console.log('Changelog fetched:', content.slice(0, 50));
-        dispatch({ type: 'CHANGELOG_FETCH_SUCCESS', content });
-    } catch (e: any) {
-        console.error('Changelog fetch error:', e);
-        dispatch({ type: 'CHANGELOG_FETCH_ERROR', error: e.message || 'Failed to fetch changelog' });
-    }
+  console.log('Fetching changelog...');
+  dispatch({ type: 'CHANGELOG_FETCH_START' });
+  try {
+    const content = await got(RELEASES_URL).text();
+    console.log('Changelog fetched:', content.slice(0, 50));
+    dispatch({ type: 'CHANGELOG_FETCH_SUCCESS', content });
+  } catch (e: any) {
+    console.error('Changelog fetch error:', e);
+    dispatch({ type: 'CHANGELOG_FETCH_ERROR', error: e.message || 'Failed to fetch changelog' });
+  }
 }
 
 function logout(dispatch: Dispatch): void {
-    credentials.clear();
-    
-    dispatch({ type: 'AUTH_CHECK_COMPLETE', user: null });
+  credentials.clear();
+
+  dispatch({ type: 'AUTH_CHECK_COMPLETE', user: null });
 }
 
 async function login(session: string, csrf: string, dispatch: Dispatch): Promise<void> {
-    const creds = { session, csrfToken: csrf };
-    leetcodeClient.setCredentials(creds);
+  const creds = { session, csrfToken: csrf };
+  leetcodeClient.setCredentials(creds);
 
-    try {
-        const status = await leetcodeClient.checkAuth();
-        if (status.isSignedIn && status.username) {
-            credentials.set(creds);
-            dispatch({ type: 'LOGIN_SUCCESS', username: status.username });
-            // Also update global app state
-            setTimeout(() => {
-                 dispatch({ type: 'AUTH_CHECK_COMPLETE', user: { username: status.username! } });
-            }, 1000);
-        } else {
-            dispatch({ type: 'LOGIN_ERROR', error: 'Invalid credentials. Please check your session cookies.' });
-        }
-    } catch (e) {
-        dispatch({ type: 'LOGIN_ERROR', error: e instanceof Error ? e.message : 'Login failed' });
+  try {
+    const status = await leetcodeClient.checkAuth();
+    if (status.isSignedIn && status.username) {
+      credentials.set(creds);
+      dispatch({ type: 'LOGIN_SUCCESS', username: status.username });
+      // Also update global app state
+      setTimeout(() => {
+        dispatch({ type: 'AUTH_CHECK_COMPLETE', user: { username: status.username! } });
+      }, 1000);
+    } else {
+      dispatch({
+        type: 'LOGIN_ERROR',
+        error: 'Invalid credentials. Please check your session cookies.',
+      });
     }
+  } catch (e) {
+    dispatch({ type: 'LOGIN_ERROR', error: e instanceof Error ? e.message : 'Login failed' });
+  }
 }

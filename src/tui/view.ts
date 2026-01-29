@@ -1,5 +1,3 @@
-
-
 import chalk from 'chalk';
 import type { AppModel } from './types.js';
 import { colors, borders, icons } from './theme.js';
@@ -14,7 +12,7 @@ import { view as renderWorkspaceScreen } from './screens/workspace/view.js';
 import { view as loginView } from './screens/login/view.js';
 import { view as renderChangelogScreen } from './screens/changelog/view.js';
 import { view as problemView } from './screens/problem/view.js';
-import { center, stripAnsi, renderLogo, box, keyHint } from './lib/layout.js';
+import { center, renderLogo } from './lib/layout.js';
 
 export function view(model: AppModel): string {
   const lines: string[] = [];
@@ -35,7 +33,7 @@ export function view(model: AppModel): string {
   });
   lines.push(...headerLines);
 
-  const contentHeight = height - 4; 
+  const contentHeight = height - 4;
   const content = renderScreen(model, width, contentHeight);
   lines.push(content);
 
@@ -66,22 +64,42 @@ function renderScreen(model: AppModel, width: number, height: number): string {
       return loginView(screenState.model as import('./types.js').LoginScreenModel, width, height);
 
     case 'workspace':
-      return renderWorkspaceScreen(screenState.model as import('./types.js').WorkspaceScreenModel, width, height);
+      return renderWorkspaceScreen(
+        screenState.model as import('./types.js').WorkspaceScreenModel,
+        width,
+        height
+      );
 
     case 'timer':
       return timerView(screenState.model as import('./types.js').TimerScreenModel, width, height);
 
     case 'stats':
-      return renderStatsScreen(screenState.model as import('./types.js').StatsScreenModel, width, height);
+      return renderStatsScreen(
+        screenState.model as import('./types.js').StatsScreenModel,
+        width,
+        height
+      );
 
     case 'config':
-      return renderConfigScreen(screenState.model as import('./types.js').ConfigScreenModel, width, height);
+      return renderConfigScreen(
+        screenState.model as import('./types.js').ConfigScreenModel,
+        width,
+        height
+      );
 
     case 'problem':
-      return problemView(screenState.model as import('./types.js').ProblemScreenModel, width, height);
+      return problemView(
+        screenState.model as import('./types.js').ProblemScreenModel,
+        width,
+        height
+      );
 
     case 'changelog':
-      return renderChangelogScreen(screenState.model as import('./types.js').ChangelogScreenModel, width, height);
+      return renderChangelogScreen(
+        screenState.model as import('./types.js').ChangelogScreenModel,
+        width,
+        height
+      );
   }
 }
 
@@ -107,59 +125,65 @@ function renderLoadingScreen(width: number, height: number): string {
   return lines.join('\n');
 }
 
-
-
 function renderHelpScreen(width: number, height: number): string {
   const lines: string[] = [];
 
-  const totalContentHeight = 4 + 4 + 7 + 5; 
+  const totalContentHeight = 4 + 4 + 7 + 5;
   const availableSpace = height - totalContentHeight - 2;
-  const gap = Math.max(0, Math.floor(availableSpace / 5)); 
+  const gap = Math.max(0, Math.floor(availableSpace / 5));
 
-  for(let i=0; i<gap; i++) lines.push('');
+  for (let i = 0; i < gap; i++) lines.push('');
 
   lines.push(chalk.hex(colors.primary).bold(`  ${icons.star} Keyboard Shortcuts`));
   lines.push(chalk.hex(colors.textMuted)('  ' + borders.horizontal.repeat(width - 4)));
   lines.push('');
 
   const shortcuts = [
-    { section: 'Global', items: [
-      ['?', 'Toggle help'],
-      ['Ctrl+C', 'Quit'],
-      ['Esc', 'Go back'],
-    ]},
-    { section: 'Navigation', items: [
-      ['j / ↓', 'Move down'],
-      ['k / ↑', 'Move up'],
-      ['g', 'Go to top'],
-      ['G', 'Go to bottom'],
-      ['Page Up/Down', 'Page navigation'],
-    ]},
-    { section: 'Home Screen', items: [
-      ['l', 'Problem List'],
-      ['d', 'Daily Challenge'],
-      ['t', 'Timer'],
-      ['s', 'Statistics'],
-      ['c', 'Config'],
-      ['q', 'Quit'],
-    ]},
-    { section: 'List Screen', items: [
-      ['/', 'Search'],
-      ['1/2/3', 'Filter Easy/Medium/Hard'],
-      ['c', 'Clear filters'],
-      ['Enter', 'Open problem'],
-    ]},
+    {
+      section: 'Global',
+      items: [
+        ['?', 'Toggle help'],
+        ['Ctrl+C', 'Quit'],
+        ['Esc', 'Go back'],
+      ],
+    },
+    {
+      section: 'Navigation',
+      items: [
+        ['j / ↓', 'Move down'],
+        ['k / ↑', 'Move up'],
+        ['g', 'Go to top'],
+        ['G', 'Go to bottom'],
+        ['Page Up/Down', 'Page navigation'],
+      ],
+    },
+    {
+      section: 'Home Screen',
+      items: [
+        ['l', 'Problem List'],
+        ['d', 'Daily Challenge'],
+        ['t', 'Timer'],
+        ['s', 'Statistics'],
+        ['c', 'Config'],
+        ['q', 'Quit'],
+      ],
+    },
+    {
+      section: 'List Screen',
+      items: [
+        ['/', 'Search'],
+        ['1/2/3', 'Filter Easy/Medium/Hard'],
+        ['c', 'Clear filters'],
+        ['Enter', 'Open problem'],
+      ],
+    },
   ];
 
   for (const group of shortcuts) {
-    for(let i=0; i<gap; i++) lines.push('');
+    for (let i = 0; i < gap; i++) lines.push('');
     lines.push(chalk.hex(colors.primary).bold(`  ${group.section}`));
     for (const [key, desc] of group.items) {
-      lines.push(
-        '    ' +
-        chalk.hex(colors.cyan)(key.padEnd(14)) +
-        chalk.hex(colors.text)(desc)
-      );
+      lines.push('    ' + chalk.hex(colors.cyan)(key.padEnd(14)) + chalk.hex(colors.text)(desc));
     }
   }
 
@@ -169,4 +193,3 @@ function renderHelpScreen(width: number, height: number): string {
 
   return lines.join('\n');
 }
-

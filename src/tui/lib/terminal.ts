@@ -1,5 +1,3 @@
-
-
 import ansiEscapes from 'ansi-escapes';
 
 export const ENTER_ALT_SCREEN = '\x1b[?1049h';
@@ -16,8 +14,8 @@ export function enterAltScreen(): void {
 export function exitAltScreen(): void {
   process.stdout.write(SHOW_CURSOR);
   process.stdout.write(EXIT_ALT_SCREEN);
-  
-  process.stdout.write('\x1b[0m'); 
+
+  process.stdout.write('\x1b[0m');
 }
 
 export function exitAltScreenAsync(): Promise<void> {

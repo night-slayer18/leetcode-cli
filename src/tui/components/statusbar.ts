@@ -1,5 +1,3 @@
-
-
 import chalk from 'chalk';
 import { colors, borders } from '../theme.js';
 import { stripAnsi, keyHints } from '../lib/layout.js';
@@ -18,7 +16,9 @@ export function renderStatusBar(props: StatusBarProps): string[] {
   lines.push(chalk.hex(colors.textMuted)(borders.horizontal.repeat(width)));
 
   const hintsText = keyHints(hints);
-  const screenBadge = chalk.bgHex(colors.bgHighlight).hex(colors.primary)(` ${screen.toUpperCase()} `);
+  const screenBadge = chalk.bgHex(colors.bgHighlight).hex(colors.primary)(
+    ` ${screen.toUpperCase()} `
+  );
 
   let statusLine: string;
   if (message) {

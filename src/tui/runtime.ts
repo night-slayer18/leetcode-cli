@@ -1,5 +1,3 @@
-
-
 import { stdin, stdout } from 'node:process';
 import ansiEscapes from 'ansi-escapes';
 import cliCursor from 'cli-cursor';
@@ -25,20 +23,23 @@ export function dispatch(msg: AppMsg): void {
       suspendTUI();
       notesCommand(cmd.id, 'edit', { silent: true })
         .catch((err) => {
-           dispatch({ type: 'GLOBAL_ERROR', error: err instanceof Error ? err.message : 'Failed to open editor' });
+          dispatch({
+            type: 'GLOBAL_ERROR',
+            error: err instanceof Error ? err.message : 'Failed to open editor',
+          });
         })
         .finally(() => {
-        resumeTUI();
+          resumeTUI();
 
-        lastRenderedOutput = ''; 
-        stdout.write(ansiEscapes.cursorTo(0, 0));
-        stdout.write(ansiEscapes.eraseScreen);
-        currentModel = { ...currentModel, needsRender: true };
+          lastRenderedOutput = '';
+          stdout.write(ansiEscapes.cursorTo(0, 0));
+          stdout.write(ansiEscapes.eraseScreen);
+          currentModel = { ...currentModel, needsRender: true };
 
-        dispatch({ type: 'PROBLEM_VIEW_NOTE' });
-        
-        render();
-      });
+          dispatch({ type: 'PROBLEM_VIEW_NOTE' });
+
+          render();
+        });
     } else {
       executeCommand(cmd, dispatch);
     }
@@ -124,13 +125,10 @@ export async function runApp(initialModel: AppModel): Promise<void> {
 
   process.on('exit', () => cleanup());
 
-  await new Promise<void>((resolve) => {
-
-  });
+  await new Promise<void>((resolve) => {});
 }
 
 export function forceExit(): void {
   cleanup();
   process.exit(0);
 }
-

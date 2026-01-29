@@ -1,14 +1,12 @@
-
-
 import chalk from 'chalk';
 import type { ListScreenModel, Problem } from '../../types.js';
 import { colors, borders, icons, layout } from '../../theme.js';
-import { 
-  stripAnsi, 
-  padEnd, 
-  padStart, 
-  truncate, 
-  statusIcon, 
+import {
+  stripAnsi,
+  padEnd,
+  padStart,
+  truncate,
+  statusIcon,
   difficultyBadge,
   badge,
   progressBar,
@@ -48,10 +46,7 @@ export function view(model: ListScreenModel, width: number, height: number): str
 
   const listHeight = Math.max(3, contentHeight - 9);
 
-  const visibleProblems = model.problems.slice(
-    model.scrollOffset,
-    model.scrollOffset + listHeight
-  );
+  const visibleProblems = model.problems.slice(model.scrollOffset, model.scrollOffset + listHeight);
 
   for (let i = 0; i < visibleProblems.length; i++) {
     const problem = visibleProblems[i];
@@ -70,18 +65,17 @@ export function view(model: ListScreenModel, width: number, height: number): str
 }
 
 function renderListHeader(model: ListScreenModel, width: number): string {
-  
   const titleText = model.bookmarkFilter ? '★ Bookmarks' : `${icons.folder} Problems`;
   const title = chalk.hex(colors.primary).bold(titleText);
-  const count = chalk.hex(colors.textMuted)(`(${model.problems.length}${model.bookmarkFilter ? ' bookmarked' : ` of ${model.total}`})`);
-  const loadingIndicator = model.loadingMore 
-    ? chalk.hex(colors.primary)(' ⋯ Loading more...') 
-    : '';
+  const count = chalk.hex(colors.textMuted)(
+    `(${model.problems.length}${model.bookmarkFilter ? ' bookmarked' : ` of ${model.total}`})`
+  );
+  const loadingIndicator = model.loadingMore ? chalk.hex(colors.primary)(' ⋯ Loading more...') : '';
 
   const leftPart = `${title} ${count}${loadingIndicator}`;
 
   if (model.total > 0) {
-    const solvedCount = model.problems.filter(p => p.status === 'ac').length;
+    const solvedCount = model.problems.filter((p) => p.status === 'ac').length;
     const progressWidth = 20;
     const progress = progressBar(solvedCount, model.problems.length, progressWidth);
     const progressLabel = chalk.hex(colors.textMuted)(` ${solvedCount} solved`);
@@ -98,7 +92,6 @@ function renderSearchBar(model: ListScreenModel, width: number): string {
   const prefix = chalk.hex(colors.textMuted)(`${icons.target} Search: `);
 
   if (model.searchMode) {
-    
     const buffer = model.searchBuffer || '';
     const cursor = chalk.hex(colors.primary)('▌');
     const searchBox = chalk.bgHex(colors.bgHighlight).hex(colors.textBright)(
@@ -108,7 +101,6 @@ function renderSearchBar(model: ListScreenModel, width: number): string {
   }
 
   if (model.searchQuery) {
-    
     const queryText = chalk.hex(colors.primary).underline(model.searchQuery);
     const clearHint = chalk.hex(colors.textMuted)('  [c] to clear');
     return prefix + queryText + clearHint;
@@ -145,7 +137,12 @@ function renderFilters(model: ListScreenModel, width: number): string {
 
   parts.push(chalk.hex(colors.textMuted)(' │ '));
 
-  const statuses: Array<{ key: string; value: 'solved' | 'attempted' | 'todo'; label: string; color: string }> = [
+  const statuses: Array<{
+    key: string;
+    value: 'solved' | 'attempted' | 'todo';
+    label: string;
+    color: string;
+  }> = [
     { key: 's', value: 'solved', label: 'Solved', color: colors.success },
     { key: 'a', value: 'attempted', label: 'Tried', color: colors.warning },
   ];
@@ -175,33 +172,48 @@ function renderFilters(model: ListScreenModel, width: number): string {
 
 function renderTableHeader(width: number): string {
   const cols = layout.tableColumns;
-  const titleWidth = width - cols.selector - cols.status - cols.id - cols.difficulty - cols.acceptance - cols.premium - 6;
+  const titleWidth =
+    width -
+    cols.selector -
+    cols.status -
+    cols.id -
+    cols.difficulty -
+    cols.acceptance -
+    cols.premium -
+    6;
 
   return chalk.hex(colors.textMuted)(
     '  ' +
-    padEnd('', cols.selector) +
-    padEnd('', cols.status) +
-    padEnd('ID', cols.id) +
-    padEnd('Title', titleWidth) +
-    padEnd('Diff', cols.difficulty) +
-    padStart('Acc %', cols.acceptance) +
-    '  ' +
-    padEnd('', cols.premium)
+      padEnd('', cols.selector) +
+      padEnd('', cols.status) +
+      padEnd('ID', cols.id) +
+      padEnd('Title', titleWidth) +
+      padEnd('Diff', cols.difficulty) +
+      padStart('Acc %', cols.acceptance) +
+      '  ' +
+      padEnd('', cols.premium)
   );
 }
 
 function renderProblemRow(problem: Problem, isSelected: boolean, width: number): string {
   const cols = layout.tableColumns;
-  const titleWidth = width - cols.selector - cols.status - cols.id - cols.difficulty - cols.acceptance - cols.premium - 6;
+  const titleWidth =
+    width -
+    cols.selector -
+    cols.status -
+    cols.id -
+    cols.difficulty -
+    cols.acceptance -
+    cols.premium -
+    6;
 
-  const selector = isSelected
-    ? chalk.hex(colors.primary).bold('▶ ')
-    : '  ';
+  const selector = isSelected ? chalk.hex(colors.primary).bold('▶ ') : '  ';
 
   const statusIconStr = statusIcon(problem.status);
-  const status = visibleLength(statusIconStr) < cols.status 
-     ? statusIconStr + ' '.repeat(cols.status - visibleLength(statusIconStr)) 
-     : statusIconStr;
+  const status =
+    visibleLength(statusIconStr) < cols.status
+      ? statusIconStr + ' '.repeat(cols.status - visibleLength(statusIconStr))
+      : statusIconStr;
 
   const id = chalk.hex(colors.textMuted)(padEnd(problem.questionFrontendId, cols.id));
 
@@ -210,13 +222,17 @@ function renderProblemRow(problem: Problem, isSelected: boolean, width: number):
     : chalk.hex(colors.text)(truncate(problem.title, titleWidth));
   const titlePadded = padEnd(title, titleWidth);
 
-  const diffColor = 
-    problem.difficulty === 'Easy' ? colors.success :
-    problem.difficulty === 'Medium' ? colors.warning :
-    colors.error;
+  const diffColor =
+    problem.difficulty === 'Easy'
+      ? colors.success
+      : problem.difficulty === 'Medium'
+        ? colors.warning
+        : colors.error;
   const diff = chalk.hex(diffColor)(padEnd(problem.difficulty, cols.difficulty));
 
-  const acc = chalk.hex(colors.textMuted)(padStart(`${Math.round(problem.acRate)}%`, cols.acceptance));
+  const acc = chalk.hex(colors.textMuted)(
+    padStart(`${Math.round(problem.acRate)}%`, cols.acceptance)
+  );
 
   const premium = problem.isPaidOnly ? chalk.hex(colors.warning)('💎') : '  ';
 
@@ -232,16 +248,15 @@ function renderProblemRow(problem: Problem, isSelected: boolean, width: number):
 }
 
 function renderListFooter(model: ListScreenModel, width: number): string {
-  
-  const position = model.problems.length > 0
-    ? `${model.cursor + 1} of ${model.problems.length}`
-    : '0 of 0';
+  const position =
+    model.problems.length > 0 ? `${model.cursor + 1} of ${model.problems.length}` : '0 of 0';
 
   const leftPart = chalk.hex(colors.textMuted)(`Position: ${position}`);
 
-  const moreInfo = model.problems.length < model.total
-    ? chalk.hex(colors.textMuted)(` (${model.total - model.problems.length} more available)`)
-    : '';
+  const moreInfo =
+    model.problems.length < model.total
+      ? chalk.hex(colors.textMuted)(` (${model.total - model.problems.length} more available)`)
+      : '';
 
   const hints = [
     keyHint('j/k', 'Move'),

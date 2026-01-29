@@ -1,5 +1,3 @@
-
-
 import { runApp } from './runtime.js';
 import { createInitialModel } from './types.js';
 

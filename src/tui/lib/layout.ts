@@ -1,5 +1,3 @@
-
-
 import chalk from 'chalk';
 import { colors, borders, icons, progressChars, layout } from '../theme.js';
 
@@ -35,10 +33,10 @@ export function center(str: string, width: number): string {
   const stripped = stripAnsi(str);
   const len = stripped.length;
   if (len >= width) return str;
-  
+
   const leftPad = Math.floor((width - len) / 2);
   const rightPad = width - len - leftPad;
-  
+
   return ' '.repeat(leftPad) + str + ' '.repeat(rightPad);
 }
 
@@ -54,30 +52,33 @@ export interface BoxOptions {
 
 const BORDER_CHARS: Record<BorderStyle, any> = {
   light: borders,
-  round: borders, 
+  round: borders,
   heavy: {
-    horizontal: '━', vertical: '┃',
-    topLeft: '┏', topRight: '┓', bottomLeft: '┗', bottomRight: '┛'
+    horizontal: '━',
+    vertical: '┃',
+    topLeft: '┏',
+    topRight: '┓',
+    bottomLeft: '┗',
+    bottomRight: '┛',
   },
   double: {
-    horizontal: '═', vertical: '║',
-    topLeft: '╔', topRight: '╗', bottomLeft: '╚', bottomRight: '╝'
-  }
+    horizontal: '═',
+    vertical: '║',
+    topLeft: '╔',
+    topRight: '╗',
+    bottomLeft: '╚',
+    bottomRight: '╝',
+  },
 };
 
 export function box(content: string[], width: number, options: string | BoxOptions = {}): string[] {
   const opts: BoxOptions = typeof options === 'string' ? { title: options } : options;
-  const { 
-    title, 
-    borderColor = colors.textMuted, 
-    padding = 0, 
-    borderStyle = 'round' 
-  } = opts;
+  const { title, borderColor = colors.textMuted, padding = 0, borderStyle = 'round' } = opts;
 
   const chars = BORDER_CHARS[borderStyle] || borders;
   const lines: string[] = [];
   const innerWidth = width - 2;
-  const contentWidth = innerWidth - (padding * 2);
+  const contentWidth = innerWidth - padding * 2;
 
   let top = chalk.hex(borderColor)(chars.topLeft || chars.roundTopLeft);
   if (title) {
@@ -92,96 +93,97 @@ export function box(content: string[], width: number, options: string | BoxOptio
   top += chalk.hex(borderColor)(chars.topRight || chars.roundTopRight);
   lines.push(top);
 
-  for(let i=0; i<padding; i++) {
-      lines.push(
-          chalk.hex(borderColor)(chars.vertical) + 
-          ' '.repeat(innerWidth) + 
-          chalk.hex(borderColor)(chars.vertical)
-      );
+  for (let i = 0; i < padding; i++) {
+    lines.push(
+      chalk.hex(borderColor)(chars.vertical) +
+        ' '.repeat(innerWidth) +
+        chalk.hex(borderColor)(chars.vertical)
+    );
   }
 
   for (const line of content) {
     const stripped = stripAnsi(line);
-    
+
     let processed = line;
     if (stripped.length > contentWidth) {
-        processed = truncate(line, contentWidth);
+      processed = truncate(line, contentWidth);
     }
     const pad = contentWidth - stripAnsi(processed).length;
     const finalLine = ' '.repeat(padding) + processed + ' '.repeat(pad) + ' '.repeat(padding);
 
     lines.push(
-      chalk.hex(borderColor)(chars.vertical) +
-      finalLine +
-      chalk.hex(borderColor)(chars.vertical)
+      chalk.hex(borderColor)(chars.vertical) + finalLine + chalk.hex(borderColor)(chars.vertical)
     );
   }
 
-  for(let i=0; i<padding; i++) {
-      lines.push(
-          chalk.hex(borderColor)(chars.vertical) + 
-          ' '.repeat(innerWidth) + 
-          chalk.hex(borderColor)(chars.vertical)
-      );
+  for (let i = 0; i < padding; i++) {
+    lines.push(
+      chalk.hex(borderColor)(chars.vertical) +
+        ' '.repeat(innerWidth) +
+        chalk.hex(borderColor)(chars.vertical)
+    );
   }
 
   lines.push(
     chalk.hex(borderColor)(chars.bottomLeft || chars.roundBottomLeft) +
-    chalk.hex(borderColor)(chars.horizontal.repeat(innerWidth)) +
-    chalk.hex(borderColor)(chars.bottomRight || chars.roundBottomRight)
+      chalk.hex(borderColor)(chars.horizontal.repeat(innerWidth)) +
+      chalk.hex(borderColor)(chars.bottomRight || chars.roundBottomRight)
   );
 
   return lines;
 }
 
 export function dropShadow(lines: string[], width: number): string[] {
+  const result = lines.map((line) => line + chalk.hex('#1a1a1a')('█'));
 
-    const result = lines.map(line => line + chalk.hex('#1a1a1a')('█'));
+  const bottomShadow = ' ' + chalk.hex('#1a1a1a')('▀'.repeat(width + 1));
+  result.push(bottomShadow);
 
-    const bottomShadow = ' ' + chalk.hex('#1a1a1a')('▀'.repeat(width + 1));
-    result.push(bottomShadow);
-    
-    return result;
+  return result;
 }
 
 export function renderModal(
-    base: string[], 
-    content: string[], 
-    screenW: number, 
-    screenH: number, 
-    opts: BoxOptions = {}
+  base: string[],
+  content: string[],
+  screenW: number,
+  screenH: number,
+  opts: BoxOptions = {}
 ): string {
-    const minW = opts.minWidth || 50;
+  const minW = opts.minWidth || 50;
 
-    const maxW = Math.max(minW, Math.min(80, Math.floor(screenW * 0.8)));
+  const maxW = Math.max(minW, Math.min(80, Math.floor(screenW * 0.8)));
 
-    const padding = opts.padding || 0;
-    const contentW = maxW - 2 - (padding * 2);
+  const padding = opts.padding || 0;
+  const contentW = maxW - 2 - padding * 2;
 
-    const boxed = box(content, maxW, opts);
+  const boxed = box(content, maxW, opts);
 
-    const shadowed = dropShadow(boxed, maxW);
+  const shadowed = dropShadow(boxed, maxW);
 
-    const overlayHeight = shadowed.length;
-    const overlayWidth = maxW + 1; 
-    
-    const startY = Math.max(0, Math.floor((screenH - overlayHeight) / 2));
+  const overlayHeight = shadowed.length;
+  const overlayWidth = maxW + 1;
 
-    const result = [...base];
-    
-    while (result.length < screenH) result.push(' '.repeat(screenW));
-    
-    for (let i = 0; i < overlayHeight; i++) {
-        const y = startY + i;
-        if (y < result.length) {
-            result[y] = center(shadowed[i], screenW);
-        }
+  const startY = Math.max(0, Math.floor((screenH - overlayHeight) / 2));
+
+  const result = [...base];
+
+  while (result.length < screenH) result.push(' '.repeat(screenW));
+
+  for (let i = 0; i < overlayHeight; i++) {
+    const y = startY + i;
+    if (y < result.length) {
+      result[y] = center(shadowed[i], screenW);
     }
-    
-    return result.join('\n');
+  }
+
+  return result.join('\n');
 }
 
-export function horizontalLine(width: number, style: 'light' | 'heavy' | 'double' = 'light', color: string = colors.textMuted): string {
+export function horizontalLine(
+  width: number,
+  style: 'light' | 'heavy' | 'double' = 'light',
+  color: string = colors.textMuted
+): string {
   let char = borders.horizontal;
   if (style === 'heavy') char = BORDER_CHARS.heavy.horizontal;
   if (style === 'double') char = BORDER_CHARS.double.horizontal;
@@ -212,7 +214,6 @@ export function percentageBar(value: number, width: number, color: string): stri
 }
 
 export function gradientText(text: string, startColor: string, endColor: string): string {
-  
   const chars = text.split('');
   return chars
     .map((char, i) => {
@@ -277,7 +278,7 @@ export function keyHint(key: string, label: string): string {
 }
 
 export function keyHints(hints: Array<{ key: string; label: string }>): string {
-  return hints.map(h => keyHint(h.key, h.label)).join('  ');
+  return hints.map((h) => keyHint(h.key, h.label)).join('  ');
 }
 
 export const LEETCODE_LOGO = [
@@ -297,7 +298,7 @@ export const LEETCODE_LOGO_SMALL = [
 
 export function renderLogo(width: number): string[] {
   const logo = width >= 80 ? LEETCODE_LOGO : LEETCODE_LOGO_SMALL;
-  return logo.map(line => center(chalk.hex(colors.primary)(line), width));
+  return logo.map((line) => center(chalk.hex(colors.primary)(line), width));
 }
 
 const SPINNER_FRAMES = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
@@ -314,7 +315,7 @@ export function tableRow(
   selected: boolean = false
 ): string {
   const row = cells
-    .map(cell => {
+    .map((cell) => {
       let content = cell.content;
       const stripped = stripAnsi(content);
 
@@ -341,7 +342,7 @@ export function tableRow(
 
 export function wrapLines(lines: readonly string[], maxWidth: number): string[] {
   const result: string[] = [];
-  
+
   for (const line of lines) {
     const stripped = stripAnsi(line);
     if (stripped.length <= maxWidth) {
@@ -354,33 +355,33 @@ export function wrapLines(lines: readonly string[], maxWidth: number): string[] 
     let currentLen = 0;
 
     for (const word of words) {
-        const wordLen = stripAnsi(word).length;
+      const wordLen = stripAnsi(word).length;
 
-        if (wordLen > maxWidth) {
-             if (currentLen > 0) {
-                 result.push(currentLine);
-                 currentLine = '';
-                 currentLen = 0;
-             }
-             
-             let remainingWord = word;
-             while (stripAnsi(remainingWord).length > 0) {
-                 const chunk = remainingWord.slice(0, maxWidth);
-
-                 result.push(chunk);
-                 remainingWord = remainingWord.slice(maxWidth);
-             }
-             continue;
+      if (wordLen > maxWidth) {
+        if (currentLen > 0) {
+          result.push(currentLine);
+          currentLine = '';
+          currentLen = 0;
         }
 
-        if (currentLen + wordLen + (currentLine ? 1 : 0) <= maxWidth) {
-            currentLine += (currentLine ? ' ' : '') + word;
-            currentLen += wordLen + (currentLine ? 1 : 0);
-        } else {
-            result.push(currentLine);
-            currentLine = word;
-            currentLen = wordLen;
+        let remainingWord = word;
+        while (stripAnsi(remainingWord).length > 0) {
+          const chunk = remainingWord.slice(0, maxWidth);
+
+          result.push(chunk);
+          remainingWord = remainingWord.slice(maxWidth);
         }
+        continue;
+      }
+
+      if (currentLen + wordLen + (currentLine ? 1 : 0) <= maxWidth) {
+        currentLine += (currentLine ? ' ' : '') + word;
+        currentLen += wordLen + (currentLine ? 1 : 0);
+      } else {
+        result.push(currentLine);
+        currentLine = word;
+        currentLen = wordLen;
+      }
     }
     if (currentLine) result.push(currentLine);
   }

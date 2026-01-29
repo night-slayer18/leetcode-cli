@@ -5,8 +5,18 @@ interface CalendarData {
 }
 
 const MONTH_NAMES = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
 ];
 
 export function generateHeatmap(calendarJson: string, width: number): string[] {
@@ -15,7 +25,7 @@ export function generateHeatmap(calendarJson: string, width: number): string[] {
     const now = new Date();
 
     const numWeeks = Math.min(52, Math.floor((width - 10) / 3));
-    
+
     const weeks: { start: string; end: string; count: number; days: number }[] = [];
 
     for (let w = numWeeks - 1; w >= 0; w--) {
@@ -51,28 +61,30 @@ export function generateHeatmap(calendarJson: string, width: number): string[] {
     const lines: string[] = [];
     const totalSubmissions = weeks.reduce((sum, w) => sum + w.count, 0);
     const totalActiveDays = weeks.reduce((sum, w) => sum + w.days, 0);
-    
+
     lines.push(chalk.bold(`📅 Activity (Last ${numWeeks} Weeks)`));
     lines.push(chalk.gray('─'.repeat(width)));
 
-    const weeksToShow = weeks.slice(-8); 
-    
+    const weeksToShow = weeks.slice(-8);
+
     for (const week of weeksToShow) {
-        const weekLabel = `${week.start} - ${week.end}`.padEnd(18);
-        const barChar = '█';
-        const bar = week.count > 0
-            ? chalk.green(barChar.repeat(Math.min(week.count, 10))).padEnd(10)
-            : chalk.gray('·').padEnd(10);
-        
-        const countStr = week.count > 0 ? `${week.count} subs`.padEnd(10) : ''.padEnd(10);
-        const daysStr = week.days > 0 ? `${week.days}d active` : '';
-        
-        lines.push(`  ${chalk.white(weekLabel)} ${bar} ${chalk.cyan(countStr)} ${chalk.yellow(daysStr)}`);
+      const weekLabel = `${week.start} - ${week.end}`.padEnd(18);
+      const barChar = '█';
+      const bar =
+        week.count > 0
+          ? chalk.green(barChar.repeat(Math.min(week.count, 10))).padEnd(10)
+          : chalk.gray('·').padEnd(10);
+
+      const countStr = week.count > 0 ? `${week.count} subs`.padEnd(10) : ''.padEnd(10);
+      const daysStr = week.days > 0 ? `${week.days}d active` : '';
+
+      lines.push(
+        `  ${chalk.white(weekLabel)} ${bar} ${chalk.cyan(countStr)} ${chalk.yellow(daysStr)}`
+      );
     }
-    
+
     lines.push(chalk.gray(`Total: ${totalSubmissions} subs, ${totalActiveDays} days`));
     return lines;
-
   } catch (e) {
     return [chalk.red('Error parsing calendar data')];
   }
@@ -118,7 +130,7 @@ export function generateTrendChart(calendarJson: string, width: number): string[
 
     lines.push(`   0 └${'────'.repeat(7)}`);
     lines.push(`       ${days.map((d) => d.label.padEnd(4)).join('')}`);
-    
+
     return lines;
   } catch (e) {
     return [chalk.red('Error generating trend')];

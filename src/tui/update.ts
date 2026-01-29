@@ -1,6 +1,14 @@
-
-
-import type { AppModel, AppMsg, Command, ScreenState, ListMsg, HomeMsg, TimerMsg, StatsMsg, ConfigMsg, ProblemMsg } from './types.js';
+import type {
+  AppModel,
+  AppMsg,
+  Command,
+  ScreenState,
+  ListMsg,
+  HomeMsg,
+  TimerMsg,
+  StatsMsg,
+  ConfigMsg,
+} from './types.js';
 import { Cmd } from './types.js';
 import * as ListScreen from './screens/list/index.js';
 import * as HomeScreen from './screens/home/index.js';
@@ -11,17 +19,11 @@ import * as ProblemScreen from './screens/problem/index.js';
 import * as WorkspaceScreen from './screens/workspace/index.js';
 import * as ChangelogScreen from './screens/changelog/index.js';
 import * as LoginScreen from './screens/login/index.js';
-import { logoutCommand } from '../commands/login.js';
 
 export function update(msg: AppMsg, model: AppModel): [AppModel, Command] {
-  
   switch (msg.type) {
-
     case 'INIT':
-      return [
-        { ...model, needsRender: true },
-        Cmd.checkAuth(),
-      ];
+      return [{ ...model, needsRender: true }, Cmd.checkAuth()];
 
     case 'KEY_PRESS': {
       const { key } = msg;
@@ -39,38 +41,59 @@ export function update(msg: AppMsg, model: AppModel): [AppModel, Command] {
           return [{ ...model, ...goBack(model), needsRender: true }, Cmd.none()];
         }
         return [
-          { ...model, ...navigateTo(model, { screen: 'help', model: { scrollOffset: 0 } }), needsRender: true },
+          {
+            ...model,
+            ...navigateTo(model, { screen: 'help', model: { scrollOffset: 0 } }),
+            needsRender: true,
+          },
           Cmd.none(),
         ];
       }
 
       if (key.name === 'escape' && model.screenState.screen !== 'home') {
-        
         if (model.screenState.screen === 'config' && model.screenState.model.editMode) {
-           return handleScreenKeyPress(model, msg);
+          return handleScreenKeyPress(model, msg);
         }
 
         if (model.screenState.screen === 'problem') {
-             const probModel = model.screenState.model as import('./types.js').ProblemScreenModel;
-             if (probModel.testResult || probModel.submissionResult || probModel.successMessage || probModel.error || probModel.activeHintIndex !== null || probModel.showSnapshots || probModel.currentNote !== null || probModel.showDiff) {
-                 const [newProbModel, cmd] = ProblemScreen.update({ type: 'PROBLEM_CLOSE_RESULT' }, probModel, model.terminalHeight, model.terminalWidth);
+          const probModel = model.screenState.model as import('./types.js').ProblemScreenModel;
+          if (
+            probModel.testResult ||
+            probModel.submissionResult ||
+            probModel.successMessage ||
+            probModel.error ||
+            probModel.activeHintIndex !== null ||
+            probModel.showSnapshots ||
+            probModel.currentNote !== null ||
+            probModel.showDiff
+          ) {
+            const [newProbModel, cmd] = ProblemScreen.update(
+              { type: 'PROBLEM_CLOSE_RESULT' },
+              probModel,
+              model.terminalHeight,
+              model.terminalWidth
+            );
 
-                 return [
-                    { ...model, screenState: { screen: 'problem', model: newProbModel }, needsRender: true },
-                    cmd
-                 ];
-             }
+            return [
+              {
+                ...model,
+                screenState: { screen: 'problem', model: newProbModel },
+                needsRender: true,
+              },
+              cmd,
+            ];
+          }
         }
-        
+
         if (model.screenState.screen === 'workspace') {
-             const wsModel = model.screenState.model as import('./types.js').WorkspaceScreenModel;
-             if (wsModel.showCreateInput || wsModel.showDeleteConfirm) {
-                 return handleScreenKeyPress(model, msg);
-             }
+          const wsModel = model.screenState.model as import('./types.js').WorkspaceScreenModel;
+          if (wsModel.showCreateInput || wsModel.showDeleteConfirm) {
+            return handleScreenKeyPress(model, msg);
+          }
         }
 
         if (model.screenState.screen === 'login') {
-             return handleScreenKeyPress(model, msg);
+          return handleScreenKeyPress(model, msg);
         }
 
         return [{ ...model, ...goBack(model), needsRender: true }, Cmd.none()];
@@ -86,10 +109,7 @@ export function update(msg: AppMsg, model: AppModel): [AppModel, Command] {
       ];
 
     case 'NAVIGATE':
-      return [
-        { ...model, ...navigateTo(model, msg.to), needsRender: true },
-        Cmd.none(),
-      ];
+      return [{ ...model, ...navigateTo(model, msg.to), needsRender: true }, Cmd.none()];
 
     case 'GO_BACK':
       return [{ ...model, ...goBack(model), needsRender: true }, Cmd.none()];
@@ -106,7 +126,7 @@ export function update(msg: AppMsg, model: AppModel): [AppModel, Command] {
           Cmd.none(),
         ];
       }
-      
+
       return [
         {
           ...model,
@@ -114,7 +134,13 @@ export function update(msg: AppMsg, model: AppModel): [AppModel, Command] {
           user: null,
           screenState: {
             screen: 'login',
-            model: { step: 'instructions', sessionToken: '', csrfToken: '', focusedField: 'session', error: null },
+            model: {
+              step: 'instructions',
+              sessionToken: '',
+              csrfToken: '',
+              focusedField: 'session',
+              error: null,
+            },
           },
           needsRender: true,
         },
@@ -130,7 +156,11 @@ export function update(msg: AppMsg, model: AppModel): [AppModel, Command] {
     case 'FETCH_DAILY_SUCCESS': {
       const [problemModel, problemCmd] = ProblemScreen.init(msg.slug);
       return [
-        { ...model, ...navigateTo(model, { screen: 'problem', model: problemModel }), needsRender: true },
+        {
+          ...model,
+          ...navigateTo(model, { screen: 'problem', model: problemModel }),
+          needsRender: true,
+        },
         problemCmd,
       ];
     }
@@ -138,7 +168,11 @@ export function update(msg: AppMsg, model: AppModel): [AppModel, Command] {
     case 'FETCH_RANDOM_SUCCESS': {
       const [problemModel, problemCmd] = ProblemScreen.init(msg.slug);
       return [
-        { ...model, ...navigateTo(model, { screen: 'problem', model: problemModel }), needsRender: true },
+        {
+          ...model,
+          ...navigateTo(model, { screen: 'problem', model: problemModel }),
+          needsRender: true,
+        },
         problemCmd,
       ];
     }
@@ -223,30 +257,43 @@ function handleHomeKeyPress(model: AppModel, msg: AppMsg): [AppModel, Command] {
   }
 
   if (key.name === 'd') {
-    
     return [model, Cmd.fetchDaily()];
   }
 
   if (key.name === 'r') {
-    
     return [model, Cmd.fetchRandom()];
   }
 
   if (key.name === 'b') {
-    
     const [listModel, listCmd] = ListScreen.init();
     return [
-      { ...model, ...navigateTo(model, { screen: 'list', model: { ...listModel, bookmarkFilter: true } }), needsRender: true },
+      {
+        ...model,
+        ...navigateTo(model, { screen: 'list', model: { ...listModel, bookmarkFilter: true } }),
+        needsRender: true,
+      },
       listCmd,
     ];
   }
 
   if (key.name === 't') {
     return [
-      { ...model, ...navigateTo(model, { 
-        screen: 'timer', 
-        model: { problemId: null, problemTitle: 'Practice', difficulty: 'Medium', remainingSeconds: 2400, totalSeconds: 2400, status: 'idle', viewMode: 'timer' } 
-      }), needsRender: true },
+      {
+        ...model,
+        ...navigateTo(model, {
+          screen: 'timer',
+          model: {
+            problemId: null,
+            problemTitle: 'Practice',
+            difficulty: 'Medium',
+            remainingSeconds: 2400,
+            totalSeconds: 2400,
+            status: 'idle',
+            viewMode: 'timer',
+          },
+        }),
+        needsRender: true,
+      },
       Cmd.none(),
     ];
   }
@@ -260,14 +307,24 @@ function handleHomeKeyPress(model: AppModel, msg: AppMsg): [AppModel, Command] {
   }
 
   if (key.name === 'y') {
-    
-    return [{ ...model, globalError: 'Use CLI command: leet sync (requires terminal interaction)', needsRender: true }, Cmd.none()];
+    return [
+      {
+        ...model,
+        globalError: 'Use CLI command: leet sync (requires terminal interaction)',
+        needsRender: true,
+      },
+      Cmd.none(),
+    ];
   }
 
   if (key.name === 'w') {
     const [workspaceModel, workspaceCmd] = WorkspaceScreen.init();
     return [
-      { ...model, ...navigateTo(model, { screen: 'workspace', model: workspaceModel }), needsRender: true },
+      {
+        ...model,
+        ...navigateTo(model, { screen: 'workspace', model: workspaceModel }),
+        needsRender: true,
+      },
       workspaceCmd,
     ];
   }
@@ -275,14 +332,22 @@ function handleHomeKeyPress(model: AppModel, msg: AppMsg): [AppModel, Command] {
   if (key.name === 'c') {
     const [configModel, configCmd] = ConfigScreen.init();
     return [
-      { ...model, ...navigateTo(model, { screen: 'config', model: configModel }), needsRender: true },
+      {
+        ...model,
+        ...navigateTo(model, { screen: 'config', model: configModel }),
+        needsRender: true,
+      },
       configCmd,
     ];
   }
 
   if (key.name === '?') {
     return [
-      { ...model, ...navigateTo(model, { screen: 'help', model: { scrollOffset: 0 } }), needsRender: true },
+      {
+        ...model,
+        ...navigateTo(model, { screen: 'help', model: { scrollOffset: 0 } }),
+        needsRender: true,
+      },
       Cmd.none(),
     ];
   }
@@ -290,7 +355,11 @@ function handleHomeKeyPress(model: AppModel, msg: AppMsg): [AppModel, Command] {
   if (key.name === 'v') {
     const [changelogModel, changelogCmd] = ChangelogScreen.init();
     return [
-      { ...model, ...navigateTo(model, { screen: 'changelog', model: changelogModel }), needsRender: true },
+      {
+        ...model,
+        ...navigateTo(model, { screen: 'changelog', model: changelogModel }),
+        needsRender: true,
+      },
       changelogCmd,
     ];
   }
@@ -316,12 +385,13 @@ function handleHomeKeyPress(model: AppModel, msg: AppMsg): [AppModel, Command] {
   }
 
   if (key.name === 'return') {
-    
     const menuActions = ['l', 'd', 'r', 'b', 't', 's', 'y', 'w', 'c', 'v', 'L', '?'];
     const actionKey = menuActions[homeModel.menuIndex];
     if (actionKey) {
-      
-      return handleHomeKeyPress(model, { type: 'KEY_PRESS', key: { name: actionKey, sequence: actionKey, ctrl: false, meta: false, shift: false } });
+      return handleHomeKeyPress(model, {
+        type: 'KEY_PRESS',
+        key: { name: actionKey, sequence: actionKey, ctrl: false, meta: false, shift: false },
+      });
     }
   }
 
@@ -337,7 +407,6 @@ function handleListKeyPress(model: AppModel, msg: AppMsg): [AppModel, Command] {
   let listMsg: ListMsg | null = null;
 
   if (listModel.searchMode) {
-    
     if (key.name === 'escape') {
       listMsg = { type: 'LIST_SEARCH_CANCEL' };
     } else if (key.name === 'return') {
@@ -348,7 +417,6 @@ function handleListKeyPress(model: AppModel, msg: AppMsg): [AppModel, Command] {
       listMsg = { type: 'LIST_SEARCH_INPUT', char: key.sequence };
     }
   } else {
-    
     if (key.name === 'j' || key.name === 'down') {
       listMsg = { type: 'LIST_CURSOR_DOWN' };
     } else if (key.name === 'k' || key.name === 'up') {
@@ -360,26 +428,44 @@ function handleListKeyPress(model: AppModel, msg: AppMsg): [AppModel, Command] {
     } else if (key.name === '/') {
       listMsg = { type: 'LIST_SEARCH_START' };
     } else if (key.name === 'return') {
-      
       const problem = listModel.problems[listModel.cursor];
       if (problem) {
         const [problemModel, problemCmd] = ProblemScreen.init(problem.titleSlug);
         return [
-          { ...model, ...navigateTo(model, { screen: 'problem', model: problemModel }), needsRender: true },
+          {
+            ...model,
+            ...navigateTo(model, { screen: 'problem', model: problemModel }),
+            needsRender: true,
+          },
           problemCmd,
         ];
       }
-      listMsg = { type: 'LIST_SELECT' }; 
+      listMsg = { type: 'LIST_SELECT' };
     } else if (key.name === '1') {
-      listMsg = { type: 'LIST_FILTER_DIFFICULTY', difficulty: listModel.difficultyFilter === 'Easy' ? null : 'Easy' };
+      listMsg = {
+        type: 'LIST_FILTER_DIFFICULTY',
+        difficulty: listModel.difficultyFilter === 'Easy' ? null : 'Easy',
+      };
     } else if (key.name === '2') {
-      listMsg = { type: 'LIST_FILTER_DIFFICULTY', difficulty: listModel.difficultyFilter === 'Medium' ? null : 'Medium' };
+      listMsg = {
+        type: 'LIST_FILTER_DIFFICULTY',
+        difficulty: listModel.difficultyFilter === 'Medium' ? null : 'Medium',
+      };
     } else if (key.name === '3') {
-      listMsg = { type: 'LIST_FILTER_DIFFICULTY', difficulty: listModel.difficultyFilter === 'Hard' ? null : 'Hard' };
+      listMsg = {
+        type: 'LIST_FILTER_DIFFICULTY',
+        difficulty: listModel.difficultyFilter === 'Hard' ? null : 'Hard',
+      };
     } else if (key.name === 's') {
-      listMsg = { type: 'LIST_FILTER_STATUS', status: listModel.statusFilter === 'solved' ? null : 'solved' };
+      listMsg = {
+        type: 'LIST_FILTER_STATUS',
+        status: listModel.statusFilter === 'solved' ? null : 'solved',
+      };
     } else if (key.name === 'a') {
-      listMsg = { type: 'LIST_FILTER_STATUS', status: listModel.statusFilter === 'attempted' ? null : 'attempted' };
+      listMsg = {
+        type: 'LIST_FILTER_STATUS',
+        status: listModel.statusFilter === 'attempted' ? null : 'attempted',
+      };
     } else if (key.name === 'b') {
       listMsg = { type: 'LIST_FILTER_BOOKMARKS' };
     } else if (key.name === 'c') {
@@ -402,7 +488,7 @@ function handleListKeyPress(model: AppModel, msg: AppMsg): [AppModel, Command] {
 
 function delegateToScreen(msg: AppMsg, model: AppModel): [AppModel, Command] {
   const { screenState } = model;
-  const terminalHeight = model.terminalHeight; 
+  const terminalHeight = model.terminalHeight;
 
   switch (screenState.screen) {
     case 'list': {
@@ -454,14 +540,23 @@ function delegateToScreen(msg: AppMsg, model: AppModel): [AppModel, Command] {
       if (!isWorkspaceMsg(msg)) return [model, Cmd.none()];
       const [newScreenModel, cmd] = WorkspaceScreen.update(msg, screenState.model);
       return [
-        { ...model, screenState: { screen: 'workspace', model: newScreenModel }, needsRender: true },
+        {
+          ...model,
+          screenState: { screen: 'workspace', model: newScreenModel },
+          needsRender: true,
+        },
         cmd,
       ];
     }
 
     case 'problem': {
       if (!isProblemMsg(msg)) return [model, Cmd.none()];
-      const [newScreenModel, cmd] = ProblemScreen.update(msg, screenState.model, terminalHeight, model.terminalWidth);
+      const [newScreenModel, cmd] = ProblemScreen.update(
+        msg,
+        screenState.model,
+        terminalHeight,
+        model.terminalWidth
+      );
       return [
         { ...model, screenState: { ...screenState, model: newScreenModel }, needsRender: true },
         cmd,
@@ -472,18 +567,22 @@ function delegateToScreen(msg: AppMsg, model: AppModel): [AppModel, Command] {
       if (!isChangelogMsg(msg)) return [model, Cmd.none()];
       const [newScreenModel, cmd] = ChangelogScreen.update(msg, screenState.model, terminalHeight);
       return [
-        { ...model, screenState: { screen: 'changelog', model: newScreenModel }, needsRender: true },
+        {
+          ...model,
+          screenState: { screen: 'changelog', model: newScreenModel },
+          needsRender: true,
+        },
         cmd,
       ];
     }
 
     case 'login': {
-        if (!isLoginMsg(msg)) return [model, Cmd.none()];
-        const [newScreenModel, cmd] = LoginScreen.update(msg, screenState.model);
-        return [
-            { ...model, screenState: { screen: 'login', model: newScreenModel }, needsRender: true },
-            cmd
-        ];
+      if (!isLoginMsg(msg)) return [model, Cmd.none()];
+      const [newScreenModel, cmd] = LoginScreen.update(msg, screenState.model);
+      return [
+        { ...model, screenState: { screen: 'login', model: newScreenModel }, needsRender: true },
+        cmd,
+      ];
     }
 
     default:
@@ -499,80 +598,82 @@ function handleProblemKeyPress(model: AppModel, msg: AppMsg): [AppModel, Command
   let problemMsg: import('./types.js').ProblemMsg | null = null;
 
   if (problemModel.showSnapshots) {
-       if (key.name === 'j' || key.name === 'down') problemMsg = { type: 'PROBLEM_SNAPSHOT_DOWN' };
-       else if (key.name === 'k' || key.name === 'up') problemMsg = { type: 'PROBLEM_SNAPSHOT_UP' };
-       else if (key.name === 'd') problemMsg = { type: 'PROBLEM_DIFF_SNAPSHOT' };
-       else if (key.name === 'r') problemMsg = { type: 'PROBLEM_RESTORE_SNAPSHOT' };
-       else if (key.name === 'V' || key.name === 'v') problemMsg = { type: 'PROBLEM_CLOSE_SNAPSHOTS' };
-  } 
-  else if (problemModel.currentNote !== null) {
-      if (key.name === 'e') problemMsg = { type: 'PROBLEM_NOTES' }; 
-      else if (key.name === 'n') {
-          
-          if (problemModel.currentNote.includes('No notes found')) {
-             problemMsg = { type: 'PROBLEM_NOTES' };
-          } else {
-             problemMsg = { type: 'PROBLEM_CLOSE_NOTE' };
-          }
-      }
-      else if (key.name === 'j' || key.name === 'down') problemMsg = { type: 'PROBLEM_NOTE_SCROLL_DOWN' };
-      else if (key.name === 'k' || key.name === 'up') problemMsg = { type: 'PROBLEM_NOTE_SCROLL_UP' };
-  }
-  else if (problemModel.showDiff) {
-       if (key.name === 'd') problemMsg = { type: 'PROBLEM_CLOSE_DIFF' };
-       else if (key.name === 'j' || key.name === 'down') problemMsg = { type: 'PROBLEM_DIFF_SCROLL_DOWN' };
-       else if (key.name === 'k' || key.name === 'up') problemMsg = { type: 'PROBLEM_DIFF_SCROLL_UP' };
-  }
-  else if (problemModel.showSubmissions) {
-      if (key.name === 'H' || key.name === 'S' || key.name === 'escape') problemMsg = { type: 'PROBLEM_CLOSE_SUBMISSIONS' };
-      else if (key.name === 'j' || key.name === 'down') problemMsg = { type: 'PROBLEM_SUBMISSIONS_SCROLL_DOWN' };
-      else if (key.name === 'k' || key.name === 'up') problemMsg = { type: 'PROBLEM_SUBMISSIONS_SCROLL_UP' };
-  }
-  
-  else if (problemModel.activeHintIndex !== null) {
-      if (key.name === 'left') problemMsg = { type: 'PROBLEM_PREV_HINT' };
-      else if (key.name === 'right') problemMsg = { type: 'PROBLEM_NEXT_HINT' };
-      else if (key.name === 'h') problemMsg = { type: 'PROBLEM_TOGGLE_HINT' };
-      else if (key.name === 'j' || key.name === 'down') problemMsg = { type: 'PROBLEM_HINT_SCROLL_DOWN' };
-      else if (key.name === 'k' || key.name === 'up') problemMsg = { type: 'PROBLEM_HINT_SCROLL_UP' };
-  }
-  
-  else {
-      if (key.name === 'j' || key.name === 'down') {
-        problemMsg = { type: 'PROBLEM_SCROLL_DOWN' };
-      } else if (key.name === 'k' || key.name === 'up') {
-        problemMsg = { type: 'PROBLEM_SCROLL_UP' };
-      } else if (key.name === 'pagedown') {
-        problemMsg = { type: 'PROBLEM_PAGE_DOWN' };
-      } else if (key.name === 'pageup') {
-        problemMsg = { type: 'PROBLEM_PAGE_UP' };
-      } else if (key.name === 'g') {
-        problemMsg = { type: 'PROBLEM_TOP' };
-      } else if (key.name === 'G') {
-        problemMsg = { type: 'PROBLEM_BOTTOM' };
-      } else if (key.name === 'p') {
-        problemMsg = { type: 'PROBLEM_PICK' };
-      } else if (key.name === 't') {
-        problemMsg = { type: 'PROBLEM_TEST' };
-      } else if (key.name === 's') {
-        problemMsg = { type: 'PROBLEM_SUBMIT' };
-      } else if (key.name === 'b') {
-        problemMsg = { type: 'PROBLEM_BOOKMARK' };
-      } else if (key.name === 'n') {
-        problemMsg = { type: 'PROBLEM_VIEW_NOTE' };
-      } else if (key.name === 'e') {
+    if (key.name === 'j' || key.name === 'down') problemMsg = { type: 'PROBLEM_SNAPSHOT_DOWN' };
+    else if (key.name === 'k' || key.name === 'up') problemMsg = { type: 'PROBLEM_SNAPSHOT_UP' };
+    else if (key.name === 'd') problemMsg = { type: 'PROBLEM_DIFF_SNAPSHOT' };
+    else if (key.name === 'r') problemMsg = { type: 'PROBLEM_RESTORE_SNAPSHOT' };
+    else if (key.name === 'V' || key.name === 'v') problemMsg = { type: 'PROBLEM_CLOSE_SNAPSHOTS' };
+  } else if (problemModel.currentNote !== null) {
+    if (key.name === 'e') problemMsg = { type: 'PROBLEM_NOTES' };
+    else if (key.name === 'n') {
+      if (problemModel.currentNote.includes('No notes found')) {
         problemMsg = { type: 'PROBLEM_NOTES' };
-      } else if (key.name === 'h') {
-        problemMsg = { type: 'PROBLEM_TOGGLE_HINT' };
-      } else if (key.name === 'H' || key.name === 'S') { 
-        problemMsg = { type: 'PROBLEM_SHOW_SUBMISSIONS' };
-      } else if (key.name === 'v' || key.name === 'w') { 
-        problemMsg = { type: 'PROBLEM_SHOW_SNAPSHOTS' };
+      } else {
+        problemMsg = { type: 'PROBLEM_CLOSE_NOTE' };
       }
+    } else if (key.name === 'j' || key.name === 'down')
+      problemMsg = { type: 'PROBLEM_NOTE_SCROLL_DOWN' };
+    else if (key.name === 'k' || key.name === 'up') problemMsg = { type: 'PROBLEM_NOTE_SCROLL_UP' };
+  } else if (problemModel.showDiff) {
+    if (key.name === 'd') problemMsg = { type: 'PROBLEM_CLOSE_DIFF' };
+    else if (key.name === 'j' || key.name === 'down')
+      problemMsg = { type: 'PROBLEM_DIFF_SCROLL_DOWN' };
+    else if (key.name === 'k' || key.name === 'up') problemMsg = { type: 'PROBLEM_DIFF_SCROLL_UP' };
+  } else if (problemModel.showSubmissions) {
+    if (key.name === 'H' || key.name === 'S' || key.name === 'escape')
+      problemMsg = { type: 'PROBLEM_CLOSE_SUBMISSIONS' };
+    else if (key.name === 'j' || key.name === 'down')
+      problemMsg = { type: 'PROBLEM_SUBMISSIONS_SCROLL_DOWN' };
+    else if (key.name === 'k' || key.name === 'up')
+      problemMsg = { type: 'PROBLEM_SUBMISSIONS_SCROLL_UP' };
+  } else if (problemModel.activeHintIndex !== null) {
+    if (key.name === 'left') problemMsg = { type: 'PROBLEM_PREV_HINT' };
+    else if (key.name === 'right') problemMsg = { type: 'PROBLEM_NEXT_HINT' };
+    else if (key.name === 'h') problemMsg = { type: 'PROBLEM_TOGGLE_HINT' };
+    else if (key.name === 'j' || key.name === 'down')
+      problemMsg = { type: 'PROBLEM_HINT_SCROLL_DOWN' };
+    else if (key.name === 'k' || key.name === 'up') problemMsg = { type: 'PROBLEM_HINT_SCROLL_UP' };
+  } else {
+    if (key.name === 'j' || key.name === 'down') {
+      problemMsg = { type: 'PROBLEM_SCROLL_DOWN' };
+    } else if (key.name === 'k' || key.name === 'up') {
+      problemMsg = { type: 'PROBLEM_SCROLL_UP' };
+    } else if (key.name === 'pagedown') {
+      problemMsg = { type: 'PROBLEM_PAGE_DOWN' };
+    } else if (key.name === 'pageup') {
+      problemMsg = { type: 'PROBLEM_PAGE_UP' };
+    } else if (key.name === 'g') {
+      problemMsg = { type: 'PROBLEM_TOP' };
+    } else if (key.name === 'G') {
+      problemMsg = { type: 'PROBLEM_BOTTOM' };
+    } else if (key.name === 'p') {
+      problemMsg = { type: 'PROBLEM_PICK' };
+    } else if (key.name === 't') {
+      problemMsg = { type: 'PROBLEM_TEST' };
+    } else if (key.name === 's') {
+      problemMsg = { type: 'PROBLEM_SUBMIT' };
+    } else if (key.name === 'b') {
+      problemMsg = { type: 'PROBLEM_BOOKMARK' };
+    } else if (key.name === 'n') {
+      problemMsg = { type: 'PROBLEM_VIEW_NOTE' };
+    } else if (key.name === 'e') {
+      problemMsg = { type: 'PROBLEM_NOTES' };
+    } else if (key.name === 'h') {
+      problemMsg = { type: 'PROBLEM_TOGGLE_HINT' };
+    } else if (key.name === 'H' || key.name === 'S') {
+      problemMsg = { type: 'PROBLEM_SHOW_SUBMISSIONS' };
+    } else if (key.name === 'v' || key.name === 'w') {
+      problemMsg = { type: 'PROBLEM_SHOW_SNAPSHOTS' };
+    }
   }
 
   if (problemMsg) {
-    const [newScreenModel, cmd] = ProblemScreen.update(problemMsg, problemModel, model.terminalHeight, model.terminalWidth);
+    const [newScreenModel, cmd] = ProblemScreen.update(
+      problemMsg,
+      problemModel,
+      model.terminalHeight,
+      model.terminalWidth
+    );
     return [
       { ...model, screenState: { screen: 'problem', model: newScreenModel }, needsRender: true },
       cmd,
@@ -588,14 +689,23 @@ function handleGenericKeyPress(model: AppModel, msg: AppMsg): [AppModel, Command
   const { screenState } = model;
 
   if (screenState.screen === 'timer') {
-    const timerModel = screenState.model; 
+    const timerModel = screenState.model;
     if (key.name === 'space') {
-      const [newModel, cmd] = TimerScreen.update({ type: timerModel.status === 'running' ? 'TIMER_PAUSE' : 'TIMER_START' }, timerModel);
-       return [{ ...model, screenState: { ...screenState, model: newModel }, needsRender: true }, cmd];
+      const [newModel, cmd] = TimerScreen.update(
+        { type: timerModel.status === 'running' ? 'TIMER_PAUSE' : 'TIMER_START' },
+        timerModel
+      );
+      return [
+        { ...model, screenState: { ...screenState, model: newModel }, needsRender: true },
+        cmd,
+      ];
     }
     if (key.name === 'r') {
       const [newModel, cmd] = TimerScreen.update({ type: 'TIMER_RESET' }, timerModel);
-       return [{ ...model, screenState: { ...screenState, model: newModel }, needsRender: true }, cmd];
+      return [
+        { ...model, screenState: { ...screenState, model: newModel }, needsRender: true },
+        cmd,
+      ];
     }
   }
 
@@ -604,28 +714,37 @@ function handleGenericKeyPress(model: AppModel, msg: AppMsg): [AppModel, Command
     let configMsg: import('./types.js').ConfigMsg | null = null;
 
     if (configModel.editMode) {
-        if (key.name === 'escape') configMsg = { type: 'CONFIG_CANCEL_EDIT' };
-        else if (key.name === 'return' || key.name === 'enter') configMsg = { type: 'CONFIG_SAVE_VALUE' };
-        else if (key.name === 'backspace') configMsg = { type: 'CONFIG_BACKSPACE' };
-        else if (key.sequence.length === 1 && !key.ctrl && !key.meta) configMsg = { type: 'CONFIG_INPUT', char: key.sequence };
+      if (key.name === 'escape') configMsg = { type: 'CONFIG_CANCEL_EDIT' };
+      else if (key.name === 'return' || key.name === 'enter')
+        configMsg = { type: 'CONFIG_SAVE_VALUE' };
+      else if (key.name === 'backspace') configMsg = { type: 'CONFIG_BACKSPACE' };
+      else if (key.sequence.length === 1 && !key.ctrl && !key.meta)
+        configMsg = { type: 'CONFIG_INPUT', char: key.sequence };
     } else {
-        if (key.name === 'j' || key.name === 'down') configMsg = { type: 'CONFIG_OPTION_DOWN' };
-        else if (key.name === 'k' || key.name === 'up') configMsg = { type: 'CONFIG_OPTION_UP' };
-        else if (key.name === 'return' || key.name === 'enter') configMsg = { type: 'CONFIG_OPTION_SELECT' };
+      if (key.name === 'j' || key.name === 'down') configMsg = { type: 'CONFIG_OPTION_DOWN' };
+      else if (key.name === 'k' || key.name === 'up') configMsg = { type: 'CONFIG_OPTION_UP' };
+      else if (key.name === 'return' || key.name === 'enter')
+        configMsg = { type: 'CONFIG_OPTION_SELECT' };
     }
 
     if (configMsg) {
-       const [newModel, cmd] = ConfigScreen.update(configMsg, configModel);
-       return [{ ...model, screenState: { ...screenState, model: newModel }, needsRender: true }, cmd];
+      const [newModel, cmd] = ConfigScreen.update(configMsg, configModel);
+      return [
+        { ...model, screenState: { ...screenState, model: newModel }, needsRender: true },
+        cmd,
+      ];
     }
   }
 
   if (screenState.screen === 'stats') {
-      const statsModel = screenState.model;
-      if (key.name === 'r' || key.name === 'R') {
-          const [newModel, cmd] = StatsScreen.update({ type: 'STATS_REFRESH' }, statsModel);
-          return [{ ...model, screenState: { ...screenState, model: newModel }, needsRender: true }, cmd];
-      }
+    const statsModel = screenState.model;
+    if (key.name === 'r' || key.name === 'R') {
+      const [newModel, cmd] = StatsScreen.update({ type: 'STATS_REFRESH' }, statsModel);
+      return [
+        { ...model, screenState: { ...screenState, model: newModel }, needsRender: true },
+        cmd,
+      ];
+    }
   }
 
   return [model, Cmd.none()];
@@ -664,111 +783,142 @@ function isChangelogMsg(msg: AppMsg): msg is import('./types.js').ChangelogMsg {
 }
 
 function isLoginMsg(msg: AppMsg): msg is import('./types.js').LoginMsg {
-    return msg.type.startsWith('LOGIN_');
+  return msg.type.startsWith('LOGIN_');
 }
 
 function handleWorkspaceKeyPress(model: AppModel, msg: AppMsg): [AppModel, Command] {
-    if (msg.type !== 'KEY_PRESS') return [model, Cmd.none()];
-    const { key } = msg;
-    const wsModel = model.screenState.model as import('./types.js').WorkspaceScreenModel;
-    let wsMsg: import('./types.js').WorkspaceMsg | null = null;
+  if (msg.type !== 'KEY_PRESS') return [model, Cmd.none()];
+  const { key } = msg;
+  const wsModel = model.screenState.model as import('./types.js').WorkspaceScreenModel;
+  let wsMsg: import('./types.js').WorkspaceMsg | null = null;
 
-    if (wsModel.showCreateInput) {
-        if (key.name === 'escape') wsMsg = { type: 'WORKSPACE_CREATE_CANCEL' };
-        else if (key.name === 'return' || key.name === 'enter') wsMsg = { type: 'WORKSPACE_CREATE_SUBMIT' };
-        else if (key.name === 'backspace') wsMsg = { type: 'WORKSPACE_CREATE_BACKSPACE' };
-        else if (key.sequence.length === 1 && !key.ctrl && !key.meta) wsMsg = { type: 'WORKSPACE_CREATE_INPUT', char: key.sequence };
-    } else if (wsModel.showDeleteConfirm) {
-        if (key.name === 'y') wsMsg = { type: 'WORKSPACE_DELETE_CONFIRM' };
-        else if (key.name === 'n' || key.name === 'escape') wsMsg = { type: 'WORKSPACE_DELETE_CANCEL' };
-    } else {
-        if (key.name === 'j' || key.name === 'down') wsMsg = { type: 'WORKSPACE_DOWN' };
-        else if (key.name === 'k' || key.name === 'up') wsMsg = { type: 'WORKSPACE_UP' };
-        else if (key.name === 'return' || key.name === 'enter') wsMsg = { type: 'WORKSPACE_SELECT' };
-        else if (key.name === 'c') wsMsg = { type: 'WORKSPACE_CREATE_START' }; 
-        else if (key.name === 'd') wsMsg = { type: 'WORKSPACE_DELETE' };
-    }
+  if (wsModel.showCreateInput) {
+    if (key.name === 'escape') wsMsg = { type: 'WORKSPACE_CREATE_CANCEL' };
+    else if (key.name === 'return' || key.name === 'enter')
+      wsMsg = { type: 'WORKSPACE_CREATE_SUBMIT' };
+    else if (key.name === 'backspace') wsMsg = { type: 'WORKSPACE_CREATE_BACKSPACE' };
+    else if (key.sequence.length === 1 && !key.ctrl && !key.meta)
+      wsMsg = { type: 'WORKSPACE_CREATE_INPUT', char: key.sequence };
+  } else if (wsModel.showDeleteConfirm) {
+    if (key.name === 'y') wsMsg = { type: 'WORKSPACE_DELETE_CONFIRM' };
+    else if (key.name === 'n' || key.name === 'escape') wsMsg = { type: 'WORKSPACE_DELETE_CANCEL' };
+  } else {
+    if (key.name === 'j' || key.name === 'down') wsMsg = { type: 'WORKSPACE_DOWN' };
+    else if (key.name === 'k' || key.name === 'up') wsMsg = { type: 'WORKSPACE_UP' };
+    else if (key.name === 'return' || key.name === 'enter') wsMsg = { type: 'WORKSPACE_SELECT' };
+    else if (key.name === 'c') wsMsg = { type: 'WORKSPACE_CREATE_START' };
+    else if (key.name === 'd') wsMsg = { type: 'WORKSPACE_DELETE' };
+  }
 
-    if (wsMsg) {
-        const [newModel, cmd] = WorkspaceScreen.update(wsMsg, wsModel);
-        return [{ ...model, screenState: { screen: 'workspace', model: newModel }, needsRender: true }, cmd];
-    }
-    return [model, Cmd.none()];
+  if (wsMsg) {
+    const [newModel, cmd] = WorkspaceScreen.update(wsMsg, wsModel);
+    return [
+      { ...model, screenState: { screen: 'workspace', model: newModel }, needsRender: true },
+      cmd,
+    ];
+  }
+  return [model, Cmd.none()];
 }
 
 function handleChangelogKeyPress(model: AppModel, msg: AppMsg): [AppModel, Command] {
-    if (msg.type !== 'KEY_PRESS') return [model, Cmd.none()];
-    const { key } = msg;
+  if (msg.type !== 'KEY_PRESS') return [model, Cmd.none()];
+  const { key } = msg;
 
-    if (key.name === 'k' || key.name === 'up') return updateModel(model, { type: 'CHANGELOG_SCROLL_UP' });
-    if (key.name === 'j' || key.name === 'down') return updateModel(model, { type: 'CHANGELOG_SCROLL_DOWN' });
+  if (key.name === 'k' || key.name === 'up')
+    return updateModel(model, { type: 'CHANGELOG_SCROLL_UP' });
+  if (key.name === 'j' || key.name === 'down')
+    return updateModel(model, { type: 'CHANGELOG_SCROLL_DOWN' });
 
-    return [model, Cmd.none()];
+  return [model, Cmd.none()];
 
-    function updateModel(model: AppModel, msg: import('./types.js').ChangelogMsg): [AppModel, Command] {
-         const screenState = model.screenState;
-         if (screenState.screen !== 'changelog') return [model, Cmd.none()];
-         
-         const [newScreenModel, cmd] = ChangelogScreen.update(msg, screenState.model, model.terminalHeight);
-         return [
-            { ...model, screenState: { screen: 'changelog', model: newScreenModel }, needsRender: true },
-            cmd
-         ];
-    }
+  function updateModel(
+    model: AppModel,
+    msg: import('./types.js').ChangelogMsg
+  ): [AppModel, Command] {
+    const screenState = model.screenState;
+    if (screenState.screen !== 'changelog') return [model, Cmd.none()];
+
+    const [newScreenModel, cmd] = ChangelogScreen.update(
+      msg,
+      screenState.model,
+      model.terminalHeight
+    );
+    return [
+      { ...model, screenState: { screen: 'changelog', model: newScreenModel }, needsRender: true },
+      cmd,
+    ];
+  }
 }
 
 function handleLoginKeyPress(model: AppModel, msg: AppMsg): [AppModel, Command] {
-    if (msg.type !== 'KEY_PRESS') return [model, Cmd.none()];
-    const { key } = msg;
-    const loginModel = model.screenState.model as import('./types.js').LoginScreenModel;
-    
-    if (key.ctrl && key.name === 'c') return [model, Cmd.exit()];
+  if (msg.type !== 'KEY_PRESS') return [model, Cmd.none()];
+  const { key } = msg;
+  const loginModel = model.screenState.model as import('./types.js').LoginScreenModel;
 
-    if (loginModel.step === 'instructions') {
-        if (key.name === 'return' || key.name === 'enter') {
-            return updateLogin(model, { type: 'LOGIN_SUBMIT' });
-        } else if (key.name === 'escape') {
-            return [model, Cmd.exit()];
-        }
-    } else if (loginModel.step === 'input' || loginModel.step === 'error') {
-        if (key.name === 'escape') {
-             return updateLogin(model, { type: 'LOGIN_BACK' }); 
-        } else if (key.name === 'tab' || key.name === 'down' || key.name === 'up') {
-             return updateLogin(model, { type: 'LOGIN_SWITCH_FOCUS' });
-        } else if (key.name === 'return' || key.name === 'enter') {
-            if (loginModel.focusedField === 'session') {
-                 if (loginModel.sessionToken.length > 0) {
-                     return updateLogin(model, { type: 'LOGIN_SET_FOCUS', field: 'csrf' });
-                 }
-            } else {
-                 if (loginModel.csrfToken.length > 0 && loginModel.sessionToken.length > 0) {
-                     return updateLogin(model, { type: 'LOGIN_SUBMIT' });
-                 }
-            }
-        } else if (key.name === 'backspace') {
-             if (loginModel.focusedField === 'session') {
-                 if (loginModel.sessionToken.length > 0) {
-                     return updateLogin(model, { type: 'LOGIN_SESSION_INPUT', value: loginModel.sessionToken.slice(0, -1) });
-                 }
-             } else {
-                 if (loginModel.csrfToken.length > 0) {
-                     return updateLogin(model, { type: 'LOGIN_CSRF_INPUT', value: loginModel.csrfToken.slice(0, -1) });
-                 }
-             }
-        } else if (!key.ctrl && !key.meta) {
-             if (loginModel.focusedField === 'session') {
-                  return updateLogin(model, { type: 'LOGIN_SESSION_INPUT', value: loginModel.sessionToken + key.sequence });
-             } else {
-                  return updateLogin(model, { type: 'LOGIN_CSRF_INPUT', value: loginModel.csrfToken + key.sequence });
-             }
-        }
+  if (key.ctrl && key.name === 'c') return [model, Cmd.exit()];
+
+  if (loginModel.step === 'instructions') {
+    if (key.name === 'return' || key.name === 'enter') {
+      return updateLogin(model, { type: 'LOGIN_SUBMIT' });
+    } else if (key.name === 'escape') {
+      return [model, Cmd.exit()];
     }
-
-    return [model, Cmd.none()];
-
-    function updateLogin(model: AppModel, msg: import('./types.js').LoginMsg): [AppModel, Command] {
-        const [newModel, cmd] = LoginScreen.update(msg, model.screenState.model as import('./types.js').LoginScreenModel);
-        return [{ ...model, screenState: { screen: 'login', model: newModel }, needsRender: true }, cmd];
+  } else if (loginModel.step === 'input' || loginModel.step === 'error') {
+    if (key.name === 'escape') {
+      return updateLogin(model, { type: 'LOGIN_BACK' });
+    } else if (key.name === 'tab' || key.name === 'down' || key.name === 'up') {
+      return updateLogin(model, { type: 'LOGIN_SWITCH_FOCUS' });
+    } else if (key.name === 'return' || key.name === 'enter') {
+      if (loginModel.focusedField === 'session') {
+        if (loginModel.sessionToken.length > 0) {
+          return updateLogin(model, { type: 'LOGIN_SET_FOCUS', field: 'csrf' });
+        }
+      } else {
+        if (loginModel.csrfToken.length > 0 && loginModel.sessionToken.length > 0) {
+          return updateLogin(model, { type: 'LOGIN_SUBMIT' });
+        }
+      }
+    } else if (key.name === 'backspace') {
+      if (loginModel.focusedField === 'session') {
+        if (loginModel.sessionToken.length > 0) {
+          return updateLogin(model, {
+            type: 'LOGIN_SESSION_INPUT',
+            value: loginModel.sessionToken.slice(0, -1),
+          });
+        }
+      } else {
+        if (loginModel.csrfToken.length > 0) {
+          return updateLogin(model, {
+            type: 'LOGIN_CSRF_INPUT',
+            value: loginModel.csrfToken.slice(0, -1),
+          });
+        }
+      }
+    } else if (!key.ctrl && !key.meta) {
+      if (loginModel.focusedField === 'session') {
+        return updateLogin(model, {
+          type: 'LOGIN_SESSION_INPUT',
+          value: loginModel.sessionToken + key.sequence,
+        });
+      } else {
+        return updateLogin(model, {
+          type: 'LOGIN_CSRF_INPUT',
+          value: loginModel.csrfToken + key.sequence,
+        });
+      }
     }
+  }
+
+  return [model, Cmd.none()];
+
+  function updateLogin(model: AppModel, msg: import('./types.js').LoginMsg): [AppModel, Command] {
+    const [newModel, cmd] = LoginScreen.update(
+      msg,
+      model.screenState.model as import('./types.js').LoginScreenModel
+    );
+    return [
+      { ...model, screenState: { screen: 'login', model: newModel }, needsRender: true },
+      cmd,
+    ];
+  }
 }
-

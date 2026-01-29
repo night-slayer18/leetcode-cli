@@ -1,5 +1,3 @@
-
-
 import type { KeyEvent } from '../types.js';
 
 const KEY_SEQUENCES: Record<string, string> = {
@@ -35,13 +33,10 @@ export function parseKeyEvent(data: Buffer | string): KeyEvent {
   if (KEY_SEQUENCES[seq]) {
     name = KEY_SEQUENCES[seq];
   } else if (ctrl && buf.length === 1) {
-    
     name = String.fromCharCode(buf[0] + 96);
   } else if (meta && buf.length === 2) {
-    
     name = String.fromCharCode(buf[1]);
   } else {
-    
     name = seq;
   }
 
