@@ -1,5 +1,17 @@
 # Release Notes
 
+## v2.2.3
+
+> **Release Date**: 2026-01-31
+> **Focus**: Cross-Platform Compatibility (Sync Command)
+
+### 🔧 Improvements
+
+- **Windows Compatibility**: Fixed `sync` command to work correctly on Windows by using `path.basename()` instead of Unix-style path splitting for repository name extraction.
+- **Shell Escaping**: Updated shell argument escaping to use double quotes instead of single quotes for better cross-platform compatibility.
+
+---
+
 ## v2.2.2
 
 > **Release Date**: 2026-01-18
