@@ -4,6 +4,7 @@ import chalk from 'chalk';
 import inquirer from 'inquirer';
 import ora from 'ora';
 import { config } from '../storage/config.js';
+import path from 'path';
 
 function sanitizeRepoName(name: string): string {
   return name.replace(/[^a-zA-Z0-9_-]/g, '-').replace(/--+/g, '-');
@@ -16,8 +17,9 @@ function isValidGitUrl(url: string): boolean {
 }
 
 function escapeShellArg(arg: string): string {
-  return `'${arg.replace(/'/g, "'\\''")}'`;
+  return `"${arg.replace(/"/g, '\\"')}"`;
 }
+
 
 function isGitInstalled(): boolean {
   try {
@@ -101,7 +103,7 @@ async function setupRemote(workDir: string): Promise<string> {
       if (createGh) {
         spinner.start('Creating GitHub repository...');
         try {
-          const rawRepoName = workDir.split('/').pop() || 'leetcode-solutions';
+          const rawRepoName = path.basename(workDir) || 'leetcode-solutions';
           const repoName = sanitizeRepoName(rawRepoName);
           execSync(`gh repo create ${repoName} --private --source=. --remote=origin`, {
             cwd: workDir,
