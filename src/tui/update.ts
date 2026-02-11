@@ -59,7 +59,7 @@ export function update(msg: AppMsg, model: AppModel): [AppModel, Command] {
 
         if (model.screenState.screen === 'problem') {
           const probModel = model.screenState.model as import('./types.js').ProblemScreenModel;
-          if (probModel.activePanel !== 'none') {
+          if (probModel.drawerMode !== 'none') {
             const [newProbModel, cmd] = ProblemScreen.update(
               { type: 'PROBLEM_CLOSE_RESULT' },
               probModel,
@@ -193,18 +193,19 @@ function navigateTo(model: AppModel, to: ScreenState): Partial<AppModel> {
   return {
     screenState: to,
     history: [...model.history, model.screenState],
+    globalError: null,
   };
 }
 
 function goBack(model: AppModel): Partial<AppModel> {
   if (model.history.length === 0) {
-    return { screenState: { screen: 'home', model: { menuIndex: 0 } } };
+    return { screenState: { screen: 'home', model: { menuIndex: 0 } }, globalError: null };
   }
 
   const history = [...model.history];
   const previous = history.pop()!;
 
-  return { screenState: previous, history };
+  return { screenState: previous, history, globalError: null };
 }
 
 function handleScreenKeyPress(model: AppModel, msg: AppMsg): [AppModel, Command] {
@@ -635,51 +636,68 @@ function handleProblemKeyPress(model: AppModel, msg: AppMsg): [AppModel, Command
   const problemModel = model.screenState.model as import('./types.js').ProblemScreenModel;
   let problemMsg: import('./types.js').ProblemMsg | null = null;
 
-  const globalActionMsg = mapProblemGlobalAction(key.name);
-  if (globalActionMsg) {
-    problemMsg = globalActionMsg;
+  if (
+    !problemMsg &&
+    problemModel.drawerMode === 'note' &&
+    (key.name === 'n' || key.name === 'escape')
+  ) {
+    problemMsg = { type: 'PROBLEM_CLOSE_NOTE' };
   }
 
-  if (!problemMsg && problemModel.activePanel === 'snapshots') {
-    if (key.name === 'j' || key.name === 'down') problemMsg = { type: 'PROBLEM_SNAPSHOT_DOWN' };
-    else if (key.name === 'k' || key.name === 'up') problemMsg = { type: 'PROBLEM_SNAPSHOT_UP' };
-    else if (key.name === 'd') problemMsg = { type: 'PROBLEM_DIFF_SNAPSHOT' };
-    else if (key.name === 'r') problemMsg = { type: 'PROBLEM_RESTORE_SNAPSHOT' };
-    else if (key.name === 'V' || key.name === 'v' || key.name === 'escape')
-      problemMsg = { type: 'PROBLEM_CLOSE_SNAPSHOTS' };
-  } else if (!problemMsg && problemModel.activePanel === 'note') {
-    if (key.name === 'e') problemMsg = { type: 'PROBLEM_NOTES' };
-    else if (key.name === 'n' || key.name === 'escape') problemMsg = { type: 'PROBLEM_CLOSE_NOTE' };
-    else if (key.name === 'j' || key.name === 'down')
-      problemMsg = { type: 'PROBLEM_NOTE_SCROLL_DOWN' };
-    else if (key.name === 'k' || key.name === 'up') problemMsg = { type: 'PROBLEM_NOTE_SCROLL_UP' };
-  } else if (!problemMsg && problemModel.activePanel === 'diff') {
-    if (key.name === 'd' || key.name === 'escape') problemMsg = { type: 'PROBLEM_CLOSE_DIFF' };
-    else if (key.name === 'j' || key.name === 'down')
-      problemMsg = { type: 'PROBLEM_DIFF_SCROLL_DOWN' };
-    else if (key.name === 'k' || key.name === 'up') problemMsg = { type: 'PROBLEM_DIFF_SCROLL_UP' };
-  } else if (!problemMsg && problemModel.activePanel === 'submissions') {
-    if (key.name === 'H' || key.name === 'S' || key.name === 'escape')
-      problemMsg = { type: 'PROBLEM_CLOSE_SUBMISSIONS' };
-    else if (key.name === 'j' || key.name === 'down')
-      problemMsg = { type: 'PROBLEM_SUBMISSIONS_SCROLL_DOWN' };
-    else if (key.name === 'k' || key.name === 'up')
-      problemMsg = { type: 'PROBLEM_SUBMISSIONS_SCROLL_UP' };
-  } else if (!problemMsg && problemModel.activePanel === 'hint') {
+  if (
+    !problemMsg &&
+    problemModel.drawerMode === 'diff' &&
+    (key.name === 'd' || key.name === 'escape')
+  ) {
+    problemMsg = { type: 'PROBLEM_CLOSE_DIFF' };
+  }
+
+  if (!problemMsg) {
+    const globalActionMsg = mapProblemGlobalAction(key.name);
+    if (globalActionMsg) {
+      problemMsg = globalActionMsg;
+    }
+  }
+
+  if (!problemMsg && key.name === 'tab' && problemModel.drawerMode !== 'none') {
+    problemMsg = { type: 'PROBLEM_FOCUS_TOGGLE' };
+  }
+
+  if (!problemMsg && problemModel.drawerMode !== 'none' && key.name === 'escape') {
+    problemMsg = { type: 'PROBLEM_CLOSE_RESULT' };
+  }
+
+  if (!problemMsg && problemModel.drawerMode === 'hint') {
     if (key.name === 'left') problemMsg = { type: 'PROBLEM_PREV_HINT' };
     else if (key.name === 'right') problemMsg = { type: 'PROBLEM_NEXT_HINT' };
-    else if (key.name === 'h' || key.name === 'escape') problemMsg = { type: 'PROBLEM_TOGGLE_HINT' };
-    else if (key.name === 'j' || key.name === 'down')
-      problemMsg = { type: 'PROBLEM_HINT_SCROLL_DOWN' };
-    else if (key.name === 'k' || key.name === 'up') problemMsg = { type: 'PROBLEM_HINT_SCROLL_UP' };
-  } else if (
-    !problemMsg &&
-    (problemModel.activePanel === 'status' ||
-      problemModel.activePanel === 'testResult' ||
-      problemModel.activePanel === 'submitResult')
-  ) {
-    if (key.name === 'escape') problemMsg = { type: 'PROBLEM_CLOSE_RESULT' };
-  } else if (!problemMsg) {
+  }
+
+  if (!problemMsg && problemModel.drawerMode !== 'none' && problemModel.focusRegion === 'drawer') {
+    if (problemModel.drawerMode === 'snapshots') {
+      if (key.name === 'j' || key.name === 'down') problemMsg = { type: 'PROBLEM_SNAPSHOT_DOWN' };
+      else if (key.name === 'k' || key.name === 'up') problemMsg = { type: 'PROBLEM_SNAPSHOT_UP' };
+      else if (key.name === 'd') problemMsg = { type: 'PROBLEM_DIFF_SNAPSHOT' };
+      else if (key.name === 'r') problemMsg = { type: 'PROBLEM_RESTORE_SNAPSHOT' };
+    } else if (problemModel.drawerMode === 'hint') {
+      if (key.name === 'j' || key.name === 'down') problemMsg = { type: 'PROBLEM_HINT_SCROLL_DOWN' };
+      else if (key.name === 'k' || key.name === 'up') problemMsg = { type: 'PROBLEM_HINT_SCROLL_UP' };
+    } else if (problemModel.drawerMode === 'submissions') {
+      if (key.name === 'j' || key.name === 'down')
+        problemMsg = { type: 'PROBLEM_SUBMISSIONS_SCROLL_DOWN' };
+      else if (key.name === 'k' || key.name === 'up')
+        problemMsg = { type: 'PROBLEM_SUBMISSIONS_SCROLL_UP' };
+    } else if (problemModel.drawerMode === 'note') {
+      if (key.name === 'j' || key.name === 'down') problemMsg = { type: 'PROBLEM_NOTE_SCROLL_DOWN' };
+      else if (key.name === 'k' || key.name === 'up') problemMsg = { type: 'PROBLEM_NOTE_SCROLL_UP' };
+    } else if (problemModel.drawerMode === 'diff') {
+      if (key.name === 'j' || key.name === 'down') problemMsg = { type: 'PROBLEM_DIFF_SCROLL_DOWN' };
+      else if (key.name === 'k' || key.name === 'up') problemMsg = { type: 'PROBLEM_DIFF_SCROLL_UP' };
+    }
+  }
+
+  const bodyFocused = problemModel.drawerMode === 'none' || problemModel.focusRegion === 'body';
+
+  if (!problemMsg && bodyFocused) {
     if (key.name === 'j' || key.name === 'down') {
       problemMsg = { type: 'PROBLEM_SCROLL_DOWN' };
     } else if (key.name === 'k' || key.name === 'up') {
@@ -692,24 +710,6 @@ function handleProblemKeyPress(model: AppModel, msg: AppMsg): [AppModel, Command
       problemMsg = { type: 'PROBLEM_TOP' };
     } else if (key.name === 'G') {
       problemMsg = { type: 'PROBLEM_BOTTOM' };
-    } else if (key.name === 'p') {
-      problemMsg = { type: 'PROBLEM_PICK' };
-    } else if (key.name === 't') {
-      problemMsg = { type: 'PROBLEM_TEST' };
-    } else if (key.name === 's') {
-      problemMsg = { type: 'PROBLEM_SUBMIT' };
-    } else if (key.name === 'b') {
-      problemMsg = { type: 'PROBLEM_BOOKMARK' };
-    } else if (key.name === 'n') {
-      problemMsg = { type: 'PROBLEM_VIEW_NOTE' };
-    } else if (key.name === 'e') {
-      problemMsg = { type: 'PROBLEM_NOTES' };
-    } else if (key.name === 'h') {
-      problemMsg = { type: 'PROBLEM_TOGGLE_HINT' };
-    } else if (key.name === 'H' || key.name === 'S') {
-      problemMsg = { type: 'PROBLEM_SHOW_SUBMISSIONS' };
-    } else if (key.name === 'v' || key.name === 'w') {
-      problemMsg = { type: 'PROBLEM_SHOW_SNAPSHOTS' };
     }
   }
 

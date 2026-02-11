@@ -1,9 +1,16 @@
-import type { ProblemScreenModel, ProblemMsg, Command, ProblemDetail } from '../../types.js';
+import type {
+  ProblemScreenModel,
+  ProblemMsg,
+  Command,
+  ProblemDetail,
+  ProblemDrawerMode,
+} from '../../types.js';
 import { Cmd } from '../../types.js';
 import { bookmarks } from '../../../storage/bookmarks.js';
 import { snapshotStorage } from '../../../storage/snapshots.js';
 import { formatProblemContent } from '../../../utils/display.js';
 import { stripAnsi, wrapLines } from '../../lib/layout.js';
+import { computeProblemViewport } from './layout.js';
 
 export function init(slug: string): [ProblemScreenModel, Command] {
   return [
@@ -21,9 +28,10 @@ export function init(slug: string): [ProblemScreenModel, Command] {
       successMessage: null,
       activeHintIndex: null,
       isBookmarked: false,
-      activePanel: 'none',
-      panelScrollOffset: 0,
-      panelData: {
+      drawerMode: 'none',
+      focusRegion: 'body',
+      drawerScrollOffset: 0,
+      drawerData: {
         statusMessage: null,
       },
       submissionsHistory: null,
@@ -37,33 +45,28 @@ export function init(slug: string): [ProblemScreenModel, Command] {
   ];
 }
 
-function closePanel(model: ProblemScreenModel): ProblemScreenModel {
+function closeDrawer(model: ProblemScreenModel): ProblemScreenModel {
   return {
     ...model,
-    activePanel: 'none',
-    panelScrollOffset: 0,
-    panelData: { statusMessage: null },
-    activeHintIndex: null,
-    testResult: null,
-    submissionResult: null,
-    successMessage: null,
-    error: null,
-    isRunning: false,
+    drawerMode: 'none',
+    focusRegion: 'body',
+    drawerScrollOffset: 0,
+    drawerData: { statusMessage: null },
   };
 }
 
-function panelDimensions(terminalWidth: number, terminalHeight: number): { width: number; height: number } {
-  const contentHeight = Math.max(6, terminalHeight - 4);
-  if (terminalWidth >= 104) {
-    const leftRatio = 0.66;
-    return {
-      width: Math.max(28, terminalWidth - Math.floor(terminalWidth * leftRatio) - 1),
-      height: Math.max(8, contentHeight - 5),
-    };
-  }
+function setDrawer(
+  model: ProblemScreenModel,
+  mode: ProblemDrawerMode,
+  statusMessage: string | null = null
+): ProblemScreenModel {
+  if (mode === 'none') return closeDrawer(model);
   return {
-    width: Math.max(22, terminalWidth - 2),
-    height: Math.max(6, Math.min(12, Math.floor(contentHeight * 0.42))),
+    ...model,
+    drawerMode: mode,
+    focusRegion: 'drawer',
+    drawerScrollOffset: 0,
+    drawerData: { statusMessage },
   };
 }
 
@@ -73,45 +76,43 @@ export function update(
   terminalHeight: number,
   terminalWidth: number
 ): [ProblemScreenModel, Command] {
-  const contentHeight = Math.max(6, terminalHeight - 4);
-  const headerUsed = 3;
-  const footerHeight = 2;
-  const viewHeight = Math.max(3, contentHeight - headerUsed - footerHeight);
-
-  const sidePanelActive =
-    terminalWidth >= 104 &&
-    (model.activePanel === 'hint' ||
-      model.activePanel === 'submissions' ||
-      model.activePanel === 'snapshots' ||
-      model.activePanel === 'note' ||
-      model.activePanel === 'diff');
-  const contentPaneRatio =
-    model.activePanel === 'note' || model.activePanel === 'diff' ? 0.62 : 0.68;
-  const contentPaneWidth = sidePanelActive
-    ? Math.floor(terminalWidth * contentPaneRatio)
-    : terminalWidth;
-  const contentWidth = Math.max(20, contentPaneWidth - 4);
-  const wrappedLines = wrapLines(model.contentLines, contentWidth);
-  const maxScroll = Math.max(0, wrappedLines.length - viewHeight);
+  const bodyMaxScroll = getBodyScrollMax(model, terminalHeight, terminalWidth);
 
   switch (msg.type) {
+    case 'PROBLEM_FOCUS_TOGGLE':
+      if (model.drawerMode === 'none') return [model, Cmd.none()];
+      return [
+        {
+          ...model,
+          focusRegion: model.focusRegion === 'body' ? 'drawer' : 'body',
+        },
+        Cmd.none(),
+      ];
+
     case 'PROBLEM_SCROLL_UP':
       return [{ ...model, scrollOffset: Math.max(0, model.scrollOffset - 1) }, Cmd.none()];
 
     case 'PROBLEM_SCROLL_DOWN':
-      return [{ ...model, scrollOffset: Math.min(maxScroll, model.scrollOffset + 1) }, Cmd.none()];
+      return [{ ...model, scrollOffset: Math.min(bodyMaxScroll, model.scrollOffset + 1) }, Cmd.none()];
 
-    case 'PROBLEM_PAGE_UP':
-      return [{ ...model, scrollOffset: Math.max(0, model.scrollOffset - viewHeight) }, Cmd.none()];
+    case 'PROBLEM_PAGE_UP': {
+      const page = Math.max(3, Math.floor(getBodyHeight(terminalHeight, model.drawerMode) * 0.8));
+      return [{ ...model, scrollOffset: Math.max(0, model.scrollOffset - page) }, Cmd.none()];
+    }
 
-    case 'PROBLEM_PAGE_DOWN':
-      return [{ ...model, scrollOffset: Math.min(maxScroll, model.scrollOffset + viewHeight) }, Cmd.none()];
+    case 'PROBLEM_PAGE_DOWN': {
+      const page = Math.max(3, Math.floor(getBodyHeight(terminalHeight, model.drawerMode) * 0.8));
+      return [
+        { ...model, scrollOffset: Math.min(bodyMaxScroll, model.scrollOffset + page) },
+        Cmd.none(),
+      ];
+    }
 
     case 'PROBLEM_TOP':
       return [{ ...model, scrollOffset: 0 }, Cmd.none()];
 
     case 'PROBLEM_BOTTOM':
-      return [{ ...model, scrollOffset: maxScroll }, Cmd.none()];
+      return [{ ...model, scrollOffset: bodyMaxScroll }, Cmd.none()];
 
     case 'PROBLEM_DETAIL_LOADED': {
       const contentLines = processContent(msg.detail);
@@ -124,13 +125,24 @@ export function update(
           contentLines,
           scrollOffset: 0,
           isBookmarked,
+          error: null,
+          successMessage: null,
+          drawerMode: 'none',
+          focusRegion: 'body',
+          drawerScrollOffset: 0,
+          drawerData: { statusMessage: null },
         },
         Cmd.none(),
       ];
     }
 
     case 'PROBLEM_DETAIL_ERROR':
-      return [{ ...model, loading: false, error: msg.error, activePanel: 'status', panelData: { statusMessage: msg.error } }, Cmd.none()];
+      return [
+        {
+          ...setDrawer({ ...model, loading: false, error: msg.error }, 'status', msg.error),
+        },
+        Cmd.none(),
+      ];
 
     case 'PROBLEM_PICK':
       return [model, Cmd.pickProblem(model.slug)];
@@ -138,15 +150,12 @@ export function update(
     case 'PROBLEM_TEST':
       return [
         {
-          ...model,
+          ...setDrawer(model, 'status', 'Running tests...'),
           isRunning: true,
           testResult: null,
           submissionResult: null,
           successMessage: null,
           error: null,
-          activePanel: 'status',
-          panelScrollOffset: 0,
-          panelData: { statusMessage: 'Running tests...' },
         },
         Cmd.testSolution(model.slug),
       ];
@@ -154,15 +163,12 @@ export function update(
     case 'PROBLEM_SUBMIT':
       return [
         {
-          ...model,
+          ...setDrawer(model, 'status', 'Submitting solution...'),
           isRunning: true,
           testResult: null,
           submissionResult: null,
           successMessage: null,
           error: null,
-          activePanel: 'status',
-          panelScrollOffset: 0,
-          panelData: { statusMessage: 'Submitting solution...' },
         },
         Cmd.submitSolution(model.slug),
       ];
@@ -170,13 +176,10 @@ export function update(
     case 'PROBLEM_TEST_RESULT':
       return [
         {
-          ...model,
+          ...setDrawer(model, 'testResult'),
           isRunning: false,
           testResult: msg.result,
           submissionResult: null,
-          activePanel: 'testResult',
-          panelScrollOffset: 0,
-          panelData: { statusMessage: null },
         },
         Cmd.none(),
       ];
@@ -184,13 +187,10 @@ export function update(
     case 'PROBLEM_SUBMIT_RESULT':
       return [
         {
-          ...model,
+          ...setDrawer(model, 'submitResult'),
           isRunning: false,
-          testResult: null,
           submissionResult: msg.result,
-          activePanel: 'submitResult',
-          panelScrollOffset: 0,
-          panelData: { statusMessage: null },
+          testResult: null,
         },
         Cmd.none(),
       ];
@@ -200,28 +200,26 @@ export function update(
       const id = model.detail.questionFrontendId;
       if (bookmarks.has(id)) {
         bookmarks.remove(id);
+        const message = 'Problem unbookmarked';
         return [
           {
-            ...model,
+            ...setDrawer(model, 'status', message),
             isBookmarked: false,
-            successMessage: 'Bookmark removed',
-            activePanel: 'status',
-            panelScrollOffset: 0,
-            panelData: { statusMessage: 'Bookmark removed' },
+            successMessage: message,
+            error: null,
           },
           Cmd.none(),
         ];
       }
 
       bookmarks.add(id);
+      const message = 'Problem bookmarked';
       return [
         {
-          ...model,
+          ...setDrawer(model, 'status', message),
           isBookmarked: true,
-          successMessage: 'Problem bookmarked',
-          activePanel: 'status',
-          panelScrollOffset: 0,
-          panelData: { statusMessage: 'Problem bookmarked' },
+          successMessage: message,
+          error: null,
         },
         Cmd.none(),
       ];
@@ -230,27 +228,25 @@ export function update(
     case 'PROBLEM_TOGGLE_HINT': {
       const hints = model.detail?.hints || [];
       if (hints.length === 0) {
+        const message = 'No hints available for this problem';
         return [
           {
-            ...model,
-            activePanel: 'status',
-            panelScrollOffset: 0,
-            panelData: { statusMessage: 'No hints available for this problem' },
+            ...setDrawer(model, 'status', message),
+            error: null,
+            successMessage: null,
           },
           Cmd.none(),
         ];
       }
-      if (model.activePanel === 'hint') {
-        return [{ ...model, activePanel: 'none', panelScrollOffset: 0 }, Cmd.none()];
+
+      if (model.drawerMode === 'hint') {
+        return [closeDrawer(model), Cmd.none()];
       }
 
       return [
         {
-          ...model,
-          activePanel: 'hint',
+          ...setDrawer(model, 'hint'),
           activeHintIndex: model.activeHintIndex ?? 0,
-          panelScrollOffset: 0,
-          panelData: { statusMessage: null },
         },
         Cmd.none(),
       ];
@@ -258,41 +254,40 @@ export function update(
 
     case 'PROBLEM_NEXT_HINT': {
       const hints = model.detail?.hints || [];
-      if (model.activeHintIndex === null || hints.length === 0) return [model, Cmd.none()];
+      if (hints.length === 0) return [model, Cmd.none()];
+      const current = model.activeHintIndex ?? 0;
       return [
         {
           ...model,
-          activePanel: 'hint',
-          activeHintIndex: Math.min(model.activeHintIndex + 1, hints.length - 1),
-          panelScrollOffset: 0,
+          activeHintIndex: Math.min(hints.length - 1, current + 1),
+          drawerScrollOffset: 0,
         },
         Cmd.none(),
       ];
     }
 
     case 'PROBLEM_PREV_HINT': {
-      if (model.activeHintIndex === null) return [model, Cmd.none()];
+      const current = model.activeHintIndex ?? 0;
       return [
         {
           ...model,
-          activePanel: 'hint',
-          activeHintIndex: Math.max(0, model.activeHintIndex - 1),
-          panelScrollOffset: 0,
+          activeHintIndex: Math.max(0, current - 1),
+          drawerScrollOffset: 0,
         },
         Cmd.none(),
       ];
     }
 
     case 'PROBLEM_HINT_SCROLL_UP':
-      return [{ ...model, panelScrollOffset: Math.max(0, model.panelScrollOffset - 1) }, Cmd.none()];
+      return [{ ...model, drawerScrollOffset: Math.max(0, model.drawerScrollOffset - 1) }, Cmd.none()];
 
     case 'PROBLEM_HINT_SCROLL_DOWN':
       return [
         {
           ...model,
-          panelScrollOffset: Math.min(
-            getHintScrollMax(model, terminalWidth, terminalHeight),
-            model.panelScrollOffset + 1
+          drawerScrollOffset: Math.min(
+            getDrawerScrollMax(model, terminalHeight, terminalWidth),
+            model.drawerScrollOffset + 1
           ),
         },
         Cmd.none(),
@@ -305,12 +300,9 @@ export function update(
     case 'PROBLEM_ACTION_ERROR':
       return [
         {
-          ...model,
+          ...setDrawer(model, 'status', msg.error),
           isRunning: false,
           error: msg.error,
-          activePanel: 'status',
-          panelScrollOffset: 0,
-          panelData: { statusMessage: msg.error },
         },
         Cmd.none(),
       ];
@@ -318,31 +310,26 @@ export function update(
     case 'PROBLEM_ACTION_SUCCESS':
       return [
         {
-          ...model,
+          ...setDrawer(model, 'status', msg.message),
           isRunning: false,
           successMessage: msg.message,
-          activePanel: 'status',
-          panelScrollOffset: 0,
-          panelData: { statusMessage: msg.message },
+          error: null,
         },
         Cmd.none(),
       ];
 
     case 'PROBLEM_CLOSE_RESULT':
-      return [closePanel(model), Cmd.none()];
+      return [closeDrawer(model), Cmd.none()];
 
     case 'PROBLEM_SHOW_SUBMISSIONS':
-      if (model.activePanel === 'submissions') {
-        return [{ ...model, activePanel: 'none', panelScrollOffset: 0 }, Cmd.none()];
+      if (model.drawerMode === 'submissions') {
+        return [closeDrawer(model), Cmd.none()];
       }
       return [
         {
-          ...model,
-          activePanel: 'submissions',
+          ...setDrawer(model, 'submissions'),
           submissionsLoading: true,
           submissionsHistory: null,
-          panelScrollOffset: 0,
-          panelData: { statusMessage: null },
         },
         Cmd.fetchSubmissions(model.slug),
       ];
@@ -350,11 +337,10 @@ export function update(
     case 'PROBLEM_SUBMISSIONS_LOADED':
       return [
         {
-          ...model,
-          activePanel: 'submissions',
+          ...setDrawer(model, 'submissions'),
           submissionsLoading: false,
           submissionsHistory: msg.submissions,
-          panelScrollOffset: 0,
+          error: null,
         },
         Cmd.none(),
       ];
@@ -362,60 +348,55 @@ export function update(
     case 'PROBLEM_SUBMISSIONS_ERROR':
       return [
         {
-          ...model,
+          ...setDrawer(model, 'status', msg.error),
           submissionsLoading: false,
           error: msg.error,
-          activePanel: 'status',
-          panelData: { statusMessage: msg.error },
-          panelScrollOffset: 0,
         },
         Cmd.none(),
       ];
 
     case 'PROBLEM_CLOSE_SUBMISSIONS':
-      return [{ ...model, activePanel: 'none', panelScrollOffset: 0 }, Cmd.none()];
+      return [closeDrawer(model), Cmd.none()];
 
     case 'PROBLEM_SUBMISSIONS_SCROLL_UP':
-      return [{ ...model, panelScrollOffset: Math.max(0, model.panelScrollOffset - 1) }, Cmd.none()];
+      return [{ ...model, drawerScrollOffset: Math.max(0, model.drawerScrollOffset - 1) }, Cmd.none()];
 
     case 'PROBLEM_SUBMISSIONS_SCROLL_DOWN':
       return [
         {
           ...model,
-          panelScrollOffset: Math.min(
-            getSubmissionScrollMax(model, terminalWidth, terminalHeight),
-            model.panelScrollOffset + 1
+          drawerScrollOffset: Math.min(
+            getDrawerScrollMax(model, terminalHeight, terminalWidth),
+            model.drawerScrollOffset + 1
           ),
         },
         Cmd.none(),
       ];
 
     case 'PROBLEM_SHOW_SNAPSHOTS': {
-      if (model.activePanel === 'snapshots') {
-        return [{ ...model, activePanel: 'none', panelScrollOffset: 0 }, Cmd.none()];
+      if (model.drawerMode === 'snapshots') {
+        return [closeDrawer(model), Cmd.none()];
       }
       const problemId = model.detail?.questionFrontendId || model.slug;
       return [
         {
-          ...model,
-          activePanel: 'snapshots',
+          ...setDrawer(model, 'snapshots'),
           snapshotsList: snapshotStorage.list(problemId),
           snapshotCursor: 0,
-          panelScrollOffset: 0,
         },
         Cmd.none(),
       ];
     }
 
     case 'PROBLEM_CLOSE_SNAPSHOTS':
-      return [{ ...model, activePanel: 'none', panelScrollOffset: 0 }, Cmd.none()];
+      return [closeDrawer(model), Cmd.none()];
 
     case 'PROBLEM_SNAPSHOT_UP':
-      if (model.activePanel !== 'snapshots' || !model.snapshotsList) return [model, Cmd.none()];
+      if (!model.snapshotsList || model.snapshotsList.length === 0) return [model, Cmd.none()];
       return [{ ...model, snapshotCursor: Math.max(0, model.snapshotCursor - 1) }, Cmd.none()];
 
     case 'PROBLEM_SNAPSHOT_DOWN':
-      if (model.activePanel !== 'snapshots' || !model.snapshotsList) return [model, Cmd.none()];
+      if (!model.snapshotsList || model.snapshotsList.length === 0) return [model, Cmd.none()];
       return [
         {
           ...model,
@@ -428,10 +409,7 @@ export function update(
       if (!model.detail) return [model, Cmd.none()];
       return [
         {
-          ...model,
-          activePanel: 'status',
-          panelData: { statusMessage: 'Loading note...' },
-          panelScrollOffset: 0,
+          ...setDrawer(model, 'status', 'Loading note...'),
         },
         Cmd.loadNote(model.detail.questionFrontendId),
       ];
@@ -439,27 +417,26 @@ export function update(
     case 'PROBLEM_NOTE_LOADED':
       return [
         {
-          ...model,
+          ...setDrawer(model, 'note'),
           noteContent: msg.content,
-          activePanel: 'note',
-          panelScrollOffset: 0,
+          error: null,
         },
         Cmd.none(),
       ];
 
     case 'PROBLEM_CLOSE_NOTE':
-      return [{ ...model, activePanel: 'none', panelScrollOffset: 0 }, Cmd.none()];
+      return [closeDrawer(model), Cmd.none()];
 
     case 'PROBLEM_NOTE_SCROLL_UP':
-      return [{ ...model, panelScrollOffset: Math.max(0, model.panelScrollOffset - 1) }, Cmd.none()];
+      return [{ ...model, drawerScrollOffset: Math.max(0, model.drawerScrollOffset - 1) }, Cmd.none()];
 
     case 'PROBLEM_NOTE_SCROLL_DOWN':
       return [
         {
           ...model,
-          panelScrollOffset: Math.min(
-            getNoteScrollMax(model, terminalWidth, terminalHeight),
-            model.panelScrollOffset + 1
+          drawerScrollOffset: Math.min(
+            getDrawerScrollMax(model, terminalHeight, terminalWidth),
+            model.drawerScrollOffset + 1
           ),
         },
         Cmd.none(),
@@ -475,27 +452,26 @@ export function update(
     case 'PROBLEM_DIFF_LOADED':
       return [
         {
-          ...model,
+          ...setDrawer(model, 'diff'),
           diffContent: msg.content,
-          activePanel: 'diff',
-          panelScrollOffset: 0,
+          error: null,
         },
         Cmd.none(),
       ];
 
     case 'PROBLEM_CLOSE_DIFF':
-      return [{ ...model, activePanel: 'none', panelScrollOffset: 0 }, Cmd.none()];
+      return [closeDrawer(model), Cmd.none()];
 
     case 'PROBLEM_DIFF_SCROLL_UP':
-      return [{ ...model, panelScrollOffset: Math.max(0, model.panelScrollOffset - 1) }, Cmd.none()];
+      return [{ ...model, drawerScrollOffset: Math.max(0, model.drawerScrollOffset - 1) }, Cmd.none()];
 
     case 'PROBLEM_DIFF_SCROLL_DOWN':
       return [
         {
           ...model,
-          panelScrollOffset: Math.min(
-            getDiffScrollMax(model, terminalWidth, terminalHeight),
-            model.panelScrollOffset + 1
+          drawerScrollOffset: Math.min(
+            getDrawerScrollMax(model, terminalHeight, terminalWidth),
+            model.drawerScrollOffset + 1
           ),
         },
         Cmd.none(),
@@ -518,16 +494,113 @@ function processContent(detail: ProblemDetail): string[] {
   return formatted.split('\n');
 }
 
-function getHintScrollMax(
+function getBodyHeight(terminalHeight: number, drawerMode: ProblemDrawerMode): number {
+  const contentHeight = Math.max(6, terminalHeight - 4);
+  return computeProblemViewport(contentHeight, drawerMode).bodyHeight;
+}
+
+function getBodyScrollMax(
   model: ProblemScreenModel,
-  terminalWidth: number,
-  terminalHeight: number
+  terminalHeight: number,
+  terminalWidth: number
 ): number {
-  if (model.activeHintIndex === null || !model.detail?.hints?.length) return 0;
-  const dims = panelDimensions(terminalWidth, terminalHeight);
-  const contentWidth = Math.max(10, dims.width - 3);
-  const hint = model.detail.hints[model.activeHintIndex] ?? '';
-  const cleanHint = stripAnsi(hint)
+  const bodyHeight = getBodyHeight(terminalHeight, model.drawerMode);
+  const contentWidth = Math.max(20, terminalWidth - 4);
+  const wrappedLines = wrapLines(model.contentLines, contentWidth);
+  return Math.max(0, wrappedLines.length - bodyHeight);
+}
+
+function getDrawerScrollMax(
+  model: ProblemScreenModel,
+  terminalHeight: number,
+  terminalWidth: number
+): number {
+  if (model.drawerMode === 'none' || model.drawerMode === 'snapshots') return 0;
+
+  const contentHeight = Math.max(6, terminalHeight - 4);
+  const viewport = computeProblemViewport(contentHeight, model.drawerMode);
+  const drawerBodyHeight = Math.max(1, viewport.drawerHeight - 2);
+  const drawerWidth = Math.max(20, terminalWidth - 2);
+
+  const rows = getDrawerRows(model, drawerWidth);
+  return Math.max(0, rows.length - drawerBodyHeight);
+}
+
+function getDrawerRows(model: ProblemScreenModel, drawerWidth: number): string[] {
+  const contentWidth = Math.max(10, drawerWidth - 2);
+
+  switch (model.drawerMode) {
+    case 'hint': {
+      const hints = model.detail?.hints || [];
+      const hintIndex = model.activeHintIndex ?? 0;
+      const hint = hints[hintIndex] ?? '';
+      const clean = sanitizeText(hint);
+      return wrapLines([clean || 'No hint content'], contentWidth);
+    }
+
+    case 'submissions': {
+      if (model.submissionsLoading) return ['Loading submissions...'];
+      if (!model.submissionsHistory || model.submissionsHistory.length === 0) {
+        return [
+          'No submissions found for this problem.',
+          'Use [s] Submit after picking a solution.',
+        ];
+      }
+      return model.submissionsHistory.map((entry) => {
+        const status = truncatePlain(entry.statusDisplay || '-', 10).padEnd(10);
+        const runtime = truncatePlain(entry.runtime || '-', 8).padEnd(8);
+        const memory = truncatePlain(entry.memory || '-', 8).padEnd(8);
+        const lang = truncatePlain(entry.lang || '-', 8).padEnd(8);
+        return `${status} ${runtime} ${memory} ${lang}`;
+      });
+    }
+
+    case 'note':
+      return wrapLines(formatNotePreview(model.noteContent || 'No notes found. Press e to edit.'), contentWidth);
+
+    case 'diff':
+      return (model.diffContent || 'No diff available.').split('\n').map((line) => sanitizeText(line));
+
+    case 'testResult': {
+      const result = model.testResult;
+      if (!result) return ['No test result available.'];
+      if (result.compile_error) return ['Compile Error', ...wrapLines([result.compile_error], contentWidth)];
+      if (result.runtime_error) return ['Runtime Error', ...wrapLines([result.runtime_error], contentWidth)];
+      if (result.correct_answer) return ['All test cases passed'];
+      return ['Wrong answer'];
+    }
+
+    case 'submitResult': {
+      const result = model.submissionResult;
+      if (!result) return ['No submission result available.'];
+      const lines = [
+        result.status_msg || '-',
+        `Runtime: ${result.status_runtime || '-'}`,
+        `Memory: ${result.status_memory || '-'}`,
+      ];
+      if (result.runtime_error) {
+        lines.push(...wrapLines([result.runtime_error], contentWidth));
+      }
+      return lines;
+    }
+
+    case 'status': {
+      const message =
+        model.drawerData.statusMessage ||
+        model.successMessage ||
+        model.error ||
+        (model.isRunning ? 'Working...' : 'Ready');
+      return wrapLines([message], contentWidth);
+    }
+
+    default:
+      return [];
+  }
+}
+
+function sanitizeText(raw: string): string {
+  return stripAnsi(raw)
+    .replace(/\[green\]|\[red\]|\[grey\]/g, '')
     .replace(/<\/?[^>]+(>|$)/g, '')
     .replace(/&nbsp;/g, ' ')
     .replace(/&lt;/g, '<')
@@ -535,39 +608,46 @@ function getHintScrollMax(
     .replace(/&amp;/g, '&')
     .replace(/\s+/g, ' ')
     .trim();
-  const wrapped = wrapLines([cleanHint || 'No content'], contentWidth);
-  return Math.max(0, wrapped.length - Math.max(3, dims.height - 5));
 }
 
-function getSubmissionScrollMax(
-  model: ProblemScreenModel,
-  terminalWidth: number,
-  terminalHeight: number
-): number {
-  const total = model.submissionsHistory?.length ?? 0;
-  const dims = panelDimensions(terminalWidth, terminalHeight);
-  const pageSize = Math.max(3, dims.height - 6);
-  return Math.max(0, total - pageSize);
+function truncatePlain(value: string, max: number): string {
+  if (value.length <= max) return value;
+  if (max <= 1) return '…';
+  return `${value.slice(0, max - 1)}…`;
 }
 
-function getNoteScrollMax(
-  model: ProblemScreenModel,
-  terminalWidth: number,
-  terminalHeight: number
-): number {
-  if (!model.noteContent) return 0;
-  const dims = panelDimensions(terminalWidth, terminalHeight);
-  const wrapped = wrapLines(model.noteContent.split('\n'), Math.max(10, dims.width - 3));
-  return Math.max(0, wrapped.length - Math.max(3, dims.height - 5));
-}
+function formatNotePreview(content: string): string[] {
+  const rawLines = content.split('\n');
+  const lines: string[] = [];
 
-function getDiffScrollMax(
-  model: ProblemScreenModel,
-  terminalWidth: number,
-  terminalHeight: number
-): number {
-  if (!model.diffContent) return 0;
-  const dims = panelDimensions(terminalWidth, terminalHeight);
-  const lines = model.diffContent.split('\n');
-  return Math.max(0, lines.length - Math.max(3, dims.height - 5));
+  for (const rawLine of rawLines) {
+    const trimmed = rawLine.trim();
+    if (!trimmed) {
+      if (lines.length > 0 && lines[lines.length - 1] !== '') {
+        lines.push('');
+      }
+      continue;
+    }
+
+    if (trimmed.startsWith('<!--') && trimmed.endsWith('-->')) continue;
+
+    let line = rawLine
+      .replace(/\*\*(.*?)\*\*/g, '$1')
+      .replace(/`([^`]+)`/g, '$1')
+      .replace(/\[(.*?)\]\((.*?)\)/g, '$1 ($2)');
+
+    if (line.startsWith('## ')) {
+      line = `• ${line.slice(3)}`;
+    } else if (line.startsWith('# ')) {
+      line = line.slice(2);
+    }
+
+    lines.push(line);
+  }
+
+  while (lines.length > 0 && lines[lines.length - 1] === '') {
+    lines.pop();
+  }
+
+  return lines.length > 0 ? lines : ['No notes found. Press e to edit.'];
 }

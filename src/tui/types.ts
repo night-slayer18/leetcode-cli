@@ -55,9 +55,10 @@ export interface ProblemScreenModel {
   readonly activeHintIndex: number | null;
   readonly isBookmarked: boolean;
 
-  readonly activePanel: ProblemPanelType;
-  readonly panelScrollOffset: number;
-  readonly panelData: {
+  readonly drawerMode: ProblemDrawerMode;
+  readonly focusRegion: 'body' | 'drawer';
+  readonly drawerScrollOffset: number;
+  readonly drawerData: {
     readonly statusMessage: string | null;
   };
 
@@ -71,7 +72,7 @@ export interface ProblemScreenModel {
   readonly diffContent: string | null;
 }
 
-export type ProblemPanelType =
+export type ProblemDrawerMode =
   | 'none'
   | 'hint'
   | 'submissions'
@@ -278,13 +279,10 @@ export type ProblemMsg =
       readonly type: 'PROBLEM_SUBMIT_RESULT';
       readonly result: import('../types.js').SubmissionResult;
     }
-  | {
-      readonly type: 'PROBLEM_SUBMIT_RESULT';
-      readonly result: import('../types.js').SubmissionResult;
-    }
   | { readonly type: 'PROBLEM_ACTION_ERROR'; readonly error: string }
   | { readonly type: 'PROBLEM_ACTION_SUCCESS'; readonly message: string }
   | { readonly type: 'PROBLEM_CLOSE_RESULT' }
+  | { readonly type: 'PROBLEM_FOCUS_TOGGLE' }
   | { readonly type: 'PROBLEM_TOGGLE_HINT' }
   | { readonly type: 'PROBLEM_NEXT_HINT' }
   | { readonly type: 'PROBLEM_PREV_HINT' }

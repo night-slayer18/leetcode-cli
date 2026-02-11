@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import type { ProblemScreenModel } from '../../types.js';
+import type { ProblemScreenModel, ProblemDrawerMode } from '../../types.js';
 import { colors } from '../../theme.js';
 import {
   center,
@@ -7,11 +7,11 @@ import {
   horizontalLine,
   keyHint,
   renderSectionHeader,
-  splitPane,
   stripAnsi,
   truncate,
   wrapLines,
 } from '../../lib/layout.js';
+import { computeProblemViewport } from './layout.js';
 
 export function view(model: ProblemScreenModel, width: number, height: number): string {
   const lines: string[] = [];
@@ -42,32 +42,12 @@ export function view(model: ProblemScreenModel, width: number, height: number): 
   lines.push(center(truncate(tags, safeWidth), safeWidth));
   lines.push(chalk.hex(colors.textMuted)(horizontalLine(safeWidth)));
 
-  const actionFooterHeight = 2;
-  const bodyHeight = Math.max(3, safeHeight - lines.length - actionFooterHeight);
+  const viewport = computeProblemViewport(safeHeight, model.drawerMode);
+  lines.push(...renderProblemBody(model, safeWidth, viewport.bodyHeight));
 
-  const hasPanel = model.activePanel !== 'none';
-  const canUseSidePanel =
-    hasPanel &&
-    safeWidth >= 104 &&
-    (model.activePanel === 'hint' ||
-      model.activePanel === 'submissions' ||
-      model.activePanel === 'snapshots' ||
-      model.activePanel === 'note' ||
-      model.activePanel === 'diff');
-
-  if (canUseSidePanel) {
-    const ratio = model.activePanel === 'note' || model.activePanel === 'diff' ? 0.62 : 0.68;
-    const leftLines = renderProblemContent(model, Math.max(30, Math.floor(safeWidth * ratio)), bodyHeight);
-    const panelLines = renderActionPanel(model, safeWidth - Math.floor(safeWidth * ratio) - 1, bodyHeight);
-    lines.push(...splitPane(leftLines, panelLines, safeWidth, bodyHeight, ratio));
-  } else if (hasPanel) {
-    const panelHeight = Math.max(6, Math.min(12, Math.floor(bodyHeight * 0.42)));
-    const contentHeight = Math.max(3, bodyHeight - panelHeight - 1);
-    lines.push(...renderProblemContent(model, safeWidth, contentHeight));
+  if (model.drawerMode !== 'none' && viewport.drawerHeight > 0) {
     lines.push(chalk.hex(colors.border)(horizontalLine(safeWidth)));
-    lines.push(...renderActionPanel(model, safeWidth, panelHeight));
-  } else {
-    lines.push(...renderProblemContent(model, safeWidth, bodyHeight));
+    lines.push(...renderDrawer(model, safeWidth, viewport.drawerHeight));
   }
 
   while (lines.length < safeHeight - 2) lines.push('');
@@ -77,9 +57,9 @@ export function view(model: ProblemScreenModel, width: number, height: number): 
   return lines.slice(0, safeHeight).join('\n');
 }
 
-function renderProblemContent(model: ProblemScreenModel, width: number, height: number): string[] {
+function renderProblemBody(model: ProblemScreenModel, width: number, height: number): string[] {
   const lines: string[] = [];
-  const contentWidth = Math.max(10, width - 4);
+  const contentWidth = Math.max(12, width - 4);
   const wrapped = wrapLines(model.contentLines, contentWidth);
   const maxScroll = Math.max(0, wrapped.length - height);
   const offset = Math.min(model.scrollOffset, maxScroll);
@@ -88,15 +68,17 @@ function renderProblemContent(model: ProblemScreenModel, width: number, height: 
   for (const line of visible) {
     lines.push(` ${chalk.hex(colors.text)(line)}`);
   }
+
   while (lines.length < height) {
     lines.push('');
   }
+
   return lines;
 }
 
 function renderActionBar(model: ProblemScreenModel, width: number): string[] {
-  const hints =
-    width >= 120
+  const actionHints =
+    width >= 130
       ? [
           keyHint('p', 'Pick'),
           keyHint('t', 'Test'),
@@ -107,7 +89,7 @@ function renderActionBar(model: ProblemScreenModel, width: number): string[] {
           keyHint('b', model.isBookmarked ? 'Unbookmark' : 'Bookmark'),
           keyHint('n', 'Note'),
           keyHint('e', 'Edit'),
-        ].join('  ')
+        ]
       : [
           keyHint('p', 'Pick'),
           keyHint('t', 'Test'),
@@ -116,42 +98,245 @@ function renderActionBar(model: ProblemScreenModel, width: number): string[] {
           keyHint('H', 'Subs'),
           keyHint('V', 'Snaps'),
           keyHint('n', 'Note'),
-        ].join('  ');
+        ];
 
-  return [center(truncate(hints, Math.max(20, width - 2)), width)];
+  const focusHints =
+    model.drawerMode === 'none'
+      ? [keyHint('Esc', 'Back')]
+      : [
+          keyHint('Tab', `Focus ${model.focusRegion === 'body' ? 'Drawer' : 'Body'}`),
+          keyHint('Esc', 'Close Drawer'),
+        ];
+
+  const line = [...actionHints, ...focusHints].join('  ');
+  return [center(truncate(line, Math.max(20, width - 2)), width)];
 }
 
-function renderActionPanel(model: ProblemScreenModel, width: number, height: number): string[] {
-  const panelWidth = Math.max(22, width);
-  const panelHeight = Math.max(3, height);
+function renderDrawer(model: ProblemScreenModel, width: number, height: number): string[] {
+  const mode = model.drawerMode;
 
-  switch (model.activePanel) {
-    case 'hint':
-      return renderHintPanel(model, panelWidth, panelHeight);
-    case 'submissions':
-      return renderSubmissionsPanel(model, panelWidth, panelHeight);
-    case 'snapshots':
-      return renderSnapshotsPanel(model, panelWidth, panelHeight);
+  if (mode === 'snapshots') {
+    return renderSnapshotsDrawer(model, width, height);
+  }
+
+  const title = drawerTitle(model);
+  const hints = drawerHints(mode);
+  const rows = getDrawerRows(model, mode, width);
+  const available = Math.max(1, height - 2);
+  const maxScroll = Math.max(0, rows.length - available);
+  const offset = Math.min(model.drawerScrollOffset, maxScroll);
+  const visible = rows.slice(offset, offset + available);
+
+  const lines: string[] = [
+    renderSectionHeader(
+      model.focusRegion === 'drawer' ? `${title} • Focused` : title,
+      width
+    ),
+  ];
+
+  lines.push(...visible.map((line) => truncate(line, width)));
+  while (lines.length < height - 1) lines.push('');
+  lines.push(chalk.hex(colors.textMuted)(truncate(hints, width)));
+
+  return lines.slice(0, height);
+}
+
+function renderSnapshotsDrawer(model: ProblemScreenModel, width: number, height: number): string[] {
+  const title = model.focusRegion === 'drawer' ? 'Snapshots • Focused' : 'Snapshots';
+  const lines: string[] = [renderSectionHeader(title, width)];
+
+  if (!model.snapshotsList || model.snapshotsList.length === 0) {
+    lines.push(chalk.hex(colors.warning)('No snapshots saved.'));
+    lines.push(chalk.hex(colors.textMuted)('Create snapshots from your solution workflow.'));
+  } else {
+    const rowHeight = Math.max(1, height - 2);
+    const pageStart = Math.floor(model.snapshotCursor / rowHeight) * rowHeight;
+    const pageRows = model.snapshotsList.slice(pageStart, pageStart + rowHeight);
+
+    for (let i = 0; i < pageRows.length; i++) {
+      const snap = pageRows[i];
+      const index = pageStart + i;
+      const selected = index === model.snapshotCursor;
+      const pointer = selected ? chalk.hex(colors.primary)('▶') : ' ';
+      const name = truncate(snap.name, 20).padEnd(20);
+      const lang = truncate(snap.language, 10).padEnd(10);
+      const row = `${pointer} ${String(snap.id).padStart(3)} ${name} ${lang} ${String(snap.lines).padStart(4)}L`;
+      lines.push(selected ? chalk.bgHex(colors.bgHighlight)(truncate(row, width).padEnd(Math.max(0, width - 1))) : row);
+    }
+  }
+
+  while (lines.length < height - 1) lines.push('');
+  lines.push(chalk.hex(colors.textMuted)(truncate(`${keyHint('j/k', 'Move')}  ${keyHint('d/r', 'Diff/Restore')}  ${keyHint('V/Esc', 'Close')}`, width)));
+
+  return lines.slice(0, height);
+}
+
+function getDrawerRows(model: ProblemScreenModel, mode: ProblemDrawerMode, width: number): string[] {
+  const contentWidth = Math.max(10, width - 2);
+
+  switch (mode) {
+    case 'hint': {
+      const hints = model.detail?.hints || [];
+      const index = model.activeHintIndex ?? 0;
+      const raw = hints[index] ?? 'No hints available';
+      const clean = sanitize(raw);
+      const header = chalk.hex(colors.primary).bold(`Hint ${index + 1}/${Math.max(1, hints.length)}`);
+      return [header, ...wrapLines([clean || 'No hint content'], contentWidth)];
+    }
+
+    case 'submissions': {
+      if (model.submissionsLoading) {
+        return [chalk.hex(colors.primary)('Loading submissions...')];
+      }
+      if (!model.submissionsHistory || model.submissionsHistory.length === 0) {
+        return [
+          chalk.hex(colors.warning)('No submissions found for this problem.'),
+          chalk.hex(colors.textMuted)('Use [s] Submit after picking a solution.'),
+        ];
+      }
+
+      return model.submissionsHistory.map((entry) => {
+        const statusColor = entry.statusDisplay === 'Accepted' ? colors.success : colors.error;
+        const status = chalk.hex(statusColor)(truncate(entry.statusDisplay, 12).padEnd(12));
+        const runtime = chalk.hex(colors.cyan)(truncate(entry.runtime || '-', 8).padEnd(8));
+        const memory = chalk.hex(colors.textMuted)(truncate(entry.memory || '-', 8).padEnd(8));
+        const lang = chalk.hex(colors.info)(truncate(entry.lang || '-', 8).padEnd(8));
+        return `${status} ${runtime} ${memory} ${lang}`;
+      });
+    }
+
     case 'note':
-      return renderNotePanel(model, panelWidth, panelHeight);
-    case 'diff':
-      return renderDiffPanel(model, panelWidth, panelHeight);
-    case 'testResult':
-      return renderTestResultPanel(model, panelWidth, panelHeight);
-    case 'submitResult':
-      return renderSubmissionResultPanel(model, panelWidth, panelHeight);
-    case 'status':
-      return renderStatusPanel(model, panelWidth, panelHeight);
+      return wrapLines(formatNotePreview(model.noteContent || 'No notes found. Press e to edit.'), contentWidth);
+
+    case 'diff': {
+      const content = model.diffContent || 'No diff available.';
+      return content.split('\n').map((line) => colorizeDiff(line));
+    }
+
+    case 'testResult': {
+      const result = model.testResult;
+      if (!result) return ['No test result available.'];
+      if (result.compile_error) {
+        return [
+          chalk.hex(colors.error).bold('Compile Error'),
+          ...wrapLines([result.compile_error], contentWidth),
+        ];
+      }
+      if (result.runtime_error) {
+        return [
+          chalk.hex(colors.error).bold('Runtime Error'),
+          ...wrapLines([result.runtime_error], contentWidth),
+        ];
+      }
+      if (result.correct_answer) return [chalk.hex(colors.success).bold('All test cases passed')];
+      return [chalk.hex(colors.warning).bold('Wrong answer')];
+    }
+
+    case 'submitResult': {
+      const result = model.submissionResult;
+      if (!result) return ['No submission result available.'];
+      const accepted = result.status_msg === 'Accepted';
+      const rows = [
+        accepted
+          ? chalk.hex(colors.success).bold(result.status_msg)
+          : chalk.hex(colors.error).bold(result.status_msg),
+        chalk.hex(colors.cyan)(`Runtime: ${result.status_runtime || '-'}`),
+        chalk.hex(colors.textMuted)(`Memory: ${result.status_memory || '-'}`),
+      ];
+      if (result.runtime_error) {
+        rows.push(...wrapLines([result.runtime_error], contentWidth));
+      }
+      return rows;
+    }
+
+    case 'status': {
+      const message =
+        model.drawerData.statusMessage ||
+        model.successMessage ||
+        model.error ||
+        (model.isRunning ? 'Working...' : 'Ready');
+      const color =
+        model.error
+          ? colors.error
+          : model.successMessage
+            ? colors.success
+            : model.isRunning
+              ? colors.primary
+              : colors.textMuted;
+      return wrapLines([message], contentWidth).map((line) => chalk.hex(color)(line));
+    }
+
     default:
-      return Array.from({ length: panelHeight }, () => '');
+      return [];
   }
 }
 
-function renderHintPanel(model: ProblemScreenModel, width: number, height: number): string[] {
-  const hints = model.detail?.hints || [];
-  const index = model.activeHintIndex ?? 0;
-  const raw = hints[index] ?? 'No hints available';
-  const clean = stripAnsi(raw)
+function drawerTitle(model: ProblemScreenModel): string {
+  switch (model.drawerMode) {
+    case 'hint':
+      return 'Hints';
+    case 'submissions':
+      return 'Submissions';
+    case 'snapshots':
+      return 'Snapshots';
+    case 'note':
+      return 'Notes';
+    case 'diff':
+      return 'Diff';
+    case 'testResult':
+      return 'Test Result';
+    case 'submitResult':
+      return 'Submission Result';
+    case 'status':
+      return resolveStatusTitle(model);
+    default:
+      return 'Drawer';
+  }
+}
+
+function drawerHints(mode: ProblemDrawerMode): string {
+  switch (mode) {
+    case 'hint':
+      return `${keyHint('←/→', 'Prev/Next')}  ${keyHint('j/k', 'Scroll')}  ${keyHint('h/Esc', 'Close')}`;
+    case 'submissions':
+      return `${keyHint('j/k', 'Scroll')}  ${keyHint('H/Esc', 'Close')}`;
+    case 'snapshots':
+      return `${keyHint('j/k', 'Move')}  ${keyHint('d/r', 'Diff/Restore')}  ${keyHint('V/Esc', 'Close')}`;
+    case 'note':
+      return `${keyHint('j/k', 'Scroll')}  ${keyHint('e', 'Edit')}  ${keyHint('n/Esc', 'Close')}`;
+    case 'diff':
+      return `${keyHint('j/k', 'Scroll')}  ${keyHint('d/Esc', 'Close')}`;
+    default:
+      return `${keyHint('Esc', 'Close')}`;
+  }
+}
+
+function resolveStatusTitle(model: ProblemScreenModel): string {
+  const message =
+    model.drawerData.statusMessage ||
+    model.successMessage ||
+    model.error ||
+    (model.isRunning ? 'Working...' : 'Ready');
+
+  const text = message.toLowerCase();
+  if (text.includes('running tests')) return 'Testing';
+  if (text.includes('submitting')) return 'Submitting';
+  if (text.includes('bookmark')) return 'Bookmark';
+  if (text.includes('error')) return 'Error';
+  return 'Status';
+}
+
+function colorizeDiff(line: string): string {
+  if (line.startsWith('[green]')) return chalk.green(line.slice(7));
+  if (line.startsWith('[red]')) return chalk.red(line.slice(5));
+  if (line.startsWith('[grey]')) return chalk.gray(line.slice(6));
+  if (line.startsWith('+')) return chalk.green(line);
+  if (line.startsWith('-')) return chalk.red(line);
+  return line;
+}
+
+function sanitize(raw: string): string {
+  return stripAnsi(raw)
     .replace(/<\/?[^>]+(>|$)/g, '')
     .replace(/&nbsp;/g, ' ')
     .replace(/&lt;/g, '<')
@@ -159,172 +344,6 @@ function renderHintPanel(model: ProblemScreenModel, width: number, height: numbe
     .replace(/&amp;/g, '&')
     .replace(/\s+/g, ' ')
     .trim();
-
-  const bodyWidth = Math.max(10, width - 2);
-  const wrapped = wrapLines([clean || 'No hint content'], bodyWidth);
-  const available = Math.max(1, height - 2);
-  const maxScroll = Math.max(0, wrapped.length - available);
-  const offset = Math.min(model.panelScrollOffset, maxScroll);
-  const visible = wrapped.slice(offset, offset + available);
-
-  const lines: string[] = [renderSectionHeader(`Hint ${index + 1}/${Math.max(1, hints.length)}`, width)];
-  lines.push(...visible.map((line) => truncate(line, width)));
-  while (lines.length < height - 1) lines.push('');
-  lines.push(chalk.hex(colors.textMuted)(`${keyHint('←/→', 'Prev/Next')}  ${keyHint('j/k', 'Scroll')}  ${keyHint('h/Esc', 'Close')}`));
-  return lines.slice(0, height);
-}
-
-function renderSubmissionsPanel(model: ProblemScreenModel, width: number, height: number): string[] {
-  const lines: string[] = [renderSectionHeader('Submissions', width)];
-  if (model.submissionsLoading) {
-    lines.push(chalk.hex(colors.primary)('Loading submissions...'));
-  } else if (!model.submissionsHistory || model.submissionsHistory.length === 0) {
-    lines.push(chalk.hex(colors.warning)('No submissions found for this problem.'));
-    lines.push(chalk.hex(colors.textMuted)('Use [s] Submit after picking a solution.'));
-  } else {
-    const rows = model.submissionsHistory.map((entry) => {
-      const statusColor = entry.statusDisplay === 'Accepted' ? colors.success : colors.error;
-      const status = chalk.hex(statusColor)(truncate(entry.statusDisplay, 10).padEnd(10));
-      const runtime = chalk.hex(colors.cyan)(truncate(entry.runtime || '-', 8).padEnd(8));
-      const memory = chalk.hex(colors.textMuted)(truncate(entry.memory || '-', 8).padEnd(8));
-      const lang = chalk.hex(colors.info)(truncate(entry.lang, 8).padEnd(8));
-      return `${status} ${runtime} ${memory} ${lang}`;
-    });
-
-    const available = Math.max(1, height - 2);
-    const maxScroll = Math.max(0, rows.length - available);
-    const offset = Math.min(model.panelScrollOffset, maxScroll);
-    lines.push(...rows.slice(offset, offset + available));
-  }
-  while (lines.length < height - 1) lines.push('');
-  lines.push(chalk.hex(colors.textMuted)(`${keyHint('j/k', 'Scroll')}  ${keyHint('H/Esc', 'Close')}`));
-  return lines.slice(0, height);
-}
-
-function renderSnapshotsPanel(model: ProblemScreenModel, width: number, height: number): string[] {
-  const lines: string[] = [renderSectionHeader('Snapshots', width)];
-  if (!model.snapshotsList || model.snapshotsList.length === 0) {
-    lines.push(chalk.hex(colors.warning)('No snapshots saved.'));
-    lines.push(chalk.hex(colors.textMuted)('Create snapshots from your solution workflow.'));
-  } else {
-    const rows = model.snapshotsList.map((snap, idx) => {
-      const selected = idx === model.snapshotCursor ? chalk.hex(colors.primary)('▶') : ' ';
-      const name = truncate(snap.name, 14).padEnd(14);
-      const lang = truncate(snap.language, 8).padEnd(8);
-      return `${selected} ${String(snap.id).padStart(3)} ${name} ${lang} ${String(snap.lines).padStart(4)}L`;
-    });
-    const available = Math.max(1, height - 2);
-    const pageStart = Math.floor(model.snapshotCursor / available) * available;
-    lines.push(...rows.slice(pageStart, pageStart + available));
-  }
-  while (lines.length < height - 1) lines.push('');
-  lines.push(chalk.hex(colors.textMuted)(`${keyHint('j/k', 'Move')}  ${keyHint('d/r', 'Diff/Restore')}  ${keyHint('V/Esc', 'Close')}`));
-  return lines.slice(0, height);
-}
-
-function renderNotePanel(model: ProblemScreenModel, width: number, height: number): string[] {
-  const lines: string[] = [renderSectionHeader('Notes', width)];
-  const content = model.noteContent || 'No notes found. Press e to edit.';
-  const wrapped = wrapLines(formatNotePreview(content), Math.max(10, width - 2));
-  const available = Math.max(1, height - 2);
-  const maxScroll = Math.max(0, wrapped.length - available);
-  const offset = Math.min(model.panelScrollOffset, maxScroll);
-  lines.push(...wrapped.slice(offset, offset + available));
-  while (lines.length < height - 1) lines.push('');
-  lines.push(chalk.hex(colors.textMuted)(`${keyHint('j/k', 'Scroll')}  ${keyHint('e', 'Edit')}  ${keyHint('n/Esc', 'Close')}`));
-  return lines.slice(0, height);
-}
-
-function renderDiffPanel(model: ProblemScreenModel, width: number, height: number): string[] {
-  const lines: string[] = [renderSectionHeader('Diff', width)];
-  const content = model.diffContent || 'No diff available.';
-  const rows = content.split('\n').map((line) => {
-    if (line.startsWith('[green]')) return chalk.green(line.slice(7));
-    if (line.startsWith('[red]')) return chalk.red(line.slice(5));
-    if (line.startsWith('[grey]')) return chalk.gray(line.slice(6));
-    return line;
-  });
-  const available = Math.max(1, height - 2);
-  const maxScroll = Math.max(0, rows.length - available);
-  const offset = Math.min(model.panelScrollOffset, maxScroll);
-  lines.push(...rows.slice(offset, offset + available));
-  while (lines.length < height - 1) lines.push('');
-  lines.push(chalk.hex(colors.textMuted)(`${keyHint('j/k', 'Scroll')}  ${keyHint('d/Esc', 'Close')}`));
-  return lines.slice(0, height);
-}
-
-function renderTestResultPanel(model: ProblemScreenModel, width: number, height: number): string[] {
-  const lines: string[] = [renderSectionHeader('Test Result', width)];
-  const result = model.testResult;
-  if (!result) {
-    lines.push('No test result available.');
-  } else if (result.compile_error) {
-    lines.push(chalk.hex(colors.error).bold('Compile Error'));
-    lines.push(...wrapLines([result.compile_error], Math.max(10, width - 2)));
-  } else if (result.runtime_error) {
-    lines.push(chalk.hex(colors.error).bold('Runtime Error'));
-    lines.push(...wrapLines([result.runtime_error], Math.max(10, width - 2)));
-  } else if (result.correct_answer) {
-    lines.push(chalk.hex(colors.success).bold('All test cases passed'));
-  } else {
-    lines.push(chalk.hex(colors.warning).bold('Wrong answer'));
-  }
-  while (lines.length < height - 1) lines.push('');
-  lines.push(chalk.hex(colors.textMuted)(`${keyHint('Esc', 'Close')}`));
-  return lines.slice(0, height);
-}
-
-function renderSubmissionResultPanel(model: ProblemScreenModel, width: number, height: number): string[] {
-  const lines: string[] = [renderSectionHeader('Submission Result', width)];
-  const result = model.submissionResult;
-  if (!result) {
-    lines.push('No submission result available.');
-  } else {
-    const accepted = result.status_msg === 'Accepted';
-    lines.push(
-      accepted ? chalk.hex(colors.success).bold(result.status_msg) : chalk.hex(colors.error).bold(result.status_msg)
-    );
-    lines.push(chalk.hex(colors.cyan)(`Runtime: ${result.status_runtime || '-'}`));
-    lines.push(chalk.hex(colors.textMuted)(`Memory: ${result.status_memory || '-'}`));
-    if (result.runtime_error) {
-      lines.push(...wrapLines([result.runtime_error], Math.max(10, width - 2)));
-    }
-  }
-  while (lines.length < height - 1) lines.push('');
-  lines.push(chalk.hex(colors.textMuted)(`${keyHint('Esc', 'Close')}`));
-  return lines.slice(0, height);
-}
-
-function renderStatusPanel(model: ProblemScreenModel, width: number, height: number): string[] {
-  const message =
-    model.panelData.statusMessage ||
-    model.successMessage ||
-    model.error ||
-    (model.isRunning ? 'Working...' : 'Ready');
-  const lines: string[] = [renderSectionHeader(resolveStatusTitle(message), width)];
-  const color =
-    model.error
-      ? colors.error
-      : model.successMessage
-        ? colors.success
-        : model.isRunning
-          ? colors.primary
-          : colors.textMuted;
-  const wrapped = wrapLines([message], Math.max(10, width - 2));
-  lines.push(...wrapped.map((line) => chalk.hex(color)(line)));
-  while (lines.length < height - 1) lines.push('');
-  lines.push(chalk.hex(colors.textMuted)(`${keyHint('Esc', 'Close')}`));
-  return lines.slice(0, height);
-}
-
-function resolveStatusTitle(message: string): string {
-  const text = message.toLowerCase();
-  if (text.includes('running tests')) return 'Testing';
-  if (text.includes('submitting')) return 'Submitting';
-  if (text.includes('bookmark')) return 'Bookmark';
-  if (text.includes('hint')) return 'Hints';
-  if (text.includes('error')) return 'Error';
-  return 'Status';
 }
 
 function formatNotePreview(content: string): string[] {
