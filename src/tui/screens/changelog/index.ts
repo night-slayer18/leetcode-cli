@@ -1,5 +1,6 @@
 import { AppModel, Cmd, Command, ChangelogScreenModel, ChangelogMsg } from '../../types.js';
 import { parseReleases } from './parser.js';
+import { estimateRenderedLineCount } from './view.js';
 
 export { view } from './view.js';
 
@@ -17,23 +18,25 @@ export function init(model?: AppModel): [ChangelogScreenModel, Command] {
 export function update(
   msg: ChangelogMsg,
   model: ChangelogScreenModel,
-  height: number
+  height: number,
+  width: number
 ): [ChangelogScreenModel, Command] {
-  const visibleHeight = height - 4;
+  const visibleHeight = Math.max(3, height - 5);
+  const maxScroll = Math.max(0, estimateRenderedLineCount(model, width) - visibleHeight);
 
   switch (msg.type) {
     case 'CHANGELOG_SCROLL_UP':
       return [{ ...model, scrollOffset: Math.max(0, model.scrollOffset - 1) }, Cmd.none()];
 
     case 'CHANGELOG_SCROLL_DOWN':
-      return [{ ...model, scrollOffset: model.scrollOffset + 1 }, Cmd.none()];
+      return [{ ...model, scrollOffset: Math.min(maxScroll, model.scrollOffset + 1) }, Cmd.none()];
 
     case 'CHANGELOG_FETCH_START':
       return [{ ...model, loading: true, error: null }, Cmd.none()];
 
     case 'CHANGELOG_FETCH_SUCCESS':
       const entries = parseReleases(msg.content);
-      return [{ ...model, loading: false, entries: entries, error: null }, Cmd.none()];
+      return [{ ...model, loading: false, entries: entries, error: null, scrollOffset: 0 }, Cmd.none()];
 
     case 'CHANGELOG_FETCH_ERROR':
       return [{ ...model, loading: false, error: msg.error }, Cmd.none()];

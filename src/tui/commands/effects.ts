@@ -14,7 +14,7 @@ import { diffLines } from 'diff';
 import * as fs from 'fs/promises';
 import { existsSync } from 'fs';
 import * as path from 'path';
-import { forceExit } from '../runtime.js';
+import { requestExit } from '../runtime.js';
 import got from 'got';
 
 const RELEASES_URL =
@@ -82,7 +82,7 @@ export function executeCommand(cmd: Command, dispatch: Dispatch): void {
       return;
 
     case 'CMD_EXIT':
-      forceExit();
+      requestExit();
       return;
 
     case 'CMD_FETCH_DAILY':
@@ -504,15 +504,19 @@ async function fetchSubmissions(slug: string, dispatch: Dispatch): Promise<void>
 }
 
 async function fetchChangelog(dispatch: Dispatch): Promise<void> {
-  console.log('Fetching changelog...');
   dispatch({ type: 'CHANGELOG_FETCH_START' });
   try {
     const content = await got(RELEASES_URL).text();
-    console.log('Changelog fetched:', content.slice(0, 50));
     dispatch({ type: 'CHANGELOG_FETCH_SUCCESS', content });
   } catch (e: any) {
-    console.error('Changelog fetch error:', e);
     dispatch({ type: 'CHANGELOG_FETCH_ERROR', error: e.message || 'Failed to fetch changelog' });
+  }
+}
+
+export function shutdownEffects(): void {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
   }
 }
 

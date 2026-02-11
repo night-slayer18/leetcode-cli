@@ -6,7 +6,7 @@ import { MENU_ITEMS } from './index.js';
 
 export function view(model: HomeScreenModel, width: number, height: number): string {
   const lines: string[] = [];
-  const contentHeight = height - 4;
+  const contentHeight = Math.max(1, height);
 
   const logoHeight = width >= 80 ? 6 : 3;
   const menuHeight = MENU_ITEMS.length + 4;
@@ -25,7 +25,7 @@ export function view(model: HomeScreenModel, width: number, height: number): str
   lines.push(center(tagline, width));
   lines.push('');
 
-  const menuWidth = Math.min(100, Math.max(60, width - 8));
+  const menuWidth = Math.max(4, Math.min(100, width - 2));
   const menuContent: string[] = [];
 
   for (let i = 0; i < MENU_ITEMS.length; i++) {
@@ -46,12 +46,12 @@ export function view(model: HomeScreenModel, width: number, height: number): str
 
     const lineLen = stripAnsi(line).length;
     const descLen = stripAnsi(desc).length;
-    if (lineLen + descLen < menuWidth - 4) {
+    if (lineLen + descLen < menuWidth - 6) {
       line += desc;
     }
 
     const stripped = stripAnsi(line);
-    const padding = menuWidth - 4 - stripped.length;
+    const padding = Math.max(0, menuWidth - 4 - stripped.length);
     line = line + (padding > 0 ? ' '.repeat(padding) : '');
 
     if (isSelected) {
@@ -87,5 +87,5 @@ export function view(model: HomeScreenModel, width: number, height: number): str
     lines.push('');
   }
 
-  return lines.join('\n');
+  return lines.slice(0, contentHeight).join('\n');
 }

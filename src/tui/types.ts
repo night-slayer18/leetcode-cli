@@ -53,24 +53,34 @@ export interface ProblemScreenModel {
   readonly isRunning: boolean;
   readonly successMessage: string | null;
   readonly activeHintIndex: number | null;
-  readonly hintScrollOffset: number;
   readonly isBookmarked: boolean;
 
-  readonly showSubmissions: boolean;
+  readonly activePanel: ProblemPanelType;
+  readonly panelScrollOffset: number;
+  readonly panelData: {
+    readonly statusMessage: string | null;
+  };
+
   readonly submissionsHistory: readonly import('../types.js').Submission[] | null;
   readonly submissionsLoading: boolean;
-  readonly submissionScrollOffset: number;
 
-  readonly showSnapshots: boolean;
   readonly snapshotsList: readonly import('../storage/snapshots.js').Snapshot[] | null;
   readonly snapshotCursor: number;
 
-  readonly currentNote: string | null;
-  readonly noteScrollOffset: number;
-  readonly showDiff: boolean;
+  readonly noteContent: string | null;
   readonly diffContent: string | null;
-  readonly diffScrollOffset: number;
 }
+
+export type ProblemPanelType =
+  | 'none'
+  | 'hint'
+  | 'submissions'
+  | 'snapshots'
+  | 'note'
+  | 'diff'
+  | 'testResult'
+  | 'submitResult'
+  | 'status';
 
 export interface TimerScreenModel {
   readonly problemId: string | null;
@@ -109,7 +119,11 @@ export interface SkillStats {
 export interface ConfigScreenModel {
   readonly selectedOption: number;
   readonly options: readonly { id: string; label: string; description: string; value: string }[];
-  readonly editMode: boolean;
+  readonly paneFocus: 'list' | 'editor';
+  readonly isEditing: boolean;
+  readonly draftValue: string;
+  readonly validationError: string | null;
+  readonly isDirty: boolean;
   readonly config: import('../types.js').UserConfig | null;
 }
 
@@ -129,6 +143,23 @@ export interface WorkspaceScreenModel {
   readonly workspaces: readonly string[];
   readonly activeWorkspace: string;
   readonly cursor: number;
+  readonly paneFocus: 'list' | 'editor';
+  readonly selectedField: 'lang' | 'workDir' | 'editor' | 'syncRepo';
+  readonly selectedWorkspace: string | null;
+  readonly selectedConfig: {
+    readonly lang: string;
+    readonly workDir: string;
+    readonly editor: string;
+    readonly syncRepo: string;
+  } | null;
+  readonly draftConfig: {
+    readonly lang: string;
+    readonly workDir: string;
+    readonly editor: string;
+    readonly syncRepo: string;
+  } | null;
+  readonly isEditing: boolean;
+  readonly isDirty: boolean;
   readonly showCreateInput: boolean;
   readonly newWorkspaceName: string;
   readonly showDeleteConfirm: boolean;
@@ -307,13 +338,22 @@ export type StatsMsg =
 export type ConfigMsg =
   | { readonly type: 'CONFIG_OPTION_UP' }
   | { readonly type: 'CONFIG_OPTION_DOWN' }
-  | { readonly type: 'CONFIG_OPTION_SELECT' }
-  | { readonly type: 'CONFIG_INPUT'; readonly char: string }
-  | { readonly type: 'CONFIG_BACKSPACE' }
-  | { readonly type: 'CONFIG_SAVE_VALUE' }
-  | { readonly type: 'CONFIG_CANCEL_EDIT' };
+  | { readonly type: 'CONFIG_FOCUS_LIST' }
+  | { readonly type: 'CONFIG_FOCUS_EDITOR' }
+  | { readonly type: 'CONFIG_TOGGLE_FOCUS' }
+  | { readonly type: 'CONFIG_EDIT_START' }
+  | { readonly type: 'CONFIG_EDIT_INPUT'; readonly char: string }
+  | { readonly type: 'CONFIG_EDIT_BACKSPACE' }
+  | { readonly type: 'CONFIG_EDIT_SAVE' }
+  | { readonly type: 'CONFIG_EDIT_CANCEL' };
 
-export type HelpMsg = { readonly type: 'HELP_SCROLL_UP' } | { readonly type: 'HELP_SCROLL_DOWN' };
+export type HelpMsg =
+  | { readonly type: 'HELP_SCROLL_UP' }
+  | { readonly type: 'HELP_SCROLL_DOWN' }
+  | { readonly type: 'HELP_PAGE_UP' }
+  | { readonly type: 'HELP_PAGE_DOWN' }
+  | { readonly type: 'HELP_TOP' }
+  | { readonly type: 'HELP_BOTTOM' };
 
 export type LoginMsg =
   | { readonly type: 'LOGIN_SESSION_INPUT'; readonly value: string }
@@ -329,6 +369,16 @@ export type WorkspaceMsg =
   | { readonly type: 'WORKSPACE_UP' }
   | { readonly type: 'WORKSPACE_DOWN' }
   | { readonly type: 'WORKSPACE_SELECT' }
+  | { readonly type: 'WORKSPACE_FOCUS_LIST' }
+  | { readonly type: 'WORKSPACE_FOCUS_EDITOR' }
+  | { readonly type: 'WORKSPACE_TOGGLE_FOCUS' }
+  | { readonly type: 'WORKSPACE_FIELD_UP' }
+  | { readonly type: 'WORKSPACE_FIELD_DOWN' }
+  | { readonly type: 'WORKSPACE_EDIT_START' }
+  | { readonly type: 'WORKSPACE_EDIT_INPUT'; readonly char: string }
+  | { readonly type: 'WORKSPACE_EDIT_BACKSPACE' }
+  | { readonly type: 'WORKSPACE_EDIT_SAVE' }
+  | { readonly type: 'WORKSPACE_EDIT_CANCEL' }
   | { readonly type: 'WORKSPACE_DELETE' }
   | { readonly type: 'WORKSPACE_CREATE_START' }
   | { readonly type: 'WORKSPACE_CREATE_INPUT'; readonly char: string }

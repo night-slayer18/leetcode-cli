@@ -27,7 +27,7 @@ export function view(model: LoginScreenModel, width: number, height: number): st
 
   // Main Box Content
   if (model.step === 'instructions') {
-    const contentWidth = Math.min(100, width - 4);
+    const contentWidth = Math.max(28, Math.min(100, width - 4));
 
     const instructions = [
       chalk.hex(colors.warning).bold('How to Login:'),
@@ -54,14 +54,16 @@ export function view(model: LoginScreenModel, width: number, height: number): st
     contentLines.push(''); // Spacing
     contentLines.push(center(keyHint('Enter', 'Continue to Login'), width));
   } else if (model.step === 'input' || model.step === 'verifying' || model.step === 'error') {
-    const contentWidth = 100;
+    const contentWidth = Math.max(28, Math.min(100, width - 4));
     const boxLines = [];
 
     const isSessionFocused = model.focusedField === 'session';
     const isCsrfFocused = model.focusedField === 'csrf';
 
     // Truncate for display to prevent box resizing/wrapping
-    const truncate = (s: string) => (s.length > 80 ? '...' + s.slice(-77) : s);
+    const tokenPreview = Math.max(12, contentWidth - 20);
+    const truncate = (s: string) =>
+      s.length > tokenPreview ? '...' + s.slice(-(tokenPreview - 3)) : s;
 
     const sessionDisplay = model.sessionToken
       ? truncate(model.sessionToken)

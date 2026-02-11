@@ -12,6 +12,7 @@ import {
   progressBar,
   keyHint,
   visibleLength,
+  wrapLines,
 } from '../../lib/layout.js';
 
 export function view(model: ListScreenModel, width: number, height: number): string {
@@ -73,6 +74,9 @@ function renderListHeader(model: ListScreenModel, width: number): string {
   const loadingIndicator = model.loadingMore ? chalk.hex(colors.primary)(' ⋯ Loading more...') : '';
 
   const leftPart = `${title} ${count}${loadingIndicator}`;
+  if (width < 60) {
+    return leftPart;
+  }
 
   if (model.total > 0) {
     const solvedCount = model.problems.filter((p) => p.status === 'ac').length;
@@ -94,10 +98,12 @@ function renderSearchBar(model: ListScreenModel, width: number): string {
   if (model.searchMode) {
     const buffer = model.searchBuffer || '';
     const cursor = chalk.hex(colors.primary)('▌');
+    const boxWidth = Math.max(10, Math.min(30, width - stripAnsi(prefix).length - 4));
     const searchBox = chalk.bgHex(colors.bgHighlight).hex(colors.textBright)(
-      ` ${buffer}${cursor} `.padEnd(30)
+      ` ${buffer}${cursor} `.padEnd(boxWidth)
     );
-    return prefix + searchBox + chalk.hex(colors.textMuted)('  (Enter to search, Esc to cancel)');
+    const hint = width > 60 ? chalk.hex(colors.textMuted)('  (Enter to search, Esc to cancel)') : '';
+    return prefix + searchBox + hint;
   }
 
   if (model.searchQuery) {
@@ -167,45 +173,56 @@ function renderFilters(model: ListScreenModel, width: number): string {
     parts.push(keyHint('c', 'Clear All'));
   }
 
-  return parts.join('');
+  const wrapped = wrapLines([parts.join('')], Math.max(10, width - 1));
+  return wrapped[0] ?? '';
 }
 
 function renderTableHeader(width: number): string {
-  const cols = layout.tableColumns;
+  const cols = getTableColumns(width);
   const titleWidth =
-    width -
+    Math.max(
+      8,
+      width -
     cols.selector -
     cols.status -
     cols.id -
     cols.difficulty -
     cols.acceptance -
     cols.premium -
-    6;
+      6
+    );
 
-  return chalk.hex(colors.textMuted)(
-    '  ' +
-      padEnd('', cols.selector) +
-      padEnd('', cols.status) +
-      padEnd('ID', cols.id) +
-      padEnd('Title', titleWidth) +
-      padEnd('Diff', cols.difficulty) +
-      padStart('Acc %', cols.acceptance) +
-      '  ' +
-      padEnd('', cols.premium)
-  );
+  const sections = [
+    '  ' + padEnd('', cols.selector) + padEnd('', cols.status) + padEnd('ID', cols.id),
+    padEnd('Title', titleWidth),
+  ];
+  if (cols.difficulty > 0) {
+    sections.push(padEnd('Diff', cols.difficulty));
+  }
+  if (cols.acceptance > 0) {
+    sections.push(padStart('Acc %', cols.acceptance));
+  }
+  if (cols.premium > 0) {
+    sections.push('  ' + padEnd('', cols.premium));
+  }
+
+  return chalk.hex(colors.textMuted)(sections.join(''));
 }
 
 function renderProblemRow(problem: Problem, isSelected: boolean, width: number): string {
-  const cols = layout.tableColumns;
+  const cols = getTableColumns(width);
   const titleWidth =
-    width -
+    Math.max(
+      8,
+      width -
     cols.selector -
     cols.status -
     cols.id -
     cols.difficulty -
     cols.acceptance -
     cols.premium -
-    6;
+      6
+    );
 
   const selector = isSelected ? chalk.hex(colors.primary).bold('▶ ') : '  ';
 
@@ -228,15 +245,23 @@ function renderProblemRow(problem: Problem, isSelected: boolean, width: number):
       : problem.difficulty === 'Medium'
         ? colors.warning
         : colors.error;
-  const diff = chalk.hex(diffColor)(padEnd(problem.difficulty, cols.difficulty));
+  const diff = cols.difficulty > 0 ? chalk.hex(diffColor)(padEnd(problem.difficulty, cols.difficulty)) : '';
+  const acc =
+    cols.acceptance > 0
+      ? chalk.hex(colors.textMuted)(padStart(`${Math.round(problem.acRate)}%`, cols.acceptance))
+      : '';
+  const premium =
+    cols.premium > 0 ? (problem.isPaidOnly ? chalk.hex(colors.warning)('💎') : '  ') : '';
 
-  const acc = chalk.hex(colors.textMuted)(
-    padStart(`${Math.round(problem.acRate)}%`, cols.acceptance)
-  );
-
-  const premium = problem.isPaidOnly ? chalk.hex(colors.warning)('💎') : '  ';
-
-  const row = '  ' + selector + status + id + titlePadded + diff + acc + '  ' + premium;
+  const row =
+    '  ' +
+    selector +
+    status +
+    id +
+    titlePadded +
+    diff +
+    (cols.acceptance > 0 ? acc : '') +
+    (cols.premium > 0 ? '  ' + premium : '');
 
   if (isSelected) {
     const stripped = stripAnsi(row);
@@ -264,10 +289,35 @@ function renderListFooter(model: ListScreenModel, width: number): string {
     keyHint('b', 'Bookmarks'),
     keyHint('↵', 'Open'),
   ];
-  const rightPart = hints.join('  ');
+  const rightPart = width < 70 ? `${keyHint('j/k', 'Move')}  ${keyHint('↵', 'Open')}` : hints.join('  ');
 
   const padding = width - stripAnsi(leftPart + moreInfo).length - stripAnsi(rightPart).length;
   return leftPart + moreInfo + (padding > 0 ? ' '.repeat(padding) : '  ') + rightPart;
+}
+
+function getTableColumns(width: number): typeof layout.tableColumns {
+  if (width >= 78) {
+    return layout.tableColumns;
+  }
+
+  if (width >= 62) {
+    return {
+      ...layout.tableColumns,
+      id: 5,
+      difficulty: 8,
+      acceptance: 0,
+      premium: 0,
+    };
+  }
+
+  return {
+    ...layout.tableColumns,
+    status: 2,
+    id: 4,
+    difficulty: 0,
+    acceptance: 0,
+    premium: 0,
+  };
 }
 
 function renderLoadingState(width: number, height: number): string[] {

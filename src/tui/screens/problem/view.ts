@@ -1,676 +1,373 @@
 import chalk from 'chalk';
 import type { ProblemScreenModel } from '../../types.js';
-import { colors, icons } from '../../theme.js';
+import { colors } from '../../theme.js';
 import {
-  renderModal,
   center,
-  wrapLines,
-  stripAnsi,
-  keyHint,
-  horizontalLine,
   difficultyBadge,
+  horizontalLine,
+  keyHint,
+  renderSectionHeader,
+  splitPane,
+  stripAnsi,
   truncate,
+  wrapLines,
 } from '../../lib/layout.js';
-import { visualizeTestOutput } from '../../../utils/visualize.js';
 
 export function view(model: ProblemScreenModel, width: number, height: number): string {
   const lines: string[] = [];
-  const contentHeight = height - 4;
+  const safeWidth = Math.max(30, width);
+  const safeHeight = Math.max(10, height);
 
   if (model.loading) {
-    return renderLoading(width, contentHeight);
+    return renderCenterMessage('Loading problem details...', safeWidth, safeHeight, colors.primary);
   }
-
   if (model.error && !model.detail) {
-    return renderError(model.error, width, contentHeight);
+    return renderCenterMessage(`Error: ${model.error}`, safeWidth, safeHeight, colors.error);
   }
-
   if (!model.detail) {
-    return renderError('Problem detail not found', width, contentHeight);
+    return renderCenterMessage('Problem detail not found', safeWidth, safeHeight, colors.error);
   }
 
-  const detail = model.detail;
-
-  lines.push('');
-
-  const idBadge = chalk.bgHex(colors.bgHighlight).hex(colors.textMuted)(
+  const titleBadge = chalk.bgHex(colors.bgHighlight).hex(colors.textMuted)(
     ` ${model.detail.questionFrontendId} `
   );
   const title = chalk.hex(colors.textBright).bold(` ${model.detail.title} `);
-  const diffBadge = difficultyBadge(model.detail.difficulty);
-  const bookmarkIcon = model.isBookmarked ? chalk.hex(colors.warning)(' ★') : '';
-
-  lines.push(center(`${idBadge}${title}${diffBadge}${bookmarkIcon}`, width));
-  lines.push('');
-
+  const diff = difficultyBadge(model.detail.difficulty);
+  const bookmarked = model.isBookmarked ? chalk.hex(colors.warning)(' ★') : '';
   const tags = (model.detail.topicTags || [])
-    .map((t: any) => chalk.hex(colors.info)(`#${t.name}`))
+    .map((tag: any) => chalk.hex(colors.info)(`#${tag.name}`))
     .join(' ');
 
-  const stats = chalk.hex(colors.textMuted)(`Difficulty: ${model.detail.difficulty}`);
+  lines.push(center(`${titleBadge}${title}${diff}${bookmarked}`, safeWidth));
+  lines.push(center(truncate(tags, safeWidth), safeWidth));
+  lines.push(chalk.hex(colors.textMuted)(horizontalLine(safeWidth)));
 
-  lines.push(center(`${tags}`, width));
-  lines.push(center(`${stats}`, width));
-  lines.push(center(horizontalLine(width - 4), width));
-  lines.push('');
+  const actionFooterHeight = 2;
+  const bodyHeight = Math.max(3, safeHeight - lines.length - actionFooterHeight);
 
-  const headerUsed = lines.length;
-  const footerHeight = 2;
-  const viewportHeight = contentHeight - headerUsed - footerHeight;
+  const hasPanel = model.activePanel !== 'none';
+  const canUseSidePanel =
+    hasPanel &&
+    safeWidth >= 104 &&
+    (model.activePanel === 'hint' ||
+      model.activePanel === 'submissions' ||
+      model.activePanel === 'snapshots' ||
+      model.activePanel === 'note' ||
+      model.activePanel === 'diff');
 
-  const wrappedLines = wrapLines(model.contentLines, width - 8);
-
-  const visibleLines = wrappedLines.slice(model.scrollOffset, model.scrollOffset + viewportHeight);
-
-  for (const line of visibleLines) {
-    lines.push('    ' + chalk.hex(colors.text)(line));
+  if (canUseSidePanel) {
+    const ratio = model.activePanel === 'note' || model.activePanel === 'diff' ? 0.62 : 0.68;
+    const leftLines = renderProblemContent(model, Math.max(30, Math.floor(safeWidth * ratio)), bodyHeight);
+    const panelLines = renderActionPanel(model, safeWidth - Math.floor(safeWidth * ratio) - 1, bodyHeight);
+    lines.push(...splitPane(leftLines, panelLines, safeWidth, bodyHeight, ratio));
+  } else if (hasPanel) {
+    const panelHeight = Math.max(6, Math.min(12, Math.floor(bodyHeight * 0.42)));
+    const contentHeight = Math.max(3, bodyHeight - panelHeight - 1);
+    lines.push(...renderProblemContent(model, safeWidth, contentHeight));
+    lines.push(chalk.hex(colors.border)(horizontalLine(safeWidth)));
+    lines.push(...renderActionPanel(model, safeWidth, panelHeight));
+  } else {
+    lines.push(...renderProblemContent(model, safeWidth, bodyHeight));
   }
 
-  while (lines.length < contentHeight - footerHeight) {
+  while (lines.length < safeHeight - 2) lines.push('');
+  lines.push(chalk.hex(colors.textMuted)(horizontalLine(safeWidth)));
+  lines.push(...renderActionBar(model, safeWidth));
+
+  return lines.slice(0, safeHeight).join('\n');
+}
+
+function renderProblemContent(model: ProblemScreenModel, width: number, height: number): string[] {
+  const lines: string[] = [];
+  const contentWidth = Math.max(10, width - 4);
+  const wrapped = wrapLines(model.contentLines, contentWidth);
+  const maxScroll = Math.max(0, wrapped.length - height);
+  const offset = Math.min(model.scrollOffset, maxScroll);
+  const visible = wrapped.slice(offset, offset + height);
+
+  for (const line of visible) {
+    lines.push(` ${chalk.hex(colors.text)(line)}`);
+  }
+  while (lines.length < height) {
     lines.push('');
   }
-
-  lines.push(center(horizontalLine(width), width));
-
-  const scrollInfo = `Scroll: ${Math.round((model.scrollOffset / Math.max(1, wrappedLines.length)) * 100)}%`;
-
-  lines.push(
-    center(
-      `${keyHint('p', 'Pick')}  ${keyHint('t', 'Test')}  ${keyHint('s', 'Submit')}  ${keyHint('h', 'Hint')}  ${keyHint('H', 'Subs')}  ${keyHint('V', 'Snaps')}  ${keyHint('b', model.isBookmarked ? 'Unbookmark' : 'Bookmark')}  ${keyHint('n', 'Note')}  ${chalk.hex(colors.textMuted)(scrollInfo)}`,
-      width
-    )
-  );
-
-  if (model.isRunning) {
-    const content = [center('Running Code...', width - 8), center('Please wait', width - 8)];
-    return renderModal(lines, content, width, height, {
-      title: 'Processing',
-      borderColor: colors.primary,
-      padding: 2,
-      borderStyle: 'round',
-    });
-  }
-
-  if (model.testResult) {
-    return renderTestResult(lines, model.testResult, model.detail?.topicTags || [], width, height);
-  }
-
-  if (model.submissionResult) {
-    return renderSubmissionResult(lines, model.submissionResult, width, height);
-  }
-
-  if (model.successMessage) {
-    const content = [
-      center(chalk.hex(colors.success).bold(model.successMessage), width - 8),
-      '',
-      center(keyHint('Esc', 'Close'), width - 8),
-    ];
-    return renderModal(lines, content, width, height, {
-      title: 'Success',
-      borderColor: colors.success,
-      padding: 2,
-      borderStyle: 'round',
-    });
-  }
-
-  if (model.activeHintIndex !== null && model.detail?.hints) {
-    return renderHintOverlay(
-      lines,
-      model.detail.hints,
-      model.activeHintIndex,
-      model.hintScrollOffset,
-      width,
-      height
-    );
-  }
-
-  if (model.error && model.detail) {
-    return renderErrorOverlay(lines, model.error, width, height);
-  }
-
-  if (model.showSubmissions) {
-    return renderSubmissionsOverlay(lines, model, width, height);
-  }
-
-  if (model.showDiff && model.diffContent) {
-    return renderDiffOverlay(lines, model.diffContent, model.diffScrollOffset, width, height);
-  }
-
-  if (model.showSnapshots) {
-    return renderSnapshotsOverlay(lines, model, width, height);
-  }
-
-  if (model.currentNote !== null) {
-    return renderNoteOverlay(lines, model.currentNote, model.noteScrollOffset, width, height);
-  }
-  return lines.join('\n');
+  return lines;
 }
 
-function renderHintOverlay(
-  base: string[],
-  hints: string[],
-  index: number,
-  scrollOffset: number,
-  width: number,
-  height: number
-): string {
-  const hint = hints[index];
-  const cleanHint = hint
-    ? stripAnsi(hint)
-        .replace(/<\/?[^>]+(>|$)/g, '')
-        .replace(/&nbsp;/g, ' ')
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/&amp;/g, '&')
-        .replace(/\s+/g, ' ')
-        .trim()
-    : '';
+function renderActionBar(model: ProblemScreenModel, width: number): string[] {
+  const hints =
+    width >= 120
+      ? [
+          keyHint('p', 'Pick'),
+          keyHint('t', 'Test'),
+          keyHint('s', 'Submit'),
+          keyHint('h', 'Hint'),
+          keyHint('H', 'Subs'),
+          keyHint('V', 'Snaps'),
+          keyHint('b', model.isBookmarked ? 'Unbookmark' : 'Bookmark'),
+          keyHint('n', 'Note'),
+          keyHint('e', 'Edit'),
+        ].join('  ')
+      : [
+          keyHint('p', 'Pick'),
+          keyHint('t', 'Test'),
+          keyHint('s', 'Submit'),
+          keyHint('h', 'Hint'),
+          keyHint('H', 'Subs'),
+          keyHint('V', 'Snaps'),
+          keyHint('n', 'Note'),
+        ].join('  ');
 
-  const modalWidth = Math.max(50, Math.min(80, Math.floor(width * 0.7)));
-  const contentWidth = modalWidth - 4;
-
-  const wrapped = wrapLines([cleanHint || 'No content'], contentWidth);
-
-  const maxContentHeight = Math.floor(height * 0.6);
-  const totalLines = wrapped.length;
-  const viewHeight = Math.min(maxContentHeight, Math.max(5, totalLines));
-
-  const visibleLines = wrapped.slice(scrollOffset, scrollOffset + viewHeight);
-
-  const content: string[] = [];
-
-  if (visibleLines.length === 0) {
-    content.push(chalk.gray('No content'));
-  } else {
-    visibleLines.forEach((line) => content.push(chalk.hex(colors.text)(line)));
-  }
-
-  if (totalLines > viewHeight) {
-    const canScrollUp = scrollOffset > 0;
-    const canScrollDown = scrollOffset + viewHeight < totalLines;
-
-    let scrollStatus = '';
-    if (canScrollUp) scrollStatus += '↑ More  ';
-    scrollStatus += `${scrollOffset + 1}-${Math.min(scrollOffset + viewHeight, totalLines)} of ${totalLines}`;
-    if (canScrollDown) scrollStatus += '  ↓ More';
-
-    content.push('');
-    content.push(center(chalk.hex(colors.textMuted)(scrollStatus), contentWidth));
-  }
-
-  const controls = [];
-  if (index > 0) controls.push(keyHint('←', 'Prev'));
-  if (index < hints.length - 1) controls.push(keyHint('→', 'Next'));
-  controls.push(keyHint('j/k', 'Scroll'));
-  controls.push(keyHint('h', 'Close'));
-
-  content.push('');
-  content.push(center(horizontalLine(contentWidth), contentWidth));
-  content.push(center(controls.join('  '), contentWidth));
-
-  return renderModal(base, content, width, height, {
-    title: `Hint ${index + 1}/${hints.length}`,
-    borderColor: colors.warning,
-    padding: 1,
-    borderStyle: 'round',
-  });
+  return [center(truncate(hints, Math.max(20, width - 2)), width)];
 }
 
-function renderTestResult(
-  base: string[],
-  result: import('../../types.js').TestResult,
-  tags: { name: string }[],
-  width: number,
-  height: number
-): string {
-  const content: string[] = [];
+function renderActionPanel(model: ProblemScreenModel, width: number, height: number): string[] {
+  const panelWidth = Math.max(22, width);
+  const panelHeight = Math.max(3, height);
 
-  const isSuccess = result.run_success && result.correct_answer;
-  const isError = !result.run_success;
-
-  const themeColor = isError ? colors.error : isSuccess ? colors.success : colors.warning;
-
-  content.push('');
-  if (result.compile_error) {
-    content.push(center(chalk.hex(colors.error).bold('❌ Compile Error'), 60));
-  } else if (result.runtime_error) {
-    content.push(center(chalk.hex(colors.error).bold('⚠ Runtime Error'), 60));
-  } else if (result.correct_answer) {
-    content.push(center(chalk.hex(colors.success).bold('✔ All Test Cases Passed'), 60));
-  } else {
-    content.push(center(chalk.hex(colors.warning).bold('✗ Wrong Answer'), 60));
+  switch (model.activePanel) {
+    case 'hint':
+      return renderHintPanel(model, panelWidth, panelHeight);
+    case 'submissions':
+      return renderSubmissionsPanel(model, panelWidth, panelHeight);
+    case 'snapshots':
+      return renderSnapshotsPanel(model, panelWidth, panelHeight);
+    case 'note':
+      return renderNotePanel(model, panelWidth, panelHeight);
+    case 'diff':
+      return renderDiffPanel(model, panelWidth, panelHeight);
+    case 'testResult':
+      return renderTestResultPanel(model, panelWidth, panelHeight);
+    case 'submitResult':
+      return renderSubmissionResultPanel(model, panelWidth, panelHeight);
+    case 'status':
+      return renderStatusPanel(model, panelWidth, panelHeight);
+    default:
+      return Array.from({ length: panelHeight }, () => '');
   }
-  content.push('');
-
-  const wrap = (str: string, w: number) => wrapLines([str], w);
-  const contentW = 70;
-
-  if (result.compile_error || result.runtime_error) {
-    const err = result.compile_error || result.runtime_error || 'Unknown error';
-    content.push(...wrap(chalk.red(err), contentW));
-  } else {
-    const outputs = result.code_answer || [];
-    const expected = result.expected_code_answer || [];
-
-    const limit = 3;
-    let shown = 0;
-
-    for (let i = 0; i < outputs.length && shown < limit; i++) {
-      const out = outputs[i];
-      const exp = expected[i];
-      const passed = out === exp;
-
-      if (isSuccess && i > 0) continue;
-
-      shown++;
-      content.push(
-        chalk.hex(colors.textMuted)(`Case ${i + 1}:`) +
-          (passed ? chalk.green(' Passed') : chalk.red(' Failed'))
-      );
-
-      try {
-        const vis = visualizeTestOutput(out, exp, tags);
-
-        content.push(chalk.hex(colors.primary)('  Your Output:'));
-        vis.outputVis.split('\n').forEach((l) => content.push('    ' + l));
-
-        content.push(chalk.hex(colors.textMuted)('  Expected:'));
-        vis.expectedVis.split('\n').forEach((l) => content.push('    ' + l));
-      } catch (e) {
-        content.push(`  Your: ${out}`);
-        content.push(`  Exp:  ${exp}`);
-      }
-      content.push(chalk.hex(colors.textMuted)('─'.repeat(contentW)));
-    }
-
-    if (outputs.length > limit) {
-      content.push(center(chalk.gray(`... ${outputs.length - limit} more cases ...`), contentW));
-    }
-  }
-
-  content.push('');
-  content.push(center(keyHint('Esc', 'Close'), contentW));
-
-  return renderModal(base, content, width, height, {
-    title: 'Test Result',
-    borderColor: themeColor,
-    padding: 1,
-    borderStyle: 'round',
-  });
 }
 
-function renderSubmissionResult(
-  base: string[],
-  result: import('../../types.js').SubmissionResult,
-  width: number,
-  height: number
-): string {
-  const content: string[] = [];
+function renderHintPanel(model: ProblemScreenModel, width: number, height: number): string[] {
+  const hints = model.detail?.hints || [];
+  const index = model.activeHintIndex ?? 0;
+  const raw = hints[index] ?? 'No hints available';
+  const clean = stripAnsi(raw)
+    .replace(/<\/?[^>]+(>|$)/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+    .replace(/\s+/g, ' ')
+    .trim();
 
-  const isSuccess = result.status_msg === 'Accepted';
-  const themeColor = isSuccess ? colors.success : colors.error;
-  const icon = isSuccess ? icons.check : icons.cross;
+  const bodyWidth = Math.max(10, width - 2);
+  const wrapped = wrapLines([clean || 'No hint content'], bodyWidth);
+  const available = Math.max(1, height - 2);
+  const maxScroll = Math.max(0, wrapped.length - available);
+  const offset = Math.min(model.panelScrollOffset, maxScroll);
+  const visible = wrapped.slice(offset, offset + available);
 
-  content.push('');
-  content.push(center(chalk.hex(themeColor).bold(`${icon} ${result.status_msg}`), 60));
-  content.push('');
-
-  const wrap = (str: string, w: number) => wrapLines([str], w);
-  const contentW = 70;
-
-  if (isSuccess) {
-    content.push(center(chalk.cyan(`Runtime: ${result.status_runtime}`), contentW));
-    content.push(
-      center(
-        chalk.hex(colors.textMuted)(`Beats ${result.runtime_percentile.toFixed(2)}% of users`),
-        contentW
-      )
-    );
-    content.push('');
-    content.push(center(chalk.magenta(`Memory: ${result.status_memory}`), contentW));
-    content.push(
-      center(
-        chalk.hex(colors.textMuted)(`Beats ${result.memory_percentile.toFixed(2)}% of users`),
-        contentW
-      )
-    );
-  } else {
-    if (result.last_testcase) {
-      content.push(chalk.hex(colors.textMuted)(`Last Input:`));
-      content.push(chalk.white(truncate(result.last_testcase, contentW)));
-      content.push('');
-    }
-
-    if (result.expected_output) {
-      content.push(
-        chalk.hex(colors.text)(`Expected: `) +
-          chalk.hex(colors.success)(truncate(result.expected_output, contentW - 10))
-      );
-    }
-    if (result.code_output) {
-      content.push(
-        chalk.hex(colors.text)(`Output:   `) +
-          chalk.hex(colors.error)(truncate(result.code_output, contentW - 10))
-      );
-    }
-
-    if (result.runtime_error) {
-      content.push('');
-      content.push(chalk.red('Runtime Error:'));
-      content.push(...wrap(result.runtime_error, contentW));
-    }
-  }
-
-  content.push('');
-  content.push(center(keyHint('Esc', 'Close'), contentW));
-
-  return renderModal(base, content, width, height, {
-    title: 'Submission Result',
-    borderColor: themeColor,
-    padding: 1,
-    borderStyle: 'round',
-  });
+  const lines: string[] = [renderSectionHeader(`Hint ${index + 1}/${Math.max(1, hints.length)}`, width)];
+  lines.push(...visible.map((line) => truncate(line, width)));
+  while (lines.length < height - 1) lines.push('');
+  lines.push(chalk.hex(colors.textMuted)(`${keyHint('←/→', 'Prev/Next')}  ${keyHint('j/k', 'Scroll')}  ${keyHint('h/Esc', 'Close')}`));
+  return lines.slice(0, height);
 }
 
-function renderSubmissionsOverlay(
-  base: string[],
-  model: ProblemScreenModel,
-  width: number,
-  height: number
-): string {
-  const content: string[] = [];
-  const contentW = Math.min(75, width - 6);
-
+function renderSubmissionsPanel(model: ProblemScreenModel, width: number, height: number): string[] {
+  const lines: string[] = [renderSectionHeader('Submissions', width)];
   if (model.submissionsLoading) {
-    content.push('');
-    content.push(center('Loading submissions...', contentW));
-    content.push('');
+    lines.push(chalk.hex(colors.primary)('Loading submissions...'));
   } else if (!model.submissionsHistory || model.submissionsHistory.length === 0) {
-    content.push('');
-    content.push(center(chalk.yellow('No submissions found'), contentW));
-    content.push('');
+    lines.push(chalk.hex(colors.warning)('No submissions found for this problem.'));
+    lines.push(chalk.hex(colors.textMuted)('Use [s] Submit after picking a solution.'));
   } else {
-    const header = `  ${'Status'.padEnd(12)} ${'Runtime'.padEnd(10)} ${'Memory'.padEnd(10)} ${'Language'.padEnd(12)} ${'Time'.padEnd(15)}`;
-    content.push(chalk.hex(colors.textMuted)(header));
-    content.push(center(horizontalLine(contentW), contentW));
-
-    const pageSize = 10;
-    const offset = model.submissionScrollOffset || 0;
-    const total = model.submissionsHistory.length;
-
-    const toShow = model.submissionsHistory.slice(offset, offset + pageSize);
-    for (const sub of toShow) {
-      const statusColor = sub.statusDisplay === 'Accepted' ? colors.success : colors.error;
-      const status = chalk.hex(statusColor)(sub.statusDisplay.padEnd(12));
-      const runtime = chalk.hex(colors.cyan)((sub.runtime || '-').padEnd(10));
-      const memory = chalk.hex(colors.textMuted)((sub.memory || '-').padEnd(10));
-      const lang = chalk.hex(colors.info)(sub.lang.padEnd(12));
-      const time = formatTimeAgo(sub.timestamp);
-      content.push(`  ${status} ${runtime} ${memory} ${lang} ${chalk.hex(colors.textMuted)(time)}`);
-    }
-
-    const canScrollDown = offset + pageSize < total;
-    if (canScrollDown) {
-      content.push('');
-      content.push(
-        center(chalk.hex(colors.warning)(`↓ ${total - (offset + pageSize)} more`), contentW)
-      );
-    } else {
-      for (let i = 0; i < pageSize - toShow.length; i++) content.push('');
-    }
-  }
-
-  content.push('');
-  content.push(center(horizontalLine(contentW), contentW));
-
-  const hints = [];
-  if (
-    !model.submissionsLoading &&
-    model.submissionsHistory &&
-    model.submissionsHistory.length > 10
-  ) {
-    hints.push(keyHint('j/k', 'Scroll'));
-  }
-  hints.push(keyHint('H', 'Close'));
-  hints.push(keyHint('Esc', 'Back'));
-
-  content.push(center(hints.join('  '), contentW));
-
-  return renderModal(base, content, width, height, {
-    title: 'Submission History',
-    borderColor: colors.primary,
-    padding: 1,
-    borderStyle: 'double',
-  });
-}
-
-function formatTimeAgo(timestamp: string): string {
-  const date = new Date(parseInt(timestamp) * 1000);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMins / 60);
-  const diffDays = Math.floor(diffHours / 24);
-
-  if (diffMins < 1) return 'just now';
-  if (diffMins < 60) return `${diffMins}m ago`;
-  if (diffHours < 24) return `${diffHours}h ago`;
-  if (diffDays < 30) return `${diffDays}d ago`;
-  return date.toLocaleDateString();
-}
-
-function renderSnapshotsOverlay(
-  base: string[],
-  model: ProblemScreenModel,
-  width: number,
-  height: number
-): string {
-  const content: string[] = [];
-  const contentW = Math.min(80, width - 6);
-
-  if (!model.snapshotsList || model.snapshotsList.length === 0) {
-    content.push('');
-    content.push(center(chalk.yellow('No snapshots saved'), contentW));
-    content.push('');
-    content.push(center(chalk.hex(colors.textMuted)('Save snapshots from CLI:'), contentW));
-    content.push(center(chalk.hex(colors.info)('leet snapshot save <id>'), contentW));
-    content.push('');
-  } else {
-    const header = `  ${'ID'.padEnd(4)} ${'Name'.padEnd(20)} ${'Lang'.padEnd(10)} ${'Lines'.padEnd(6)} ${'Created'.padEnd(15)}`;
-    content.push(chalk.hex(colors.textMuted)(header));
-    content.push(center(horizontalLine(contentW), contentW));
-
-    const pageSize = 8;
-    const pageStart = Math.floor(model.snapshotCursor / pageSize) * pageSize;
-    const toShow = model.snapshotsList.slice(pageStart, pageStart + pageSize);
-
-    toShow.forEach((snap, idx) => {
-      const absoluteIndex = pageStart + idx;
-      const isSelected = absoluteIndex === model.snapshotCursor;
-
-      const pointer = isSelected ? chalk.hex(colors.primary)('>') : ' ';
-      const bgFn = isSelected
-        ? (s: string) => chalk.bgHex(colors.bgHighlight)(s)
-        : (s: string) => s;
-
-      const id = String(snap.id).padEnd(4);
-      const name = snap.name.slice(0, 18).padEnd(20);
-      const lang = snap.language.padEnd(10);
-      const lines = String(snap.lines).padEnd(6);
-      const created = formatTimeAgo(String(new Date(snap.createdAt).getTime() / 1000));
-
-      const row = `${id} ${name} ${lang} ${lines} ${created}`;
-      content.push(bgFn(`${pointer} ${row}`));
+    const rows = model.submissionsHistory.map((entry) => {
+      const statusColor = entry.statusDisplay === 'Accepted' ? colors.success : colors.error;
+      const status = chalk.hex(statusColor)(truncate(entry.statusDisplay, 10).padEnd(10));
+      const runtime = chalk.hex(colors.cyan)(truncate(entry.runtime || '-', 8).padEnd(8));
+      const memory = chalk.hex(colors.textMuted)(truncate(entry.memory || '-', 8).padEnd(8));
+      const lang = chalk.hex(colors.info)(truncate(entry.lang, 8).padEnd(8));
+      return `${status} ${runtime} ${memory} ${lang}`;
     });
 
-    const fill = pageSize - toShow.length;
-    for (let i = 0; i < fill; i++) content.push('');
+    const available = Math.max(1, height - 2);
+    const maxScroll = Math.max(0, rows.length - available);
+    const offset = Math.min(model.panelScrollOffset, maxScroll);
+    lines.push(...rows.slice(offset, offset + available));
+  }
+  while (lines.length < height - 1) lines.push('');
+  lines.push(chalk.hex(colors.textMuted)(`${keyHint('j/k', 'Scroll')}  ${keyHint('H/Esc', 'Close')}`));
+  return lines.slice(0, height);
+}
 
-    if (model.snapshotsList.length > pageSize) {
-      const pageInfo = `Page ${Math.floor(pageStart / pageSize) + 1}/${Math.ceil(model.snapshotsList.length / pageSize)}`;
-      content.push('');
-      content.push(center(chalk.hex(colors.textMuted)(pageInfo), contentW));
+function renderSnapshotsPanel(model: ProblemScreenModel, width: number, height: number): string[] {
+  const lines: string[] = [renderSectionHeader('Snapshots', width)];
+  if (!model.snapshotsList || model.snapshotsList.length === 0) {
+    lines.push(chalk.hex(colors.warning)('No snapshots saved.'));
+    lines.push(chalk.hex(colors.textMuted)('Create snapshots from your solution workflow.'));
+  } else {
+    const rows = model.snapshotsList.map((snap, idx) => {
+      const selected = idx === model.snapshotCursor ? chalk.hex(colors.primary)('▶') : ' ';
+      const name = truncate(snap.name, 14).padEnd(14);
+      const lang = truncate(snap.language, 8).padEnd(8);
+      return `${selected} ${String(snap.id).padStart(3)} ${name} ${lang} ${String(snap.lines).padStart(4)}L`;
+    });
+    const available = Math.max(1, height - 2);
+    const pageStart = Math.floor(model.snapshotCursor / available) * available;
+    lines.push(...rows.slice(pageStart, pageStart + available));
+  }
+  while (lines.length < height - 1) lines.push('');
+  lines.push(chalk.hex(colors.textMuted)(`${keyHint('j/k', 'Move')}  ${keyHint('d/r', 'Diff/Restore')}  ${keyHint('V/Esc', 'Close')}`));
+  return lines.slice(0, height);
+}
+
+function renderNotePanel(model: ProblemScreenModel, width: number, height: number): string[] {
+  const lines: string[] = [renderSectionHeader('Notes', width)];
+  const content = model.noteContent || 'No notes found. Press e to edit.';
+  const wrapped = wrapLines(formatNotePreview(content), Math.max(10, width - 2));
+  const available = Math.max(1, height - 2);
+  const maxScroll = Math.max(0, wrapped.length - available);
+  const offset = Math.min(model.panelScrollOffset, maxScroll);
+  lines.push(...wrapped.slice(offset, offset + available));
+  while (lines.length < height - 1) lines.push('');
+  lines.push(chalk.hex(colors.textMuted)(`${keyHint('j/k', 'Scroll')}  ${keyHint('e', 'Edit')}  ${keyHint('n/Esc', 'Close')}`));
+  return lines.slice(0, height);
+}
+
+function renderDiffPanel(model: ProblemScreenModel, width: number, height: number): string[] {
+  const lines: string[] = [renderSectionHeader('Diff', width)];
+  const content = model.diffContent || 'No diff available.';
+  const rows = content.split('\n').map((line) => {
+    if (line.startsWith('[green]')) return chalk.green(line.slice(7));
+    if (line.startsWith('[red]')) return chalk.red(line.slice(5));
+    if (line.startsWith('[grey]')) return chalk.gray(line.slice(6));
+    return line;
+  });
+  const available = Math.max(1, height - 2);
+  const maxScroll = Math.max(0, rows.length - available);
+  const offset = Math.min(model.panelScrollOffset, maxScroll);
+  lines.push(...rows.slice(offset, offset + available));
+  while (lines.length < height - 1) lines.push('');
+  lines.push(chalk.hex(colors.textMuted)(`${keyHint('j/k', 'Scroll')}  ${keyHint('d/Esc', 'Close')}`));
+  return lines.slice(0, height);
+}
+
+function renderTestResultPanel(model: ProblemScreenModel, width: number, height: number): string[] {
+  const lines: string[] = [renderSectionHeader('Test Result', width)];
+  const result = model.testResult;
+  if (!result) {
+    lines.push('No test result available.');
+  } else if (result.compile_error) {
+    lines.push(chalk.hex(colors.error).bold('Compile Error'));
+    lines.push(...wrapLines([result.compile_error], Math.max(10, width - 2)));
+  } else if (result.runtime_error) {
+    lines.push(chalk.hex(colors.error).bold('Runtime Error'));
+    lines.push(...wrapLines([result.runtime_error], Math.max(10, width - 2)));
+  } else if (result.correct_answer) {
+    lines.push(chalk.hex(colors.success).bold('All test cases passed'));
+  } else {
+    lines.push(chalk.hex(colors.warning).bold('Wrong answer'));
+  }
+  while (lines.length < height - 1) lines.push('');
+  lines.push(chalk.hex(colors.textMuted)(`${keyHint('Esc', 'Close')}`));
+  return lines.slice(0, height);
+}
+
+function renderSubmissionResultPanel(model: ProblemScreenModel, width: number, height: number): string[] {
+  const lines: string[] = [renderSectionHeader('Submission Result', width)];
+  const result = model.submissionResult;
+  if (!result) {
+    lines.push('No submission result available.');
+  } else {
+    const accepted = result.status_msg === 'Accepted';
+    lines.push(
+      accepted ? chalk.hex(colors.success).bold(result.status_msg) : chalk.hex(colors.error).bold(result.status_msg)
+    );
+    lines.push(chalk.hex(colors.cyan)(`Runtime: ${result.status_runtime || '-'}`));
+    lines.push(chalk.hex(colors.textMuted)(`Memory: ${result.status_memory || '-'}`));
+    if (result.runtime_error) {
+      lines.push(...wrapLines([result.runtime_error], Math.max(10, width - 2)));
     }
   }
-
-  content.push('');
-  content.push(center(horizontalLine(contentW), contentW));
-
-  const hints = [
-    keyHint('j/k', 'Nav'),
-    keyHint('d', 'Diff'),
-    keyHint('r', 'Restore'),
-    keyHint('V/Esc', 'Close'),
-  ];
-  content.push(center(hints.join('  '), contentW));
-
-  return renderModal(base, content, width, height, {
-    title: 'Snapshots',
-    borderColor: colors.info,
-    padding: 1,
-    borderStyle: 'round',
-  });
+  while (lines.length < height - 1) lines.push('');
+  lines.push(chalk.hex(colors.textMuted)(`${keyHint('Esc', 'Close')}`));
+  return lines.slice(0, height);
 }
 
-function renderLoading(width: number, height: number): string {
+function renderStatusPanel(model: ProblemScreenModel, width: number, height: number): string[] {
+  const message =
+    model.panelData.statusMessage ||
+    model.successMessage ||
+    model.error ||
+    (model.isRunning ? 'Working...' : 'Ready');
+  const lines: string[] = [renderSectionHeader(resolveStatusTitle(message), width)];
+  const color =
+    model.error
+      ? colors.error
+      : model.successMessage
+        ? colors.success
+        : model.isRunning
+          ? colors.primary
+          : colors.textMuted;
+  const wrapped = wrapLines([message], Math.max(10, width - 2));
+  lines.push(...wrapped.map((line) => chalk.hex(color)(line)));
+  while (lines.length < height - 1) lines.push('');
+  lines.push(chalk.hex(colors.textMuted)(`${keyHint('Esc', 'Close')}`));
+  return lines.slice(0, height);
+}
+
+function resolveStatusTitle(message: string): string {
+  const text = message.toLowerCase();
+  if (text.includes('running tests')) return 'Testing';
+  if (text.includes('submitting')) return 'Submitting';
+  if (text.includes('bookmark')) return 'Bookmark';
+  if (text.includes('hint')) return 'Hints';
+  if (text.includes('error')) return 'Error';
+  return 'Status';
+}
+
+function formatNotePreview(content: string): string[] {
+  const rawLines = content.split('\n');
   const lines: string[] = [];
-  const midY = Math.floor(height / 2);
-  for (let i = 0; i < midY - 1; i++) lines.push('');
-  lines.push(center(chalk.hex(colors.primary)('Loading problem details...'), width));
+
+  for (const rawLine of rawLines) {
+    const trimmed = rawLine.trim();
+    if (!trimmed) {
+      if (lines.length > 0 && lines[lines.length - 1] !== '') {
+        lines.push('');
+      }
+      continue;
+    }
+
+    if (trimmed.startsWith('<!--') && trimmed.endsWith('-->')) continue;
+
+    let line = rawLine
+      .replace(/\*\*(.*?)\*\*/g, '$1')
+      .replace(/`([^`]+)`/g, '$1')
+      .replace(/\[(.*?)\]\((.*?)\)/g, '$1 ($2)');
+
+    if (line.startsWith('## ')) {
+      line = `${chalk.hex(colors.primary).bold('•')} ${line.slice(3)}`;
+    } else if (line.startsWith('# ')) {
+      line = chalk.hex(colors.primary).bold(line.slice(2));
+    }
+
+    lines.push(line);
+  }
+
+  while (lines.length > 0 && lines[lines.length - 1] === '') {
+    lines.pop();
+  }
+
+  return lines.length > 0 ? lines : ['No notes found. Press e to edit.'];
+}
+
+function renderCenterMessage(message: string, width: number, height: number, color: string): string {
+  const lines: string[] = [];
+  const top = Math.max(0, Math.floor(height / 2) - 1);
+  for (let i = 0; i < top; i++) lines.push('');
+  lines.push(center(chalk.hex(color)(message), width));
   while (lines.length < height) lines.push('');
   return lines.join('\n');
-}
-
-function renderError(error: string, width: number, height: number): string {
-  const lines: string[] = [];
-  const midY = Math.floor(height / 2);
-  for (let i = 0; i < midY - 1; i++) lines.push('');
-  lines.push(center(chalk.hex(colors.error)(`Error: ${error}`), width));
-  while (lines.length < height) lines.push('');
-  return lines.join('\n');
-}
-
-function renderNoteOverlay(
-  base: string[],
-  content: string,
-  scrollOffset: number,
-  width: number,
-  height: number
-): string {
-  const overlayContent: string[] = [];
-  const contentW = Math.min(80, width - 6);
-
-  const wrapped = wrapLines(content.split('\n'), contentW);
-  const maxLines = Math.floor(height * 0.6);
-
-  const displayLines = wrapped.slice(scrollOffset, scrollOffset + maxLines);
-
-  for (const line of displayLines) {
-    overlayContent.push('   ' + chalk.hex(colors.text)(line));
-  }
-
-  const padding = Math.max(0, maxLines - displayLines.length);
-  for (let i = 0; i < padding; i++) overlayContent.push('');
-
-  const canScrollUp = scrollOffset > 0;
-  const canScrollDown = scrollOffset + maxLines < wrapped.length;
-
-  if (canScrollDown) {
-    overlayContent.push('');
-    overlayContent.push(
-      center(
-        chalk.hex(colors.warning)(`↓ ${wrapped.length - (scrollOffset + maxLines)} more lines`),
-        contentW
-      )
-    );
-  } else {
-    overlayContent.push('');
-    overlayContent.push(' ');
-  }
-
-  overlayContent.push('');
-  overlayContent.push(center(horizontalLine(contentW), contentW));
-
-  const navHints = [];
-  if (canScrollUp || canScrollDown) navHints.push(keyHint('j/k', 'Scroll'));
-  navHints.push(keyHint('n', 'Edit/Close'));
-  navHints.push(keyHint('Esc', 'Close'));
-
-  overlayContent.push(center(navHints.join('  '), contentW));
-
-  return renderModal(base, overlayContent, width, height, {
-    title: 'Problem Notes',
-    borderColor: colors.warning,
-    padding: 1,
-    borderStyle: 'double',
-  });
-}
-
-function renderDiffOverlay(
-  base: string[],
-  content: string,
-  scrollOffset: number,
-  width: number,
-  height: number
-): string {
-  const overlayContent: string[] = [];
-  const contentW = Math.min(95, width - 6);
-
-  const lines = content.split('\n');
-  const maxLines = Math.floor(height * 0.7);
-
-  const displayLines = lines.slice(scrollOffset, scrollOffset + maxLines);
-
-  for (const line of displayLines) {
-    let coloredLine = line;
-    if (line.startsWith('[green]')) coloredLine = chalk.green(line.slice(7));
-    else if (line.startsWith('[red]')) coloredLine = chalk.red(line.slice(5));
-    else if (line.startsWith('[grey]')) coloredLine = chalk.gray(line.slice(6));
-
-    overlayContent.push('   ' + coloredLine);
-  }
-
-  const canScrollDown = scrollOffset + maxLines < lines.length;
-
-  if (canScrollDown) {
-    overlayContent.push('');
-    overlayContent.push(
-      center(
-        chalk.hex(colors.warning)(`↓ ${lines.length - (scrollOffset + maxLines)} more lines`),
-        contentW
-      )
-    );
-  }
-
-  overlayContent.push('');
-  overlayContent.push(center(horizontalLine(contentW), contentW));
-
-  const hints = [];
-  if (lines.length > maxLines) hints.push(keyHint('j/k', 'Scroll'));
-  hints.push(keyHint('Esc', 'Close'));
-
-  overlayContent.push(center(hints.join('  '), contentW));
-
-  return renderModal(base, overlayContent, width, height, {
-    title: 'Diff View',
-    borderColor: colors.primary,
-    padding: 1,
-    borderStyle: 'round',
-  });
-}
-
-function renderErrorOverlay(base: string[], error: string, width: number, height: number): string {
-  const contentW = Math.min(60, width - 6);
-  const content = [
-    ...wrapLines([error], contentW).map((l) => center(chalk.hex(colors.text)(l), contentW)),
-    '',
-    center(horizontalLine(contentW), contentW),
-    center(keyHint('Esc', 'Close'), contentW),
-  ];
-  return renderModal(base, content, width, height, {
-    title: '⚠️  Error',
-    borderColor: colors.error,
-    padding: 2,
-    borderStyle: 'round',
-  });
 }

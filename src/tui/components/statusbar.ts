@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 import { colors, borders } from '../theme.js';
-import { stripAnsi, keyHints } from '../lib/layout.js';
+import { stripAnsi, keyHints, wrapLines } from '../lib/layout.js';
 
 export interface StatusBarProps {
   screen: string;
@@ -28,8 +28,10 @@ export function renderStatusBar(props: StatusBarProps): string[] {
     statusLine = hintsText;
   }
 
-  const leftLen = stripAnsi(statusLine).length;
   const rightLen = stripAnsi(screenBadge).length;
+  const availableWidth = Math.max(1, width - rightLen - 1);
+  statusLine = wrapLines([statusLine], availableWidth)[0] ?? '';
+  const leftLen = stripAnsi(statusLine).length;
   const padding = width - leftLen - rightLen;
   const spaces = padding > 0 ? ' '.repeat(padding) : '  ';
 
@@ -67,6 +69,25 @@ export function getScreenHints(screen: string): Array<{ key: string; label: stri
       return [
         { key: 'Space', label: 'Start/Pause' },
         { key: 'r', label: 'Reset' },
+        { key: 'Esc', label: 'Back' },
+      ];
+    case 'help':
+      return [
+        { key: 'j/k', label: 'Scroll' },
+        { key: 'PgUp/PgDn', label: 'Page' },
+        { key: '?/Esc', label: 'Close' },
+      ];
+    case 'workspace':
+      return [
+        { key: 'Tab', label: 'Switch Pane' },
+        { key: 'Enter', label: 'Switch/Edit' },
+        { key: 'c/d', label: 'Create/Delete' },
+        { key: 'Esc', label: 'Back' },
+      ];
+    case 'config':
+      return [
+        { key: 'Tab', label: 'Switch Pane' },
+        { key: 'Enter', label: 'Edit/Save' },
         { key: 'Esc', label: 'Back' },
       ];
     default:

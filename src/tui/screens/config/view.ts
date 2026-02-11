@@ -1,59 +1,122 @@
 import chalk from 'chalk';
 import type { ConfigScreenModel } from '../../types.js';
-import { colors, icons, borders } from '../../theme.js';
-import { box, center, keyHint } from '../../lib/layout.js';
+import {
+  renderFooterHints,
+  renderScreenTitle,
+  renderSectionHeader,
+  splitPane,
+  truncate,
+  wrapLines,
+} from '../../lib/layout.js';
+import { colors, borders, icons } from '../../theme.js';
+
+const EXAMPLES: Record<string, string> = {
+  language: 'Example: typescript, python3, cpp',
+  editor: 'Example: code, vim, nvim',
+  workdir: 'Example: /Users/name/leetcode',
+  repo: 'Example: https://github.com/user/leetcode.git',
+};
 
 export function view(model: ConfigScreenModel, width: number, height: number): string {
+  const safeWidth = Math.max(20, width);
+  const safeHeight = Math.max(8, height);
   const lines: string[] = [];
-  const contentHeight = height;
 
-  const headerHeight = 3;
-  const listHeight = model.options.length * 3 + 2;
-  const footerHeight = 2;
+  lines.push(...renderScreenTitle(`${icons.gear} Configuration`, 'Workspace-local CLI settings', safeWidth));
+  lines.push(chalk.hex(colors.textMuted)(borders.horizontal.repeat(safeWidth)));
 
-  const availableSpace = contentHeight - headerHeight - listHeight - footerHeight;
-  const topPadding = Math.max(0, Math.floor(availableSpace / 2));
+  const bodyHeight = Math.max(3, safeHeight - lines.length - 3);
+  if (safeWidth >= 90) {
+    lines.push(...splitPane(renderOptionList(model, safeWidth), renderOptionDetails(model, safeWidth), safeWidth, bodyHeight, 0.4));
+  } else {
+    const topHeight = Math.max(3, Math.floor(bodyHeight * 0.4));
+    const bottomHeight = Math.max(3, bodyHeight - topHeight - 1);
+    const top = renderOptionList(model, safeWidth).slice(0, topHeight);
+    while (top.length < topHeight) top.push('');
+    const bottom = renderOptionDetails(model, safeWidth).slice(0, bottomHeight);
+    while (bottom.length < bottomHeight) bottom.push('');
+    lines.push(...top);
+    lines.push(chalk.hex(colors.border)(borders.horizontal.repeat(safeWidth)));
+    lines.push(...bottom);
+  }
 
-  for (let i = 0; i < topPadding; i++) lines.push('');
+  while (lines.length < safeHeight - 2) lines.push('');
+  lines.push(chalk.hex(colors.textMuted)(borders.horizontal.repeat(safeWidth)));
+  lines.push(...renderFooter(model, safeWidth));
 
-  lines.push(center(chalk.hex(colors.primary).bold(` ${icons.gear} Configuration `), width));
+  return lines.slice(0, safeHeight).join('\n');
+}
+
+function renderOptionList(model: ConfigScreenModel, width: number): string[] {
+  const paneWidth = width >= 90 ? Math.max(20, Math.floor(width * 0.4)) : width;
+  const lines: string[] = [];
+  lines.push(renderSectionHeader('Options', paneWidth));
   lines.push('');
 
-  const configRows: string[] = [];
   for (let i = 0; i < model.options.length; i++) {
-    const opt = model.options[i];
-    const isSel = i === model.selectedOption;
-    const isEdit = isSel && model.editMode;
-
-    const label = opt.label.padEnd(25);
-    let valStr = opt.value || '(empty)';
-
-    if (isEdit) {
-      valStr = chalk.bgHex(colors.bgHighlight).white(` ${valStr} `);
+    const option = model.options[i];
+    const isSelected = i === model.selectedOption;
+    const prefix = isSelected ? chalk.hex(colors.primary)('▶') : ' ';
+    const row = `${prefix} ${truncate(option.label, Math.max(8, paneWidth - 4))}`;
+    if (isSelected && model.paneFocus === 'list') {
+      lines.push(chalk.bgHex(colors.bgHighlight)(row.padEnd(Math.max(0, paneWidth - 1))));
     } else {
-      valStr = chalk.hex(colors.secondary)(valStr);
-    }
-
-    const prefix = isSel ? chalk.hex(colors.primary)('▶ ') : '  ';
-    const row = `${prefix}${isSel ? chalk.bold(label) : label} ${valStr}`;
-    configRows.push(row);
-
-    if (isSel) {
-      configRows.push(`    ${chalk.hex(colors.textMuted)(opt.description)}`);
-      configRows.push('');
-    } else {
+      lines.push(row);
     }
   }
 
-  lines.push(...box(configRows, width, 'Settings'));
+  return lines;
+}
 
-  while (lines.length < contentHeight - footerHeight) lines.push('');
+function renderOptionDetails(model: ConfigScreenModel, width: number): string[] {
+  const paneWidth = width >= 90 ? Math.max(20, width - Math.floor(width * 0.4) - 1) : width;
+  const option = model.options[model.selectedOption];
+  const lines: string[] = [];
 
-  const hints = model.editMode
-    ? keyHint('↵', 'Save') + ' ' + keyHint('Esc', 'Cancel')
-    : keyHint('↑/↓', 'Move') + ' ' + keyHint('↵', 'Edit') + ' ' + keyHint('Esc', 'Back');
+  lines.push(renderSectionHeader('Editor', paneWidth));
+  lines.push('');
+  lines.push(chalk.hex(colors.primary).bold(option.label));
+  lines.push(...wrapLines([chalk.hex(colors.textMuted)(option.description)], Math.max(12, paneWidth - 2)));
+  lines.push('');
 
-  lines.push(center(hints, width));
+  const rawValue = model.isEditing ? `${model.draftValue}█` : model.draftValue;
+  const valueLabel = `Value: ${rawValue || '(empty)'}`;
+  const valueLine = truncate(valueLabel, Math.max(8, paneWidth - 2));
+  if (model.paneFocus === 'editor') {
+    lines.push(chalk.bgHex(colors.bgHighlight)(valueLine.padEnd(Math.max(0, paneWidth - 1))));
+  } else {
+    lines.push(valueLine);
+  }
 
-  return lines.join('\n');
+  lines.push(chalk.hex(colors.textMuted)(truncate(EXAMPLES[option.id] || '', paneWidth - 2)));
+  lines.push('');
+
+  if (option.id === 'language' || option.id === 'workdir') {
+    lines.push(chalk.hex(colors.textMuted)('Validation: required'));
+  } else {
+    lines.push(chalk.hex(colors.textMuted)('Validation: optional'));
+  }
+
+  if (model.validationError) {
+    lines.push(chalk.hex(colors.error)(truncate(model.validationError, paneWidth - 2)));
+  } else if (model.isDirty) {
+    lines.push(chalk.hex(colors.warning)('Unsaved changes'));
+  } else {
+    lines.push(chalk.hex(colors.success)('No pending changes'));
+  }
+
+  return lines;
+}
+
+function renderFooter(model: ConfigScreenModel, width: number): string[] {
+  return renderFooterHints(
+    [
+      { key: '↑/↓', label: model.paneFocus === 'list' ? 'Move option' : 'Move option' },
+      { key: 'Tab/h/l', label: 'Switch pane' },
+      { key: 'Enter', label: model.isEditing ? 'Save' : 'Edit' },
+      { key: 'Esc', label: model.isEditing ? 'Cancel edit' : 'Back' },
+    ],
+    width,
+    width < 90 ? 'compact' : 'normal'
+  );
 }

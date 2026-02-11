@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import type { TimerScreenModel } from '../../types.js';
 import { colors } from '../../theme.js';
-import { center, keyHint, box } from '../../lib/layout.js';
+import { center, keyHint, box, stripAnsi } from '../../lib/layout.js';
 
 export function view(model: TimerScreenModel, width: number, height: number): string {
   const lines: string[] = [];
@@ -20,11 +20,12 @@ export function view(model: TimerScreenModel, width: number, height: number): st
   const timeStr = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
   const bigTimeLines = renderBigTime(timeStr, model.status);
-  const timePadding = Math.floor((width - 60) / 2);
+  const timeBlockWidth = Math.max(...bigTimeLines.map((l) => stripAnsi(l).length), 0);
+  const timePadding = Math.floor((width - timeBlockWidth) / 2);
   const centeredTime = bigTimeLines.map((l) => ' '.repeat(Math.max(0, timePadding)) + l);
 
   const remainingHeight = contentHeight - lines.length - 8;
-  const topPad = Math.floor(remainingHeight / 2) - 3;
+  const topPad = Math.max(0, Math.floor(remainingHeight / 2) - 3);
 
   for (let i = 0; i < topPad; i++) lines.push('');
   lines.push(...centeredTime);

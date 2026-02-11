@@ -3,6 +3,13 @@ import { ChangelogScreenModel, VersionEntry } from '../../types.js';
 import { keyHint } from '../../lib/layout.js';
 import { colors, borders, icons } from '../../theme.js';
 
+export function estimateRenderedLineCount(model: ChangelogScreenModel, width: number): number {
+  if (model.loading || model.error) {
+    return 3;
+  }
+  return buildEntryLines(model.entries, width).length;
+}
+
 export function view(model: ChangelogScreenModel, width: number, height: number): string {
   const lines: string[] = [];
 
@@ -16,7 +23,7 @@ export function view(model: ChangelogScreenModel, width: number, height: number)
   lines.push(chalk.hex(colors.textMuted)(borders.horizontal.repeat(width)));
   lines.push('');
 
-  const visibleHeight = height - 5;
+  const visibleHeight = Math.max(3, height - 5);
 
   if (model.loading) {
     lines.push('');
@@ -26,21 +33,19 @@ export function view(model: ChangelogScreenModel, width: number, height: number)
     lines.push('  ' + chalk.red(icons.cross + ' Error loading changelog:'));
     lines.push('  ' + chalk.red(model.error));
   } else {
-    const allLines: string[] = [];
-    const contentWidth = width - 4;
-
-    model.entries.forEach((entry) => {
-      allLines.push(...renderEntry(entry, contentWidth));
-      allLines.push('');
-      allLines.push(chalk.hex(colors.border)(borders.horizontal.repeat(contentWidth)));
-      allLines.push('');
-    });
-
-    const visibleLines = allLines.slice(model.scrollOffset, model.scrollOffset + visibleHeight);
+    const allLines = buildEntryLines(model.entries, width);
+    const maxScroll = Math.max(0, allLines.length - visibleHeight);
+    const clampedOffset = Math.min(model.scrollOffset, maxScroll);
+    const visibleLines = allLines.slice(clampedOffset, clampedOffset + visibleHeight);
 
     visibleLines.forEach((line) => {
       lines.push('  ' + line);
     });
+
+    if (maxScroll > 0 && lines.length < height - 2) {
+      const progress = `${clampedOffset + 1}-${Math.min(clampedOffset + visibleHeight, allLines.length)} of ${allLines.length}`;
+      lines.push('  ' + chalk.hex(colors.textMuted)(progress));
+    }
   }
 
   while (lines.length < height - 2) {
@@ -125,7 +130,8 @@ function renderEntry(entry: VersionEntry, width: number): string[] {
 }
 
 function wrapText(text: string, width: number, indent: number): string[] {
-  if (stripAnsi(text).length <= width) return [text];
+  const safeWidth = Math.max(1, width);
+  if (stripAnsi(text).length <= safeWidth) return [text];
 
   const words = text.split(' ');
   const lines: string[] = [];
@@ -133,7 +139,7 @@ function wrapText(text: string, width: number, indent: number): string[] {
   const indentStr = ' '.repeat(indent);
 
   words.forEach((word) => {
-    if (stripAnsi(currentLine + word).length + 1 > width) {
+    if (stripAnsi(currentLine + word).length + 1 > safeWidth) {
       lines.push(currentLine);
       currentLine = indentStr + word + ' ';
     } else {
@@ -147,4 +153,18 @@ function wrapText(text: string, width: number, indent: number): string[] {
 
 function stripAnsi(str: string): string {
   return str.replace(/\x1B\[\d+m/g, '');
+}
+
+function buildEntryLines(entries: VersionEntry[], width: number): string[] {
+  const allLines: string[] = [];
+  const contentWidth = Math.max(20, width - 4);
+
+  entries.forEach((entry) => {
+    allLines.push(...renderEntry(entry, contentWidth));
+    allLines.push('');
+    allLines.push(chalk.hex(colors.border)(borders.horizontal.repeat(contentWidth)));
+    allLines.push('');
+  });
+
+  return allLines;
 }

@@ -12,9 +12,34 @@ export function visibleLength(str: string): number {
 }
 
 export function truncate(str: string, maxLen: number): string {
-  const stripped = stripAnsi(str);
-  if (stripped.length <= maxLen) return str;
-  return str.slice(0, maxLen - 1) + '…';
+  if (maxLen <= 0) return '';
+  if (maxLen === 1) return '…';
+  if (visibleLength(str) <= maxLen) return str;
+
+  const target = maxLen - 1;
+  let result = '';
+  let visible = 0;
+
+  for (let i = 0; i < str.length && visible < target; ) {
+    if (str[i] === '\x1b') {
+      const match = str.slice(i).match(/^\x1B\[[0-9;]*[a-zA-Z]/);
+      if (match) {
+        result += match[0];
+        i += match[0].length;
+        continue;
+      }
+    }
+
+    result += str[i];
+    i += 1;
+    visible += 1;
+  }
+
+  if (str.includes('\x1b[')) {
+    return `${result}…\x1b[0m`;
+  }
+
+  return `${result}…`;
 }
 
 export function padEnd(str: string, len: number): string {
@@ -30,6 +55,7 @@ export function padStart(str: string, len: number): string {
 }
 
 export function center(str: string, width: number): string {
+  if (width <= 0) return '';
   const stripped = stripAnsi(str);
   const len = stripped.length;
   if (len >= width) return str;
@@ -77,8 +103,9 @@ export function box(content: string[], width: number, options: string | BoxOptio
 
   const chars = BORDER_CHARS[borderStyle] || borders;
   const lines: string[] = [];
-  const innerWidth = width - 2;
-  const contentWidth = innerWidth - padding * 2;
+  const safeWidth = Math.max(4, width);
+  const innerWidth = Math.max(2, safeWidth - 2);
+  const contentWidth = Math.max(1, innerWidth - padding * 2);
 
   let top = chalk.hex(borderColor)(chars.topLeft || chars.roundTopLeft);
   if (title) {
@@ -149,19 +176,12 @@ export function renderModal(
   screenH: number,
   opts: BoxOptions = {}
 ): string {
-  const minW = opts.minWidth || 50;
-
-  const maxW = Math.max(minW, Math.min(80, Math.floor(screenW * 0.8)));
-
-  const padding = opts.padding || 0;
-  const contentW = maxW - 2 - padding * 2;
-
+  const maxModalWidth = Math.max(4, Math.min(screenW - 2, Math.floor(screenW * 0.88)));
+  const minModalWidth = Math.max(4, Math.min(opts.minWidth || 50, maxModalWidth));
+  const maxW = Math.max(minModalWidth, maxModalWidth);
   const boxed = box(content, maxW, opts);
-
-  const shadowed = dropShadow(boxed, maxW);
-
-  const overlayHeight = shadowed.length;
-  const overlayWidth = maxW + 1;
+  const overlay = maxW + 1 <= screenW ? dropShadow(boxed, maxW) : boxed;
+  const overlayHeight = overlay.length;
 
   const startY = Math.max(0, Math.floor((screenH - overlayHeight) / 2));
 
@@ -172,7 +192,7 @@ export function renderModal(
   for (let i = 0; i < overlayHeight; i++) {
     const y = startY + i;
     if (y < result.length) {
-      result[y] = center(shadowed[i], screenW);
+      result[y] = center(overlay[i], screenW);
     }
   }
 
@@ -187,7 +207,7 @@ export function horizontalLine(
   let char = borders.horizontal;
   if (style === 'heavy') char = BORDER_CHARS.heavy.horizontal;
   if (style === 'double') char = BORDER_CHARS.double.horizontal;
-  return chalk.hex(color)(char.repeat(width));
+  return chalk.hex(color)(char.repeat(Math.max(0, width)));
 }
 
 export function progressBar(current: number, total: number, width: number): string {
@@ -281,6 +301,59 @@ export function keyHints(hints: Array<{ key: string; label: string }>): string {
   return hints.map((h) => keyHint(h.key, h.label)).join('  ');
 }
 
+export function renderScreenTitle(title: string, subtitle: string, width: number): string[] {
+  const maxWidth = Math.max(20, width);
+  const titleLine = chalk.hex(colors.primary).bold(` ${title} `);
+  const subtitleLine = chalk.hex(colors.textMuted)(truncate(subtitle, Math.max(8, maxWidth - 2)));
+  return [center(titleLine, maxWidth), center(subtitleLine, maxWidth)];
+}
+
+export function renderSectionHeader(label: string, width: number): string {
+  const safeWidth = Math.max(10, width);
+  const prefix = chalk.hex(colors.primary).bold(` ${label} `);
+  const remaining = Math.max(0, safeWidth - visibleLength(prefix));
+  return prefix + chalk.hex(colors.textMuted)(borders.horizontal.repeat(remaining));
+}
+
+export function renderFooterHints(
+  hints: Array<{ key: string; label: string }>,
+  width: number,
+  mode: 'normal' | 'compact' = 'normal'
+): string[] {
+  const safeWidth = Math.max(20, width);
+  const normalized = mode === 'compact' ? hints.slice(0, 3) : hints;
+  const hintText = keyHints(normalized);
+  const wrapped = wrapLines([hintText], safeWidth);
+  return wrapped.map((line) => center(line, safeWidth));
+}
+
+export function splitPane(
+  leftLines: string[],
+  rightLines: string[],
+  width: number,
+  height: number,
+  ratio = 0.5
+): string[] {
+  const safeWidth = Math.max(20, width);
+  const safeHeight = Math.max(1, height);
+  const leftWidth = Math.max(8, Math.floor(safeWidth * ratio));
+  const rightWidth = Math.max(8, safeWidth - leftWidth - 1);
+  const left = [...leftLines];
+  const right = [...rightLines];
+  const lines: string[] = [];
+
+  while (left.length < safeHeight) left.push('');
+  while (right.length < safeHeight) right.push('');
+
+  for (let i = 0; i < safeHeight; i++) {
+    const leftCell = padEnd(truncate(left[i] ?? '', leftWidth), leftWidth);
+    const rightCell = padEnd(truncate(right[i] ?? '', rightWidth), rightWidth);
+    lines.push(leftCell + chalk.hex(colors.border)(borders.vertical) + rightCell);
+  }
+
+  return lines;
+}
+
 export const LEETCODE_LOGO = [
   '██╗     ███████╗███████╗████████╗ ██████╗ ██████╗ ██████╗ ███████╗',
   '██║     ██╔════╝██╔════╝╚══██╔══╝██╔════╝██╔═══██╗██╔══██╗██╔════╝',
@@ -341,11 +414,12 @@ export function tableRow(
 }
 
 export function wrapLines(lines: readonly string[], maxWidth: number): string[] {
+  const safeMaxWidth = Math.max(1, maxWidth);
   const result: string[] = [];
 
   for (const line of lines) {
     const stripped = stripAnsi(line);
-    if (stripped.length <= maxWidth) {
+    if (stripped.length <= safeMaxWidth) {
       result.push(line);
       continue;
     }
@@ -357,7 +431,7 @@ export function wrapLines(lines: readonly string[], maxWidth: number): string[] 
     for (const word of words) {
       const wordLen = stripAnsi(word).length;
 
-      if (wordLen > maxWidth) {
+      if (wordLen > safeMaxWidth) {
         if (currentLen > 0) {
           result.push(currentLine);
           currentLine = '';
@@ -366,17 +440,18 @@ export function wrapLines(lines: readonly string[], maxWidth: number): string[] 
 
         let remainingWord = word;
         while (stripAnsi(remainingWord).length > 0) {
-          const chunk = remainingWord.slice(0, maxWidth);
+          const chunk = remainingWord.slice(0, safeMaxWidth);
 
           result.push(chunk);
-          remainingWord = remainingWord.slice(maxWidth);
+          remainingWord = remainingWord.slice(safeMaxWidth);
         }
         continue;
       }
 
-      if (currentLen + wordLen + (currentLine ? 1 : 0) <= maxWidth) {
+      const spacer = currentLine ? 1 : 0;
+      if (currentLen + wordLen + spacer <= safeMaxWidth) {
         currentLine += (currentLine ? ' ' : '') + word;
-        currentLen += wordLen + (currentLine ? 1 : 0);
+        currentLen += wordLen + spacer;
       } else {
         result.push(currentLine);
         currentLine = word;

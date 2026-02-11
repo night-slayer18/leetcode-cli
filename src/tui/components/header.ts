@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 import { colors, icons, borders } from '../theme.js';
-import { stripAnsi } from '../lib/layout.js';
+import { stripAnsi, wrapLines } from '../lib/layout.js';
 
 export interface HeaderProps {
   username: string | null;
@@ -23,12 +23,14 @@ export function renderHeader(props: HeaderProps): string[] {
   const leftPart = logo;
   const rightPart = `${status}  ${userText}`;
 
-  const leftLen = stripAnsi(leftPart).length;
   const rightLen = stripAnsi(rightPart).length;
+  const availableLeftWidth = Math.max(1, width - rightLen - 1);
+  const leftLine = wrapLines([leftPart], availableLeftWidth)[0] ?? leftPart;
+  const leftLen = stripAnsi(leftLine).length;
   const padding = width - leftLen - rightLen;
   const spaces = padding > 0 ? ' '.repeat(padding) : '  ';
 
-  lines.push(leftPart + spaces + rightPart);
+  lines.push(leftLine + spaces + rightPart);
 
   lines.push(chalk.hex(colors.textMuted)(borders.horizontal.repeat(width)));
 

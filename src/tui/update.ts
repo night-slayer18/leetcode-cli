@@ -8,6 +8,7 @@ import type {
   TimerMsg,
   StatsMsg,
   ConfigMsg,
+  HelpMsg,
 } from './types.js';
 import { Cmd } from './types.js';
 import * as ListScreen from './screens/list/index.js';
@@ -19,6 +20,7 @@ import * as ProblemScreen from './screens/problem/index.js';
 import * as WorkspaceScreen from './screens/workspace/index.js';
 import * as ChangelogScreen from './screens/changelog/index.js';
 import * as LoginScreen from './screens/login/index.js';
+import { estimateHelpMaxScroll } from './view.js';
 
 export function update(msg: AppMsg, model: AppModel): [AppModel, Command] {
   switch (msg.type) {
@@ -51,22 +53,13 @@ export function update(msg: AppMsg, model: AppModel): [AppModel, Command] {
       }
 
       if (key.name === 'escape' && model.screenState.screen !== 'home') {
-        if (model.screenState.screen === 'config' && model.screenState.model.editMode) {
+        if (model.screenState.screen === 'config' && model.screenState.model.isEditing) {
           return handleScreenKeyPress(model, msg);
         }
 
         if (model.screenState.screen === 'problem') {
           const probModel = model.screenState.model as import('./types.js').ProblemScreenModel;
-          if (
-            probModel.testResult ||
-            probModel.submissionResult ||
-            probModel.successMessage ||
-            probModel.error ||
-            probModel.activeHintIndex !== null ||
-            probModel.showSnapshots ||
-            probModel.currentNote !== null ||
-            probModel.showDiff
-          ) {
+          if (probModel.activePanel !== 'none') {
             const [newProbModel, cmd] = ProblemScreen.update(
               { type: 'PROBLEM_CLOSE_RESULT' },
               probModel,
@@ -87,7 +80,7 @@ export function update(msg: AppMsg, model: AppModel): [AppModel, Command] {
 
         if (model.screenState.screen === 'workspace') {
           const wsModel = model.screenState.model as import('./types.js').WorkspaceScreenModel;
-          if (wsModel.showCreateInput || wsModel.showDeleteConfirm) {
+          if (wsModel.showCreateInput || wsModel.showDeleteConfirm || wsModel.isEditing) {
             return handleScreenKeyPress(model, msg);
           }
         }
@@ -231,6 +224,8 @@ function handleScreenKeyPress(model: AppModel, msg: AppMsg): [AppModel, Command]
     case 'stats':
     case 'config':
       return handleGenericKeyPress(model, msg);
+    case 'help':
+      return handleHelpKeyPress(model, msg);
     case 'workspace':
       return handleWorkspaceKeyPress(model, msg);
     case 'changelog':
@@ -536,6 +531,44 @@ function delegateToScreen(msg: AppMsg, model: AppModel): [AppModel, Command] {
       ];
     }
 
+    case 'help': {
+      if (!isHelpMsg(msg)) return [model, Cmd.none()];
+      const helpModel = screenState.model as import('./types.js').HelpScreenModel;
+      const maxScroll = estimateHelpMaxScroll(model.terminalWidth, model.terminalHeight - 4);
+      const pageSize = Math.max(3, Math.floor((model.terminalHeight - 4) / 2));
+      let nextOffset = helpModel.scrollOffset;
+
+      switch (msg.type) {
+        case 'HELP_SCROLL_UP':
+          nextOffset = Math.max(0, helpModel.scrollOffset - 1);
+          break;
+        case 'HELP_SCROLL_DOWN':
+          nextOffset = Math.min(maxScroll, helpModel.scrollOffset + 1);
+          break;
+        case 'HELP_PAGE_UP':
+          nextOffset = Math.max(0, helpModel.scrollOffset - pageSize);
+          break;
+        case 'HELP_PAGE_DOWN':
+          nextOffset = Math.min(maxScroll, helpModel.scrollOffset + pageSize);
+          break;
+        case 'HELP_TOP':
+          nextOffset = 0;
+          break;
+        case 'HELP_BOTTOM':
+          nextOffset = maxScroll;
+          break;
+      }
+
+      return [
+        {
+          ...model,
+          screenState: { screen: 'help', model: { scrollOffset: nextOffset } },
+          needsRender: true,
+        },
+        Cmd.none(),
+      ];
+    }
+
     case 'workspace': {
       if (!isWorkspaceMsg(msg)) return [model, Cmd.none()];
       const [newScreenModel, cmd] = WorkspaceScreen.update(msg, screenState.model);
@@ -565,7 +598,12 @@ function delegateToScreen(msg: AppMsg, model: AppModel): [AppModel, Command] {
 
     case 'changelog': {
       if (!isChangelogMsg(msg)) return [model, Cmd.none()];
-      const [newScreenModel, cmd] = ChangelogScreen.update(msg, screenState.model, terminalHeight);
+      const [newScreenModel, cmd] = ChangelogScreen.update(
+        msg,
+        screenState.model,
+        terminalHeight,
+        model.terminalWidth
+      );
       return [
         {
           ...model,
@@ -597,43 +635,51 @@ function handleProblemKeyPress(model: AppModel, msg: AppMsg): [AppModel, Command
   const problemModel = model.screenState.model as import('./types.js').ProblemScreenModel;
   let problemMsg: import('./types.js').ProblemMsg | null = null;
 
-  if (problemModel.showSnapshots) {
+  const globalActionMsg = mapProblemGlobalAction(key.name);
+  if (globalActionMsg) {
+    problemMsg = globalActionMsg;
+  }
+
+  if (!problemMsg && problemModel.activePanel === 'snapshots') {
     if (key.name === 'j' || key.name === 'down') problemMsg = { type: 'PROBLEM_SNAPSHOT_DOWN' };
     else if (key.name === 'k' || key.name === 'up') problemMsg = { type: 'PROBLEM_SNAPSHOT_UP' };
     else if (key.name === 'd') problemMsg = { type: 'PROBLEM_DIFF_SNAPSHOT' };
     else if (key.name === 'r') problemMsg = { type: 'PROBLEM_RESTORE_SNAPSHOT' };
-    else if (key.name === 'V' || key.name === 'v') problemMsg = { type: 'PROBLEM_CLOSE_SNAPSHOTS' };
-  } else if (problemModel.currentNote !== null) {
+    else if (key.name === 'V' || key.name === 'v' || key.name === 'escape')
+      problemMsg = { type: 'PROBLEM_CLOSE_SNAPSHOTS' };
+  } else if (!problemMsg && problemModel.activePanel === 'note') {
     if (key.name === 'e') problemMsg = { type: 'PROBLEM_NOTES' };
-    else if (key.name === 'n') {
-      if (problemModel.currentNote.includes('No notes found')) {
-        problemMsg = { type: 'PROBLEM_NOTES' };
-      } else {
-        problemMsg = { type: 'PROBLEM_CLOSE_NOTE' };
-      }
-    } else if (key.name === 'j' || key.name === 'down')
+    else if (key.name === 'n' || key.name === 'escape') problemMsg = { type: 'PROBLEM_CLOSE_NOTE' };
+    else if (key.name === 'j' || key.name === 'down')
       problemMsg = { type: 'PROBLEM_NOTE_SCROLL_DOWN' };
     else if (key.name === 'k' || key.name === 'up') problemMsg = { type: 'PROBLEM_NOTE_SCROLL_UP' };
-  } else if (problemModel.showDiff) {
-    if (key.name === 'd') problemMsg = { type: 'PROBLEM_CLOSE_DIFF' };
+  } else if (!problemMsg && problemModel.activePanel === 'diff') {
+    if (key.name === 'd' || key.name === 'escape') problemMsg = { type: 'PROBLEM_CLOSE_DIFF' };
     else if (key.name === 'j' || key.name === 'down')
       problemMsg = { type: 'PROBLEM_DIFF_SCROLL_DOWN' };
     else if (key.name === 'k' || key.name === 'up') problemMsg = { type: 'PROBLEM_DIFF_SCROLL_UP' };
-  } else if (problemModel.showSubmissions) {
+  } else if (!problemMsg && problemModel.activePanel === 'submissions') {
     if (key.name === 'H' || key.name === 'S' || key.name === 'escape')
       problemMsg = { type: 'PROBLEM_CLOSE_SUBMISSIONS' };
     else if (key.name === 'j' || key.name === 'down')
       problemMsg = { type: 'PROBLEM_SUBMISSIONS_SCROLL_DOWN' };
     else if (key.name === 'k' || key.name === 'up')
       problemMsg = { type: 'PROBLEM_SUBMISSIONS_SCROLL_UP' };
-  } else if (problemModel.activeHintIndex !== null) {
+  } else if (!problemMsg && problemModel.activePanel === 'hint') {
     if (key.name === 'left') problemMsg = { type: 'PROBLEM_PREV_HINT' };
     else if (key.name === 'right') problemMsg = { type: 'PROBLEM_NEXT_HINT' };
-    else if (key.name === 'h') problemMsg = { type: 'PROBLEM_TOGGLE_HINT' };
+    else if (key.name === 'h' || key.name === 'escape') problemMsg = { type: 'PROBLEM_TOGGLE_HINT' };
     else if (key.name === 'j' || key.name === 'down')
       problemMsg = { type: 'PROBLEM_HINT_SCROLL_DOWN' };
     else if (key.name === 'k' || key.name === 'up') problemMsg = { type: 'PROBLEM_HINT_SCROLL_UP' };
-  } else {
+  } else if (
+    !problemMsg &&
+    (problemModel.activePanel === 'status' ||
+      problemModel.activePanel === 'testResult' ||
+      problemModel.activePanel === 'submitResult')
+  ) {
+    if (key.name === 'escape') problemMsg = { type: 'PROBLEM_CLOSE_RESULT' };
+  } else if (!problemMsg) {
     if (key.name === 'j' || key.name === 'down') {
       problemMsg = { type: 'PROBLEM_SCROLL_DOWN' };
     } else if (key.name === 'k' || key.name === 'up') {
@@ -683,6 +729,22 @@ function handleProblemKeyPress(model: AppModel, msg: AppMsg): [AppModel, Command
   return [model, Cmd.none()];
 }
 
+function mapProblemGlobalAction(
+  keyName: string
+): import('./types.js').ProblemMsg | null {
+  if (keyName === 'p') return { type: 'PROBLEM_PICK' };
+  if (keyName === 't') return { type: 'PROBLEM_TEST' };
+  if (keyName === 's') return { type: 'PROBLEM_SUBMIT' };
+  if (keyName === 'b') return { type: 'PROBLEM_BOOKMARK' };
+  if (keyName === 'n') return { type: 'PROBLEM_VIEW_NOTE' };
+  if (keyName === 'e') return { type: 'PROBLEM_NOTES' };
+  if (keyName === 'h') return { type: 'PROBLEM_TOGGLE_HINT' };
+  if (keyName === 'H' || keyName === 'S') return { type: 'PROBLEM_SHOW_SUBMISSIONS' };
+  if (keyName === 'v' || keyName === 'V' || keyName === 'w')
+    return { type: 'PROBLEM_SHOW_SNAPSHOTS' };
+  return null;
+}
+
 function handleGenericKeyPress(model: AppModel, msg: AppMsg): [AppModel, Command] {
   if (msg.type !== 'KEY_PRESS') return [model, Cmd.none()];
   const { key } = msg;
@@ -713,18 +775,24 @@ function handleGenericKeyPress(model: AppModel, msg: AppMsg): [AppModel, Command
     const configModel = screenState.model as import('./types.js').ConfigScreenModel;
     let configMsg: import('./types.js').ConfigMsg | null = null;
 
-    if (configModel.editMode) {
-      if (key.name === 'escape') configMsg = { type: 'CONFIG_CANCEL_EDIT' };
+    if (key.name === 'tab' || key.name === 'h' || key.name === 'l') {
+      configMsg = { type: 'CONFIG_TOGGLE_FOCUS' };
+    } else if (key.name === 'left') {
+      configMsg = { type: 'CONFIG_FOCUS_LIST' };
+    } else if (key.name === 'right') {
+      configMsg = { type: 'CONFIG_FOCUS_EDITOR' };
+    } else if (configModel.isEditing) {
+      if (key.name === 'escape') configMsg = { type: 'CONFIG_EDIT_CANCEL' };
       else if (key.name === 'return' || key.name === 'enter')
-        configMsg = { type: 'CONFIG_SAVE_VALUE' };
-      else if (key.name === 'backspace') configMsg = { type: 'CONFIG_BACKSPACE' };
+        configMsg = { type: 'CONFIG_EDIT_SAVE' };
+      else if (key.name === 'backspace') configMsg = { type: 'CONFIG_EDIT_BACKSPACE' };
       else if (key.sequence.length === 1 && !key.ctrl && !key.meta)
-        configMsg = { type: 'CONFIG_INPUT', char: key.sequence };
+        configMsg = { type: 'CONFIG_EDIT_INPUT', char: key.sequence };
     } else {
       if (key.name === 'j' || key.name === 'down') configMsg = { type: 'CONFIG_OPTION_DOWN' };
       else if (key.name === 'k' || key.name === 'up') configMsg = { type: 'CONFIG_OPTION_UP' };
       else if (key.name === 'return' || key.name === 'enter')
-        configMsg = { type: 'CONFIG_OPTION_SELECT' };
+        configMsg = { type: 'CONFIG_EDIT_START' };
     }
 
     if (configMsg) {
@@ -750,6 +818,26 @@ function handleGenericKeyPress(model: AppModel, msg: AppMsg): [AppModel, Command
   return [model, Cmd.none()];
 }
 
+function handleHelpKeyPress(model: AppModel, msg: AppMsg): [AppModel, Command] {
+  if (msg.type !== 'KEY_PRESS') return [model, Cmd.none()];
+  const { key } = msg;
+
+  let helpMsg: import('./types.js').HelpMsg | null = null;
+
+  if (key.name === 'j' || key.name === 'down') helpMsg = { type: 'HELP_SCROLL_DOWN' };
+  else if (key.name === 'k' || key.name === 'up') helpMsg = { type: 'HELP_SCROLL_UP' };
+  else if (key.name === 'pagedown') helpMsg = { type: 'HELP_PAGE_DOWN' };
+  else if (key.name === 'pageup') helpMsg = { type: 'HELP_PAGE_UP' };
+  else if (key.name === 'g') helpMsg = { type: 'HELP_TOP' };
+  else if (key.name === 'G') helpMsg = { type: 'HELP_BOTTOM' };
+
+  if (helpMsg) {
+    return delegateToScreen(helpMsg, model);
+  }
+
+  return [model, Cmd.none()];
+}
+
 function isListMsg(msg: AppMsg): msg is ListMsg {
   return msg.type.startsWith('LIST_');
 }
@@ -768,6 +856,10 @@ function isStatsMsg(msg: AppMsg): msg is StatsMsg {
 
 function isConfigMsg(msg: AppMsg): msg is ConfigMsg {
   return msg.type.startsWith('CONFIG_');
+}
+
+function isHelpMsg(msg: AppMsg): msg is HelpMsg {
+  return msg.type.startsWith('HELP_');
 }
 
 function isProblemMsg(msg: AppMsg): msg is import('./types.js').ProblemMsg {
@@ -800,14 +892,31 @@ function handleWorkspaceKeyPress(model: AppModel, msg: AppMsg): [AppModel, Comma
     else if (key.sequence.length === 1 && !key.ctrl && !key.meta)
       wsMsg = { type: 'WORKSPACE_CREATE_INPUT', char: key.sequence };
   } else if (wsModel.showDeleteConfirm) {
-    if (key.name === 'y') wsMsg = { type: 'WORKSPACE_DELETE_CONFIRM' };
+    if (key.name === 'y' || key.name === 'return' || key.name === 'enter')
+      wsMsg = { type: 'WORKSPACE_DELETE_CONFIRM' };
     else if (key.name === 'n' || key.name === 'escape') wsMsg = { type: 'WORKSPACE_DELETE_CANCEL' };
+  } else if (wsModel.isEditing) {
+    if (key.name === 'escape') wsMsg = { type: 'WORKSPACE_EDIT_CANCEL' };
+    else if (key.name === 'return' || key.name === 'enter') wsMsg = { type: 'WORKSPACE_EDIT_SAVE' };
+    else if (key.name === 'backspace') wsMsg = { type: 'WORKSPACE_EDIT_BACKSPACE' };
+    else if (key.sequence.length === 1 && !key.ctrl && !key.meta)
+      wsMsg = { type: 'WORKSPACE_EDIT_INPUT', char: key.sequence };
   } else {
-    if (key.name === 'j' || key.name === 'down') wsMsg = { type: 'WORKSPACE_DOWN' };
-    else if (key.name === 'k' || key.name === 'up') wsMsg = { type: 'WORKSPACE_UP' };
-    else if (key.name === 'return' || key.name === 'enter') wsMsg = { type: 'WORKSPACE_SELECT' };
-    else if (key.name === 'c') wsMsg = { type: 'WORKSPACE_CREATE_START' };
-    else if (key.name === 'd') wsMsg = { type: 'WORKSPACE_DELETE' };
+    if (key.name === 'tab' || key.name === 'h' || key.name === 'l')
+      wsMsg = { type: 'WORKSPACE_TOGGLE_FOCUS' };
+    else if (key.name === 'left') wsMsg = { type: 'WORKSPACE_FOCUS_LIST' };
+    else if (key.name === 'right') wsMsg = { type: 'WORKSPACE_FOCUS_EDITOR' };
+    else if (wsModel.paneFocus === 'list') {
+      if (key.name === 'j' || key.name === 'down') wsMsg = { type: 'WORKSPACE_DOWN' };
+      else if (key.name === 'k' || key.name === 'up') wsMsg = { type: 'WORKSPACE_UP' };
+      else if (key.name === 'return' || key.name === 'enter') wsMsg = { type: 'WORKSPACE_SELECT' };
+      else if (key.name === 'c') wsMsg = { type: 'WORKSPACE_CREATE_START' };
+      else if (key.name === 'd') wsMsg = { type: 'WORKSPACE_DELETE' };
+    } else {
+      if (key.name === 'j' || key.name === 'down') wsMsg = { type: 'WORKSPACE_FIELD_DOWN' };
+      else if (key.name === 'k' || key.name === 'up') wsMsg = { type: 'WORKSPACE_FIELD_UP' };
+      else if (key.name === 'return' || key.name === 'enter') wsMsg = { type: 'WORKSPACE_EDIT_START' };
+    }
   }
 
   if (wsMsg) {
@@ -841,7 +950,8 @@ function handleChangelogKeyPress(model: AppModel, msg: AppMsg): [AppModel, Comma
     const [newScreenModel, cmd] = ChangelogScreen.update(
       msg,
       screenState.model,
-      model.terminalHeight
+      model.terminalHeight,
+      model.terminalWidth
     );
     return [
       { ...model, screenState: { screen: 'changelog', model: newScreenModel }, needsRender: true },
