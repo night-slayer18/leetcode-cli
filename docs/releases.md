@@ -1,14 +1,37 @@
 # Release Notes
 
-## v2.2.3
+## v2.3.0
 
-> **Release Date**: 2026-01-31
-> **Focus**: Cross-Platform Compatibility (Sync Command)
+> **Release Date**: 2026-02-11
+> **Focus**: TUI Functionality + Stability + Cross-Platform Fixes
 
-### 🔧 Improvements
+### ✅ Compatibility
 
-- **Windows Compatibility**: Fixed `sync` command to work correctly on Windows by using `path.basename()` instead of Unix-style path splitting for repository name extraction.
-- **Shell Escaping**: Updated shell argument escaping to use double quotes instead of single quotes for better cross-platform compatibility.
+This is a **minor, non-breaking** release.
+
+- Existing CLI command signatures are unchanged.
+- Existing problem action shortcuts remain available in TUI (`p/t/s/h/H/V/b/n/e`).
+
+### 🚀 Highlights
+
+#### TUI Functionality (`leetcode`)
+
+- Running `leetcode` (no args, interactive terminal) launches full-screen TUI mode.
+- Problem screen uses a **single-column statement layout** with a **unified bottom drawer** for hints, submissions, snapshots, notes, diff, and status/test/submit output.
+- Added focus toggle (`Tab`) between statement body and drawer, with `j/k` and arrows scrolling the focused region.
+- Action shortcuts are available in problem view: `p/t/s/h/H/V/b/n/e`.
+- Close behavior is consistent: `Esc` closes drawer first, then navigates back.
+- Rendering and terminal handling include full-screen redraw and cleanup guards (ANSI reset, cursor/raw-mode restoration) to reduce residue/flicker issues.
+
+#### Cross-Platform Sync Fixes
+
+- Fixed `sync` repository-name extraction on Windows by using `path.basename()` instead of Unix-style path splitting.
+- Updated shell argument escaping to use double quotes for better cross-platform behavior.
+
+### 🧪 Quality
+
+- Added dedicated TUI tests for problem-screen drawer routing and state transitions.
+- Verified with `npm run typecheck`, `npm run test`, and `npm run build`.
 
 ---
 

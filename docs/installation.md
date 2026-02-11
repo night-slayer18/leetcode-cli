@@ -17,4 +17,7 @@ npm install -g @night-slayer18/leetcode-cli
 ```bash
 leetcode --version
 leetcode --help
+leetcode
 ```
+
+`leetcode` (with no arguments) launches the interactive TUI when run in an interactive terminal.

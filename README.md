@@ -26,6 +26,7 @@ A modern, feature-rich LeetCode CLI built with TypeScript.
 - 👥 **Collaborative coding** - Solve problems with a partner
 - 📁 **Workspaces** - Isolate contexts (interview prep, study, contests)
 - ⚙️ **Configurable** - Set language, editor, and working directory
+- 🖥️ **Interactive TUI** - Launch full-screen terminal workflow with `leetcode`
 - 📂 **Smart file discovery** - Use problem ID, filename, or full path
 - 🔄 **Git Sync** - Auto-sync solutions to GitHub/GitLab
 - 🚀 **Auto-update notifications** - Get notified when updates are available
@@ -33,6 +34,8 @@ A modern, feature-rich LeetCode CLI built with TypeScript.
 ## 📚 Documentation
 
 **[View Full Documentation →](https://night-slayer18.github.io/leetcode-cli/)**
+
+**[TUI Guide →](docs/tui.md)**
 
 **[Read the Blog Post →](https://leetcode-cli.hashnode.dev/leetcode-cli)**
 
@@ -45,6 +48,9 @@ npm install -g @night-slayer18/leetcode-cli
 ## Quick Start
 
 ```bash
+# Launch interactive TUI mode
+leetcode
+
 # Login with your LeetCode cookies
 leetcode login
 
@@ -62,6 +68,16 @@ leetcode test ./Easy/Array/1.two-sum.java   # Full path
 # Submit your solution
 leetcode submit 1
 ```
+
+## Interactive TUI
+
+Run `leetcode` with no arguments to open the full-screen TUI.
+
+- Works in interactive terminals (TTY).
+- Keeps existing command shortcuts for problem actions (`p/t/s/h/H/V/b/n/e`).
+- Uses a unified bottom drawer in Problem view for hints, submissions, snapshots, notes, and status output.
+
+See [docs/tui.md](docs/tui.md) for full keybindings and behavior.
 
 ## Commands
 

@@ -1,0 +1,38 @@
+changelog:
+  exclude:
+    labels:
+      - skip-changelog
+      - release
+      - chore
+    authors:
+      - dependabot[bot]
+  categories:
+    - title: '⚠️ Breaking Changes'
+      labels:
+        - breaking
+        - semver-major
+    - title: '🚀 Features'
+      labels:
+        - feature
+        - enhancement
+        - semver-minor
+    - title: '🐛 Fixes'
+      labels:
+        - bug
+        - fix
+        - semver-patch
+    - title: '🖥️ TUI'
+      labels:
+        - tui
+        - ux
+    - title: '📚 Documentation'
+      labels:
+        - docs
+    - title: '🔧 Maintenance'
+      labels:
+        - ci
+        - refactor
+        - test
+    - title: 'Other Changes'
+      labels:
+        - '*'

@@ -1,6 +1,6 @@
 # Testing
 
-This project uses [Vitest](https://vitest.dev/) for testing with a comprehensive test suite covering all CLI commands.
+This project uses [Vitest](https://vitest.dev/) for testing with a comprehensive suite covering CLI commands and core TUI state behavior.
 
 ## Running Tests
 
@@ -44,6 +44,8 @@ src/__tests__/
 │   └── workspace.test.ts   # workspace create/use/list/delete
 ├── storage/
 │   └── workspace-integration.test.ts  # Multi-workspace isolation
+├── tui/
+│   └── problem-screen.test.ts # TUI problem drawer/navigation behavior
 ├── utils/
 │   └── visualize.test.ts   # Visual debugging output
 └── integration/
@@ -52,7 +54,7 @@ src/__tests__/
 
 ## Test Categories
 
-### Unit Tests (~177 tests)
+### Unit Tests (~182 tests)
 
 Test individual command logic with mocked dependencies:
 

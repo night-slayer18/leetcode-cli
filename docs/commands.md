@@ -4,6 +4,39 @@ Complete reference for all CLI commands based on actual implementation.
 
 ---
 
+## Interactive TUI Mode
+
+Run the CLI without arguments to launch the interactive Terminal UI:
+
+```bash
+leetcode
+```
+
+Behavior:
+
+- No args + interactive terminal: launches TUI.
+- No args + non-interactive terminal: prints help output.
+- Any args: runs normal command mode.
+
+Common TUI keys:
+
+- `j/k` or `up/down`: move/scroll
+- `Enter`: select/open
+- `Esc`: back/close drawer
+- `?`: help
+- `Ctrl+C`: quit
+
+Problem action keys:
+
+- `p/t/s`: pick, test, submit
+- `h/H/V`: hint, submissions, snapshots
+- `b/n/e`: bookmark, note, edit note
+- `Tab`: toggle focus between statement and drawer when drawer is open
+
+See [TUI Guide](tui.md) for complete behavior and screen-specific shortcuts.
+
+---
+
 ## Authentication Commands
 
 ### `leetcode login`

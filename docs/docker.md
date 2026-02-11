@@ -53,10 +53,13 @@ function leetcode {
 ### Usage
 
 ```bash
+leetcode
 leetcode list
 leetcode pick 1
 leetcode submit 1
 ```
+
+`-it` is required for TUI mode. The shell function shown above already includes it.
 
 ## Build Locally
 

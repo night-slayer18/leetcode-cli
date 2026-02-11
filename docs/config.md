@@ -56,3 +56,13 @@ Settings are now stored per-workspace for isolation:
 | Bookmarks   | `~/.leetcode/bookmarks.json`                | Shared        |
 
 Use `leetcode workspace current` to see which workspace is active.
+
+## TUI Configuration
+
+You can also manage workspace settings from TUI:
+
+1. Run `leetcode` to open TUI.
+2. Open **Workspace** (`w`) to switch/edit workspace-specific properties.
+3. Open **Config** (`c`) to edit active workspace defaults.
+
+Both screens use buffered editing (`Enter` to save, `Esc` to cancel).

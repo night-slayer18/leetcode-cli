@@ -11,6 +11,7 @@ A modern, feature-rich command-line interface for LeetCode, built with TypeScrip
 - [Installation Guide](installation.md)
 - [Configuration](config.md)
 - [Commands Reference](commands.md)
+- [TUI Guide](tui.md)
 - [Docker Usage](docker.md)
 - [Testing](testing.md)
 - [Release Notes](releases.md)
@@ -21,4 +22,5 @@ A modern, feature-rich command-line interface for LeetCode, built with TypeScrip
 - 📝 Auto-generation of solution files
 - 🧪 Local testing against sample cases
 - 📤 Direct submission to LeetCode
+- 🖥️ Interactive Terminal UI (TUI) mode
 - 🐳 Docker support
