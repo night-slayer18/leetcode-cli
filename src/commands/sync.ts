@@ -161,6 +161,7 @@ async function setupRemote(workDir: string): Promise<string> {
       console.log(chalk.green('✓ Added remote origin'));
     } catch {
       console.log(chalk.red('Failed to add remote origin'));
+      return '';
     }
   }
 
@@ -187,7 +188,11 @@ export async function syncCommand(): Promise<void> {
   }
 
   // 2. Ensure Remote
-  await setupRemote(workDir);
+  const configuredRemote = await setupRemote(workDir);
+  if (!configuredRemote && !getRemoteUrl(workDir)) {
+    console.log(chalk.red('No valid remote repository configured. Sync aborted.'));
+    return;
+  }
 
   // 3. Sync
   const spinner = ora('Syncing solutions...').start();

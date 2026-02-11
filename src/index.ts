@@ -403,7 +403,7 @@ program
   .option('-l, --lang <language>', 'Set default programming language')
   .option('-e, --editor <editor>', 'Set editor command')
   .option('-w, --workdir <path>', 'Set working directory for solutions')
-  .option('-r, --repo <url>', 'Set Git repository URL')
+  .option('-r, --repo [url]', 'Set Git repository URL (omit value to clear)')
   .option('-i, --interactive', 'Interactive configuration')
   .addHelpText(
     'after',
@@ -414,6 +414,7 @@ ${chalk.yellow('Examples:')}
   ${chalk.cyan('$ leetcode config -e "code"')}        Set editor to VS Code
   ${chalk.cyan('$ leetcode config -w ~/leetcode')}    Set solutions folder
   ${chalk.cyan('$ leetcode config -r https://...')}   Set git repository
+  ${chalk.cyan('$ leetcode config --repo')}            Clear git repository
   ${chalk.cyan('$ leetcode config -i')}               Interactive setup
 
 ${chalk.gray('Supported languages: typescript, javascript, python3, java, cpp, c, csharp, go, rust, kotlin, swift')}

@@ -106,22 +106,29 @@ export async function collabSyncCommand(): Promise<void> {
 
   const spinner = ora('Syncing your code...').start();
 
-  const workDir = config.getWorkDir();
-  const filePath = await findSolutionFile(workDir, session.problemId);
+  try {
+    const workDir = config.getWorkDir();
+    const filePath = await findSolutionFile(workDir, session.problemId);
 
-  if (!filePath) {
-    spinner.fail(`No solution file found for problem ${session.problemId}`);
-    return;
-  }
+    if (!filePath) {
+      spinner.fail(`No solution file found for problem ${session.problemId}`);
+      return;
+    }
 
-  const code = await readFile(filePath, 'utf-8');
-  const result = await collabService.syncCode(code);
+    const code = await readFile(filePath, 'utf-8');
+    const result = await collabService.syncCode(code);
 
-  if (result.success) {
-    spinner.succeed('Code synced successfully!');
-    console.log(chalk.gray(`Uploaded ${code.split('\n').length} lines from ${filePath}`));
-  } else {
-    spinner.fail(result.error || 'Sync failed');
+    if (result.success) {
+      spinner.succeed('Code synced successfully!');
+      console.log(chalk.gray(`Uploaded ${code.split('\n').length} lines from ${filePath}`));
+    } else {
+      spinner.fail(result.error || 'Sync failed');
+    }
+  } catch (error) {
+    spinner.fail('Sync failed');
+    if (error instanceof Error) {
+      console.log(chalk.red(error.message));
+    }
   }
 }
 
@@ -138,64 +145,71 @@ export async function collabCompareCommand(): Promise<void> {
 
   const spinner = ora('Fetching solutions...').start();
 
-  // Get my code
-  const workDir = config.getWorkDir();
-  const filePath = await findSolutionFile(workDir, session.problemId);
+  try {
+    // Get my code
+    const workDir = config.getWorkDir();
+    const filePath = await findSolutionFile(workDir, session.problemId);
 
-  if (!filePath) {
-    spinner.fail(`No solution file found for problem ${session.problemId}`);
-    return;
+    if (!filePath) {
+      spinner.fail(`No solution file found for problem ${session.problemId}`);
+      return;
+    }
+
+    const myCode = await readFile(filePath, 'utf-8');
+
+    // Get partner's code
+    const partnerResult = await collabService.getPartnerCode();
+
+    if ('error' in partnerResult) {
+      spinner.fail(partnerResult.error);
+      return;
+    }
+
+    spinner.stop();
+
+    if (!partnerResult.code) {
+      console.log(chalk.yellow('Partner has not synced their code yet.'));
+      console.log(chalk.gray('Ask them to run `leetcode collab sync`.'));
+      return;
+    }
+
+    // Display sequential comparison
+    console.log();
+    console.log(chalk.bold.cyan('📊 Solution Comparison'));
+    console.log(chalk.gray('─'.repeat(60)));
+
+    // Your solution
+    console.log();
+    console.log(chalk.bold.green(`▸ Your Solution (${session.username})`));
+    console.log(chalk.gray('─'.repeat(60)));
+    const myLines = myCode.split('\n');
+    for (let i = 0; i < myLines.length; i++) {
+      const lineNum = String(i + 1).padStart(3, ' ');
+      console.log(`${chalk.gray(lineNum)} ${myLines[i]}`);
+    }
+
+    // Partner's solution
+    console.log();
+    console.log(chalk.bold.blue(`▸ ${partnerResult.username}'s Solution`));
+    console.log(chalk.gray('─'.repeat(60)));
+    const partnerLines = partnerResult.code.split('\n');
+    for (let i = 0; i < partnerLines.length; i++) {
+      const lineNum = String(i + 1).padStart(3, ' ');
+      console.log(`${chalk.gray(lineNum)} ${partnerLines[i]}`);
+    }
+
+    console.log();
+    console.log(chalk.gray('─'.repeat(60)));
+    console.log(
+      chalk.gray(`Your code: ${myLines.length} lines | Partner: ${partnerLines.length} lines`)
+    );
+    console.log();
+  } catch (error) {
+    spinner.fail('Failed to fetch solutions');
+    if (error instanceof Error) {
+      console.log(chalk.red(error.message));
+    }
   }
-
-  const myCode = await readFile(filePath, 'utf-8');
-
-  // Get partner's code
-  const partnerResult = await collabService.getPartnerCode();
-
-  if ('error' in partnerResult) {
-    spinner.fail(partnerResult.error);
-    return;
-  }
-
-  spinner.stop();
-
-  if (!partnerResult.code) {
-    console.log(chalk.yellow('Partner has not synced their code yet.'));
-    console.log(chalk.gray('Ask them to run `leetcode collab sync`.'));
-    return;
-  }
-
-  // Display sequential comparison
-  console.log();
-  console.log(chalk.bold.cyan('📊 Solution Comparison'));
-  console.log(chalk.gray('─'.repeat(60)));
-
-  // Your solution
-  console.log();
-  console.log(chalk.bold.green(`▸ Your Solution (${session.username})`));
-  console.log(chalk.gray('─'.repeat(60)));
-  const myLines = myCode.split('\n');
-  for (let i = 0; i < myLines.length; i++) {
-    const lineNum = String(i + 1).padStart(3, ' ');
-    console.log(`${chalk.gray(lineNum)} ${myLines[i]}`);
-  }
-
-  // Partner's solution
-  console.log();
-  console.log(chalk.bold.blue(`▸ ${partnerResult.username}'s Solution`));
-  console.log(chalk.gray('─'.repeat(60)));
-  const partnerLines = partnerResult.code.split('\n');
-  for (let i = 0; i < partnerLines.length; i++) {
-    const lineNum = String(i + 1).padStart(3, ' ');
-    console.log(`${chalk.gray(lineNum)} ${partnerLines[i]}`);
-  }
-
-  console.log();
-  console.log(chalk.gray('─'.repeat(60)));
-  console.log(
-    chalk.gray(`Your code: ${myLines.length} lines | Partner: ${partnerLines.length} lines`)
-  );
-  console.log();
 }
 
 export async function collabLeaveCommand(): Promise<void> {

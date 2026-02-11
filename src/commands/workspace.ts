@@ -4,6 +4,7 @@ import { workspaceStorage, WorkspaceConfig } from '../storage/workspaces.js';
 import inquirer from 'inquirer';
 import { homedir } from 'os';
 import { join } from 'path';
+import { isValidWorkspaceName } from '../utils/validation.js';
 
 export async function workspaceCurrentCommand(): Promise<void> {
   const active = workspaceStorage.getActive();
@@ -41,42 +42,55 @@ export async function workspaceCreateCommand(
   name: string,
   options: { workdir?: string }
 ): Promise<void> {
-  if (workspaceStorage.exists(name)) {
-    console.log(chalk.red(`Workspace "${name}" already exists`));
+  const workspaceName = name.trim();
+  if (!isValidWorkspaceName(workspaceName)) {
+    console.log(chalk.red('Invalid workspace name.'));
+    console.log(chalk.gray('Use 1-64 characters: letters, numbers, "-" or "_".'));
     return;
   }
 
-  const workDir = options.workdir ?? join(homedir(), 'leetcode', name);
+  if (workspaceStorage.exists(workspaceName)) {
+    console.log(chalk.red(`Workspace "${workspaceName}" already exists`));
+    return;
+  }
+
+  const workDir = options.workdir ?? join(homedir(), 'leetcode', workspaceName);
 
   const config: WorkspaceConfig = {
     workDir,
     lang: 'typescript',
   };
 
-  const success = workspaceStorage.create(name, config);
+  const success = workspaceStorage.create(workspaceName, config);
 
   if (success) {
-    console.log(chalk.green(`✓ Created workspace "${name}"`));
+    console.log(chalk.green(`✓ Created workspace "${workspaceName}"`));
     console.log(`  workDir: ${chalk.gray(workDir)}`);
     console.log();
-    console.log(chalk.gray(`Switch to it: leetcode workspace use ${name}`));
+    console.log(chalk.gray(`Switch to it: leetcode workspace use ${workspaceName}`));
   } else {
     console.log(chalk.red('Failed to create workspace'));
   }
 }
 
 export async function workspaceUseCommand(name: string): Promise<void> {
-  if (!workspaceStorage.exists(name)) {
-    console.log(chalk.red(`Workspace "${name}" not found`));
+  const workspaceName = name.trim();
+  if (!isValidWorkspaceName(workspaceName)) {
+    console.log(chalk.red('Invalid workspace name.'));
+    return;
+  }
+
+  if (!workspaceStorage.exists(workspaceName)) {
+    console.log(chalk.red(`Workspace "${workspaceName}" not found`));
     console.log(chalk.gray('Use `leetcode workspace list` to see available workspaces'));
     return;
   }
 
-  const success = workspaceStorage.setActive(name);
+  const success = workspaceStorage.setActive(workspaceName);
 
   if (success) {
-    const config = workspaceStorage.getConfig(name);
-    console.log(chalk.green(`✓ Switched to workspace "${name}"`));
+    const config = workspaceStorage.getConfig(workspaceName);
+    console.log(chalk.green(`✓ Switched to workspace "${workspaceName}"`));
     console.log(`  workDir: ${chalk.gray(config.workDir)}`);
   } else {
     console.log(chalk.red('Failed to switch workspace'));
@@ -84,13 +98,19 @@ export async function workspaceUseCommand(name: string): Promise<void> {
 }
 
 export async function workspaceDeleteCommand(name: string): Promise<void> {
-  if (name === 'default') {
+  const workspaceName = name.trim();
+  if (!isValidWorkspaceName(workspaceName)) {
+    console.log(chalk.red('Invalid workspace name.'));
+    return;
+  }
+
+  if (workspaceName === 'default') {
     console.log(chalk.red('Cannot delete the default workspace'));
     return;
   }
 
-  if (!workspaceStorage.exists(name)) {
-    console.log(chalk.red(`Workspace "${name}" not found`));
+  if (!workspaceStorage.exists(workspaceName)) {
+    console.log(chalk.red(`Workspace "${workspaceName}" not found`));
     return;
   }
 
@@ -98,7 +118,7 @@ export async function workspaceDeleteCommand(name: string): Promise<void> {
     {
       type: 'confirm',
       name: 'confirmed',
-      message: `Delete workspace "${name}"? (files in workDir will NOT be deleted)`,
+      message: `Delete workspace "${workspaceName}"? (files in workDir will NOT be deleted)`,
       default: false,
     },
   ]);
@@ -108,10 +128,10 @@ export async function workspaceDeleteCommand(name: string): Promise<void> {
     return;
   }
 
-  const success = workspaceStorage.delete(name);
+  const success = workspaceStorage.delete(workspaceName);
 
   if (success) {
-    console.log(chalk.green(`✓ Deleted workspace "${name}"`));
+    console.log(chalk.green(`✓ Deleted workspace "${workspaceName}"`));
   } else {
     console.log(chalk.red('Failed to delete workspace'));
   }

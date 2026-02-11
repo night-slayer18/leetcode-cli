@@ -63,6 +63,11 @@ export const collabService = {
       return { error: 'Room not found' };
     }
 
+    // Prevent multiple users from occupying the guest slot.
+    if (room.guest_username && room.guest_username !== username) {
+      return { error: 'Room already has a guest' };
+    }
+
     // Update room with guest info
     const { error: updateError } = await supabase
       .from('collab_rooms')

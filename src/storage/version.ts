@@ -68,7 +68,11 @@ export const versionStorage = {
    */
   clearCache(): void {
     if (existsSync(VERSION_FILE)) {
-      unlinkSync(VERSION_FILE);
+      try {
+        unlinkSync(VERSION_FILE);
+      } catch {
+        // Ignore cleanup errors and let the next write replace stale data.
+      }
     }
   },
 };

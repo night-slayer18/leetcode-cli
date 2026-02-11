@@ -9,7 +9,7 @@ interface ConfigOptions {
   lang?: string;
   editor?: string;
   workdir?: string;
-  repo?: string;
+  repo?: string | boolean;
 }
 
 const SUPPORTED_LANGUAGES: SupportedLanguage[] = [
@@ -27,8 +27,10 @@ const SUPPORTED_LANGUAGES: SupportedLanguage[] = [
 ];
 
 export async function configCommand(options: ConfigOptions): Promise<void> {
+  const hasRepoOption = options.repo !== undefined;
+
   // If no options provided, show current config
-  if (!options.lang && !options.editor && !options.workdir) {
+  if (!options.lang && !options.editor && !options.workdir && !hasRepoOption) {
     showCurrentConfig();
     return;
   }
@@ -57,11 +59,11 @@ export async function configCommand(options: ConfigOptions): Promise<void> {
     console.log(chalk.green(`✓ Work directory set to ${options.workdir}`));
   }
 
-  if (options.repo !== undefined) {
-    if (options.repo.trim() === '') {
+  if (hasRepoOption) {
+    if (options.repo === true || (typeof options.repo === 'string' && options.repo.trim() === '')) {
       config.deleteRepo();
       console.log(chalk.green('✓ Repository URL cleared'));
-    } else {
+    } else if (typeof options.repo === 'string') {
       config.setRepo(options.repo);
       console.log(chalk.green(`✓ Repository URL set to ${options.repo}`));
     }

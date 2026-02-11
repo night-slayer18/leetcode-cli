@@ -4,6 +4,7 @@ import { join } from 'path';
 import { LANGUAGE_EXTENSIONS } from '../utils/templates.js';
 import type { SupportedLanguage } from '../types.js';
 import { workspaceStorage } from './workspaces.js';
+import { isValidSnapshotName } from '../utils/validation.js';
 
 export interface Snapshot {
   id: number;
@@ -83,7 +84,10 @@ export const snapshotStorage = {
     const nextId = meta.snapshots.length > 0 ? Math.max(...meta.snapshots.map((s) => s.id)) + 1 : 1;
 
     // Generate name if not provided
-    const snapshotName = name || `snapshot-${nextId}`;
+    const snapshotName = (name ?? `snapshot-${nextId}`).trim();
+    if (!isValidSnapshotName(snapshotName)) {
+      return { error: 'Invalid snapshot name. Use 1-64 characters: letters, numbers, spaces, "-" or "_".' };
+    }
 
     // Check for duplicate name
     const existing = meta.snapshots.find((s) => s.name === snapshotName);

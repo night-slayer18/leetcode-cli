@@ -2,6 +2,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
+import { isValidWorkspaceName } from '../utils/validation.js';
 
 export interface WorkspaceConfig {
   workDir: string;
@@ -37,12 +38,26 @@ function saveRegistry(registry: WorkspaceRegistry): void {
   writeFileSync(WORKSPACES_FILE, JSON.stringify(registry, null, 2));
 }
 
+function normalizeWorkspaceName(name: string): string | null {
+  const trimmed = name.trim();
+  return isValidWorkspaceName(trimmed) ? trimmed : null;
+}
+
 export const workspaceStorage = {
   /**
    * Initialize workspaces on first run - migrate existing config to "default" workspace
    */
   ensureInitialized(): void {
     const registry = loadRegistry();
+    const validWorkspaces = registry.workspaces
+      .map((name) => normalizeWorkspaceName(name))
+      .filter((name): name is string => name !== null);
+
+    let shouldSave = false;
+    if (validWorkspaces.length !== registry.workspaces.length) {
+      registry.workspaces = [...new Set(validWorkspaces)];
+      shouldSave = true;
+    }
 
     // If no workspaces exist, create "default"
     if (registry.workspaces.length === 0) {
@@ -52,6 +67,20 @@ export const workspaceStorage = {
       });
       registry.workspaces = ['default'];
       registry.active = 'default';
+      saveRegistry(registry);
+      return;
+    }
+
+    const activeName = normalizeWorkspaceName(registry.active);
+    if (!activeName || !registry.workspaces.includes(activeName)) {
+      registry.active = registry.workspaces[0];
+      shouldSave = true;
+    } else if (activeName !== registry.active) {
+      registry.active = activeName;
+      shouldSave = true;
+    }
+
+    if (shouldSave) {
       saveRegistry(registry);
     }
   },
@@ -68,11 +97,16 @@ export const workspaceStorage = {
    * Set the active workspace
    */
   setActive(name: string): boolean {
-    const registry = loadRegistry();
-    if (!registry.workspaces.includes(name)) {
+    const wsName = normalizeWorkspaceName(name);
+    if (!wsName) {
       return false;
     }
-    registry.active = name;
+
+    const registry = loadRegistry();
+    if (!registry.workspaces.includes(wsName)) {
+      return false;
+    }
+    registry.active = wsName;
     saveRegistry(registry);
     return true;
   },
@@ -89,22 +123,32 @@ export const workspaceStorage = {
    * Check if a workspace exists
    */
   exists(name: string): boolean {
+    const wsName = normalizeWorkspaceName(name);
+    if (!wsName) {
+      return false;
+    }
+
     this.ensureInitialized();
-    return loadRegistry().workspaces.includes(name);
+    return loadRegistry().workspaces.includes(wsName);
   },
 
   /**
    * Create a new workspace
    */
   create(name: string, config: WorkspaceConfig): boolean {
+    const wsName = normalizeWorkspaceName(name);
+    if (!wsName) {
+      return false;
+    }
+
     const registry = loadRegistry();
 
-    if (registry.workspaces.includes(name)) {
+    if (registry.workspaces.includes(wsName)) {
       return false; // Already exists
     }
 
     // Create workspace directory
-    const wsDir = join(WORKSPACES_DIR, name);
+    const wsDir = join(WORKSPACES_DIR, wsName);
     ensureDir(wsDir);
     ensureDir(join(wsDir, 'snapshots'));
 
@@ -120,7 +164,7 @@ export const workspaceStorage = {
     writeFileSync(join(wsDir, 'collab.json'), JSON.stringify({ session: null }, null, 2));
 
     // Update registry
-    registry.workspaces.push(name);
+    registry.workspaces.push(wsName);
     saveRegistry(registry);
 
     return true;
@@ -130,20 +174,21 @@ export const workspaceStorage = {
    * Delete a workspace
    */
   delete(name: string): boolean {
-    if (name === 'default') {
+    const wsName = normalizeWorkspaceName(name);
+    if (!wsName || wsName === 'default') {
       return false; // Can't delete default
     }
 
     const registry = loadRegistry();
-    if (!registry.workspaces.includes(name)) {
+    if (!registry.workspaces.includes(wsName)) {
       return false;
     }
 
     // Remove from registry (don't delete files to be safe)
-    registry.workspaces = registry.workspaces.filter((w) => w !== name);
+    registry.workspaces = registry.workspaces.filter((w) => w !== wsName);
 
     // If deleting active workspace, switch to default
-    if (registry.active === name) {
+    if (registry.active === wsName) {
       registry.active = 'default';
     }
 
@@ -155,7 +200,7 @@ export const workspaceStorage = {
    * Get the directory path for a workspace
    */
   getWorkspaceDir(name?: string): string {
-    const wsName = name ?? this.getActive();
+    const wsName = name ? normalizeWorkspaceName(name) || 'default' : this.getActive();
     return join(WORKSPACES_DIR, wsName);
   },
 
@@ -163,7 +208,7 @@ export const workspaceStorage = {
    * Get config for a workspace
    */
   getConfig(name?: string): WorkspaceConfig {
-    const wsName = name ?? this.getActive();
+    const wsName = name ? normalizeWorkspaceName(name) || 'default' : this.getActive();
     const configPath = join(WORKSPACES_DIR, wsName, 'config.json');
 
     if (existsSync(configPath)) {
@@ -181,7 +226,7 @@ export const workspaceStorage = {
    * Update config for a workspace
    */
   setConfig(config: Partial<WorkspaceConfig>, name?: string): void {
-    const wsName = name ?? this.getActive();
+    const wsName = name ? normalizeWorkspaceName(name) || 'default' : this.getActive();
     const wsDir = join(WORKSPACES_DIR, wsName);
     ensureDir(wsDir);
 
