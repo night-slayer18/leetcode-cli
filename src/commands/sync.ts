@@ -1,4 +1,4 @@
-import { execSync } from 'child_process';
+import { execFileSync, execSync } from 'child_process';
 import { existsSync } from 'fs';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
@@ -15,11 +15,6 @@ function isValidGitUrl(url: string): boolean {
   const sshPattern = /^git@[\w.-]+:[\w./-]+$/;
   return httpsPattern.test(url) || sshPattern.test(url);
 }
-
-function escapeShellArg(arg: string): string {
-  return `"${arg.replace(/"/g, '\\"')}"`;
-}
-
 
 function isGitInstalled(): boolean {
   try {
@@ -105,9 +100,11 @@ async function setupRemote(workDir: string): Promise<string> {
         try {
           const rawRepoName = path.basename(workDir) || 'leetcode-solutions';
           const repoName = sanitizeRepoName(rawRepoName);
-          execSync(`gh repo create ${repoName} --private --source=. --remote=origin`, {
-            cwd: workDir,
-          });
+          execFileSync(
+            'gh',
+            ['repo', 'create', repoName, '--private', '--source=.', '--remote=origin'],
+            { cwd: workDir }
+          );
           spinner.succeed('Created and linked GitHub repository');
 
           // Fetch the URL to save it
@@ -157,7 +154,7 @@ async function setupRemote(workDir: string): Promise<string> {
   const currentRemote = getRemoteUrl(workDir);
   if (!currentRemote && repoUrl) {
     try {
-      execSync(`git remote add origin ${repoUrl}`, { cwd: workDir });
+      execFileSync('git', ['remote', 'add', 'origin', repoUrl], { cwd: workDir });
       console.log(chalk.green('✓ Added remote origin'));
     } catch {
       console.log(chalk.red('Failed to add remote origin'));
@@ -208,13 +205,13 @@ export async function syncCommand(): Promise<void> {
     // Add
     execSync('git add .', { cwd: workDir });
 
-    // Commit - Security: Use escapeShellArg to prevent injection
+    // Commit with argument vector to avoid shell interpolation issues.
     const lines = status.trim().split('\n');
     const count = lines.length;
     const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
     const message = `Sync: ${count} solutions - ${timestamp}`;
 
-    execSync(`git commit -m ${escapeShellArg(message)}`, { cwd: workDir });
+    execFileSync('git', ['commit', '-m', message], { cwd: workDir });
 
     // Try pushing to main or master
     try {
