@@ -101,7 +101,7 @@ import { pickCommand, batchPickCommand } from '../../commands/pick.js';
 import { testCommand } from '../../commands/test.js';
 import { submitCommand } from '../../commands/submit.js';
 import { leetcodeClient } from '../../api/client.js';
-import { findSolutionFile, findFileByName } from '../../utils/fileUtils.js';
+import { findSolutionFile, findFileByName, getLangSlugFromExtension } from '../../utils/fileUtils.js';
 import { writeFile } from 'fs/promises';
 import { existsSync } from 'fs';
 
@@ -135,6 +135,34 @@ describe('Solve Commands', () => {
         await pickCommand('1', { lang: 'java', open: false });
 
         expect(leetcodeClient.getProblemById).toHaveBeenCalled();
+      });
+
+      it('should create .sql file when sql language is selected', async () => {
+        vi.mocked(existsSync).mockReturnValue(false);
+        vi.mocked(leetcodeClient.getProblemById).mockResolvedValueOnce({
+          questionId: '175',
+          questionFrontendId: '175',
+          title: 'Combine Two Tables',
+          titleSlug: 'combine-two-tables',
+          difficulty: 'Easy',
+          content: '<p>Write a solution...</p>',
+          topicTags: [{ name: 'Database', slug: 'database' }],
+          codeSnippets: [{ lang: 'MySQL', langSlug: 'mysql', code: 'SELECT * FROM Person;' }],
+          exampleTestcases: '',
+          sampleTestCase: '',
+          hints: [],
+          companyTags: [],
+          stats: '{}',
+          isPaidOnly: false,
+          acRate: 0,
+          status: null,
+        });
+
+        await pickCommand('175', { lang: 'sql', open: false });
+
+        expect(writeFile).toHaveBeenCalled();
+        const targetPath = String(vi.mocked(writeFile).mock.calls[0]?.[0] ?? '');
+        expect(targetPath.endsWith('.sql')).toBe(true);
       });
 
       it('should handle existing file', async () => {
@@ -172,6 +200,45 @@ describe('Solve Commands', () => {
 
         expect(findSolutionFile).toHaveBeenCalled();
         expect(leetcodeClient.testSolution).toHaveBeenCalled();
+      });
+
+      it('should resolve sql language slug using problem snippets', async () => {
+        vi.mocked(findSolutionFile).mockResolvedValueOnce(
+          '/tmp/leetcode/Easy/Database/175.combine-two-tables.sql'
+        );
+        vi.mocked(leetcodeClient.getProblem).mockResolvedValueOnce({
+          questionId: '175',
+          questionFrontendId: '175',
+          title: 'Combine Two Tables',
+          titleSlug: 'combine-two-tables',
+          difficulty: 'Easy',
+          exampleTestcases: '',
+          sampleTestCase: '',
+          content: '<p>Write a solution...</p>',
+          topicTags: [{ name: 'Database', slug: 'database' }],
+          codeSnippets: [{ lang: 'MySQL', langSlug: 'mysql', code: 'SELECT 1;' }],
+          hints: [],
+          companyTags: [],
+          stats: '{}',
+          isPaidOnly: false,
+          acRate: 0,
+          status: null,
+        });
+        vi.mocked(getLangSlugFromExtension).mockReturnValueOnce('mysql');
+
+        await testCommand('175', {});
+
+        expect(getLangSlugFromExtension).toHaveBeenCalledWith(
+          'sql',
+          expect.arrayContaining([expect.objectContaining({ langSlug: 'mysql' })])
+        );
+        expect(leetcodeClient.testSolution).toHaveBeenCalledWith(
+          expect.any(String),
+          expect.any(String),
+          'mysql',
+          expect.any(String),
+          expect.any(String)
+        );
       });
 
       it('should test by filename', async () => {
@@ -227,6 +294,44 @@ describe('Solve Commands', () => {
 
         expect(findSolutionFile).toHaveBeenCalled();
         expect(leetcodeClient.submitSolution).toHaveBeenCalled();
+      });
+
+      it('should resolve sql language slug for submit flow', async () => {
+        vi.mocked(findSolutionFile).mockResolvedValueOnce(
+          '/tmp/leetcode/Easy/Database/175.combine-two-tables.sql'
+        );
+        vi.mocked(leetcodeClient.getProblem).mockResolvedValueOnce({
+          questionId: '175',
+          questionFrontendId: '175',
+          title: 'Combine Two Tables',
+          titleSlug: 'combine-two-tables',
+          difficulty: 'Easy',
+          exampleTestcases: '',
+          sampleTestCase: '',
+          content: '<p>Write a solution...</p>',
+          topicTags: [{ name: 'Database', slug: 'database' }],
+          codeSnippets: [{ lang: 'MySQL', langSlug: 'mysql', code: 'SELECT 1;' }],
+          hints: [],
+          companyTags: [],
+          stats: '{}',
+          isPaidOnly: false,
+          acRate: 0,
+          status: null,
+        });
+        vi.mocked(getLangSlugFromExtension).mockReturnValueOnce('mysql');
+
+        await submitCommand('175');
+
+        expect(getLangSlugFromExtension).toHaveBeenCalledWith(
+          'sql',
+          expect.arrayContaining([expect.objectContaining({ langSlug: 'mysql' })])
+        );
+        expect(leetcodeClient.submitSolution).toHaveBeenCalledWith(
+          expect.any(String),
+          expect.any(String),
+          'mysql',
+          expect.any(String)
+        );
       });
 
       it('should submit by filename', async () => {

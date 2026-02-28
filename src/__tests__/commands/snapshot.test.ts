@@ -58,7 +58,7 @@ vi.mock('../../storage/config.js', () => ({
 
 vi.mock('../../utils/fileUtils.js', () => ({
   findSolutionFile: vi.fn().mockResolvedValue('/tmp/leetcode/Easy/Array/1.two-sum.ts'),
-  getLangSlugFromExtension: vi.fn().mockReturnValue('typescript'),
+  detectLanguageFromFile: vi.fn().mockReturnValue('typescript'),
 }));
 
 vi.mock('fs/promises', () => ({

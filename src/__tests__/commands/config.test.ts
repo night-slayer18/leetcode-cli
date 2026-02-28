@@ -65,6 +65,12 @@ describe('Config Command', () => {
       expect(config.setLanguage).toHaveBeenCalledWith('java');
     });
 
+    it('should set sql as default language', async () => {
+      await configCommand({ lang: 'sql' });
+
+      expect(config.setLanguage).toHaveBeenCalledWith('sql');
+    });
+
     it('should set editor', async () => {
       await configCommand({ editor: 'vim' });
 
