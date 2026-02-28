@@ -142,7 +142,8 @@ export type SupportedLanguage =
   | 'go'
   | 'rust'
   | 'kotlin'
-  | 'swift';
+  | 'swift'
+  | 'sql';
 
 export interface UserConfig {
   language: SupportedLanguage;

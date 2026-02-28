@@ -44,6 +44,7 @@ import {
 } from './commands/workspace.js';
 import { updateCommand, checkForUpdatesOnStartup } from './commands/update.js';
 import { changelogCommand } from './commands/changelog.js';
+import { getSupportedLanguagesLabel } from './utils/languages.js';
 
 import { launchTUI as launchNewTUI } from './tui/index.js';
 
@@ -66,7 +67,7 @@ program
   .name('leetcode')
   .usage('[command] [options]')
   .description(chalk.bold.cyan('🔥 A modern LeetCode CLI built with TypeScript'))
-  .version('2.3.0', '-v, --version', 'Output the version number')
+  .version('2.3.1', '-v, --version', 'Output the version number')
   .helpOption('-h, --help', 'Display help for command')
   .addHelpText(
     'after',
@@ -417,7 +418,7 @@ ${chalk.yellow('Examples:')}
   ${chalk.cyan('$ leetcode config --repo')}            Clear git repository
   ${chalk.cyan('$ leetcode config -i')}               Interactive setup
 
-${chalk.gray('Supported languages: typescript, javascript, python3, java, cpp, c, csharp, go, rust, kotlin, swift')}
+${chalk.gray(`Supported languages: ${getSupportedLanguagesLabel()}`)}
 `
   )
   .action(async (options) => {

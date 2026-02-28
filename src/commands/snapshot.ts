@@ -2,7 +2,7 @@
 import chalk from 'chalk';
 import { snapshotStorage } from '../storage/snapshots.js';
 import { config } from '../storage/config.js';
-import { findSolutionFile, getLangSlugFromExtension } from '../utils/fileUtils.js';
+import { detectLanguageFromFile, findSolutionFile } from '../utils/fileUtils.js';
 import { readFile, writeFile } from 'fs/promises';
 import { extname, basename } from 'path';
 import { diffLines } from 'diff';
@@ -39,7 +39,7 @@ export async function snapshotSaveCommand(problemId: string, name?: string): Pro
     // Read current code
     const code = await readFile(filePath, 'utf-8');
     const ext = extname(filePath).slice(1);
-    const lang = getLangSlugFromExtension(ext) || ext;
+    const lang = detectLanguageFromFile(filePath) || ext;
 
     // Extract title from filename (e.g., "1.two-sum.ts" -> "two-sum")
     const fileName = basename(filePath);
@@ -134,7 +134,7 @@ export async function snapshotRestoreCommand(problemId: string, idOrName: string
     // Auto-backup before restore
     const backupName = `backup-before-restore-${Date.now()}`;
     const ext = extname(filePath).slice(1);
-    const lang = getLangSlugFromExtension(ext) || ext;
+    const lang = detectLanguageFromFile(filePath) || ext;
     snapshotStorage.save(problemId, '', currentCode, lang, backupName);
 
     // Get snapshot code

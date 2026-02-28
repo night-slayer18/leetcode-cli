@@ -3,7 +3,7 @@ import inquirer from 'inquirer';
 import chalk from 'chalk';
 import { config } from '../storage/config.js';
 import { credentials } from '../storage/credentials.js';
-import type { SupportedLanguage } from '../types.js';
+import { SUPPORTED_LANGUAGES, normalizeLanguageInput } from '../utils/languages.js';
 
 interface ConfigOptions {
   lang?: string;
@@ -11,20 +11,6 @@ interface ConfigOptions {
   workdir?: string;
   repo?: string | boolean;
 }
-
-const SUPPORTED_LANGUAGES: SupportedLanguage[] = [
-  'typescript',
-  'javascript',
-  'python3',
-  'java',
-  'cpp',
-  'c',
-  'csharp',
-  'go',
-  'rust',
-  'kotlin',
-  'swift',
-];
 
 export async function configCommand(options: ConfigOptions): Promise<void> {
   const hasRepoOption = options.repo !== undefined;
@@ -37,16 +23,15 @@ export async function configCommand(options: ConfigOptions): Promise<void> {
 
   // Set options
   if (options.lang) {
-    const langInput = options.lang.toLowerCase();
-    if (!SUPPORTED_LANGUAGES.includes(langInput as SupportedLanguage)) {
+    const normalizedLanguage = normalizeLanguageInput(options.lang);
+    if (!normalizedLanguage) {
       console.log(chalk.red(`Unsupported language: ${options.lang}`));
       console.log(chalk.gray(`Supported: ${SUPPORTED_LANGUAGES.join(', ')}`));
       return;
     }
-    // Safe to cast after validation
-    const lang = langInput as SupportedLanguage;
-    config.setLanguage(lang);
-    console.log(chalk.green(`✓ Default language set to ${lang}`));
+
+    config.setLanguage(normalizedLanguage);
+    console.log(chalk.green(`✓ Default language set to ${normalizedLanguage}`));
   }
 
   if (options.editor) {

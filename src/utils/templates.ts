@@ -1,6 +1,7 @@
 // Code templates for different programming languages
 import type { SupportedLanguage, CodeSnippet } from '../types.js';
 import striptags from 'striptags';
+import { LANGUAGE_ALIAS_MAP, resolveSupportedLanguageFromLeetCodeSlug } from './languages.js';
 
 // File extensions for each language
 export const LANGUAGE_EXTENSIONS: Record<SupportedLanguage, string> = {
@@ -15,26 +16,11 @@ export const LANGUAGE_EXTENSIONS: Record<SupportedLanguage, string> = {
   rust: 'rs',
   kotlin: 'kt',
   swift: 'swift',
+  sql: 'sql',
 };
 
 // LeetCode's language slugs mapped to our supported languages
-export const LANG_SLUG_MAP: Record<string, SupportedLanguage> = {
-  typescript: 'typescript',
-  javascript: 'javascript',
-  python3: 'python3',
-  python: 'python3',
-  java: 'java',
-  'c++': 'cpp',
-  cpp: 'cpp',
-  c: 'c',
-  'c#': 'csharp',
-  csharp: 'csharp',
-  go: 'go',
-  golang: 'go',
-  rust: 'rust',
-  kotlin: 'kotlin',
-  swift: 'swift',
-};
+export const LANG_SLUG_MAP: Record<string, SupportedLanguage> = { ...LANGUAGE_ALIAS_MAP };
 
 export function getCodeTemplate(
   snippets: CodeSnippet[],
@@ -42,12 +28,20 @@ export function getCodeTemplate(
 ): CodeSnippet | null {
   // Try to find the preferred language first
   const preferred = snippets.find(
-    (s) => LANG_SLUG_MAP[s.langSlug.toLowerCase()] === preferredLanguage
+    (s) => resolveSupportedLanguageFromLeetCodeSlug(s.langSlug) === preferredLanguage
   );
   if (preferred) return preferred;
 
   // Fallback to any available snippet
   return snippets[0] ?? null;
+}
+
+export function getPremiumPlaceholderCode(
+  language: SupportedLanguage,
+  title: string
+): string {
+  const commentStyle = getCommentStyle(language);
+  return `${commentStyle.single} Premium Problem - ${title}\n${commentStyle.single} Solution stub not available - visit LeetCode to view`;
 }
 
 export function generateSolutionFile(
@@ -83,6 +77,8 @@ function getCommentStyle(language: SupportedLanguage): CommentStyle {
   switch (language) {
     case 'python3':
       return { single: '#', blockStart: '"""', blockEnd: '"""', linePrefix: '' };
+    case 'sql':
+      return { single: '--', blockStart: '/*', blockEnd: '*/', linePrefix: ' * ' };
     case 'c':
     case 'cpp':
     case 'java':

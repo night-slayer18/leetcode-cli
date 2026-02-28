@@ -1,5 +1,4 @@
 import type { Command, AppMsg, ProblemListFilters } from '../types.js';
-import type { SupportedLanguage } from '../../types.js';
 import { leetcodeClient } from '../../api/client.js';
 import { credentials } from '../../storage/credentials.js';
 import { config } from '../../storage/config.js';
@@ -7,8 +6,9 @@ import {
   getCodeTemplate,
   generateSolutionFile,
   getSolutionFileName,
-  LANG_SLUG_MAP,
+  getPremiumPlaceholderCode,
 } from '../../utils/templates.js';
+import { normalizeLanguageInput, resolveLeetCodeLangSlug } from '../../utils/languages.js';
 import { snapshotStorage } from '../../storage/snapshots.js';
 import { diffLines } from 'diff';
 import * as fs from 'fs/promises';
@@ -251,6 +251,7 @@ async function getSolutionCode(
   const configLang = config.getLanguage();
 
   const problem = await leetcodeClient.getProblem(slug);
+  const leetcodeLang = resolveLeetCodeLangSlug(configLang, problem.codeSnippets);
 
   const fileName = getSolutionFileName(problem.questionFrontendId, problem.titleSlug, configLang);
 
@@ -265,12 +266,12 @@ async function getSolutionCode(
 
   try {
     const code = await fs.readFile(filePath, 'utf-8');
-    return { code, lang: configLang, questionId: problem.questionId };
+    return { code, lang: leetcodeLang, questionId: problem.questionId };
   } catch (e) {
     const rootPath = path.join(workDir, fileName);
     try {
       const code = await fs.readFile(rootPath, 'utf-8');
-      return { code, lang: configLang, questionId: problem.questionId };
+      return { code, lang: leetcodeLang, questionId: problem.questionId };
     } catch {
       throw new Error(
         `Could not read solution file at ${filePath}. Make sure you have picked the problem first.`
@@ -284,22 +285,26 @@ async function pickProblem(slug: string, dispatch: Dispatch): Promise<void> {
     const problem = await leetcodeClient.getProblem(slug);
 
     const langInput = config.getLanguage();
-    const language: SupportedLanguage = (LANG_SLUG_MAP[langInput] ??
-      langInput) as SupportedLanguage;
+    const language = normalizeLanguageInput(langInput);
+    if (!language) {
+      throw new Error(`Unsupported language: ${langInput}`);
+    }
 
     const snippets = problem.codeSnippets ?? [];
     const template = getCodeTemplate(snippets, language);
 
-    if (!template) {
+    if (snippets.length > 0 && !template) {
       throw new Error(`No code template available for ${language}`);
     }
+
+    const code = template ? template.code : getPremiumPlaceholderCode(language, problem.title);
 
     const content = generateSolutionFile(
       problem.questionFrontendId,
       problem.titleSlug,
       problem.title,
       problem.difficulty,
-      template.code,
+      code,
       language,
       problem.content ?? undefined
     );

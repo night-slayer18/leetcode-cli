@@ -10,11 +10,11 @@ import {
   getCodeTemplate,
   generateSolutionFile,
   getSolutionFileName,
-  LANG_SLUG_MAP,
+  getPremiumPlaceholderCode,
 } from '../utils/templates.js';
 import { openInEditor } from '../utils/editor.js';
 import { requireAuth } from '../utils/auth.js';
-import type { SupportedLanguage } from '../types.js';
+import { normalizeLanguageInput } from '../utils/languages.js';
 
 export interface PickOptions {
   lang?: string;
@@ -45,9 +45,12 @@ export async function pickCommand(idOrSlug: string, options: PickOptions): Promi
     spinner.text = 'Generating solution file...';
 
     // Determine language
-    const langInput = options.lang?.toLowerCase() ?? config.getLanguage();
-    const language: SupportedLanguage = (LANG_SLUG_MAP[langInput] ??
-      langInput) as SupportedLanguage;
+    const langInput = options.lang ?? config.getLanguage();
+    const language = normalizeLanguageInput(langInput);
+    if (!language) {
+      spinner.fail(`Unsupported language: ${langInput}`);
+      return false;
+    }
 
     // Get code template
     const snippets = problem.codeSnippets ?? [];
@@ -60,7 +63,7 @@ export async function pickCommand(idOrSlug: string, options: PickOptions): Promi
       // Premium problem - no code snippets available from API
       spinner.warn(chalk.yellow('Premium Problem (No code snippets available)'));
       console.log(chalk.gray('Generating placeholder file with problem info...'));
-      code = `// 🔒 Premium Problem - ${problem.title}\n// Solution stub not available - visit LeetCode to view`;
+      code = getPremiumPlaceholderCode(language, problem.title);
     } else if (!template) {
       // Snippets exist but not for the selected language
       spinner.fail(`No code template available for ${language}`);

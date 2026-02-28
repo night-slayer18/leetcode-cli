@@ -9,7 +9,7 @@ function buildOptions(currentConfig: ReturnType<typeof config.getConfig>): Confi
     {
       id: 'language',
       label: 'Default Language',
-      description: 'Language for new solutions (example: typescript, python3)',
+      description: 'Language for new solutions (example: typescript, python3, sql)',
       value: currentConfig.language,
     },
     {

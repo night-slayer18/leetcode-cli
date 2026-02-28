@@ -92,7 +92,7 @@ export async function submissionsCommand(
         await mkdir(targetDir, { recursive: true });
       }
 
-      const langSlug = details.lang.name;
+      const langSlug = details.lang.name.toLowerCase();
       const supportedLang = LANG_SLUG_MAP[langSlug] ?? 'txt';
       const ext = LANGUAGE_EXTENSIONS[supportedLang as SupportedLanguage] ?? langSlug;
 

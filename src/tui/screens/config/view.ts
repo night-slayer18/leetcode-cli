@@ -11,7 +11,7 @@ import {
 import { colors, borders, icons } from '../../theme.js';
 
 const EXAMPLES: Record<string, string> = {
-  language: 'Example: typescript, python3, cpp',
+  language: 'Example: typescript, python3, cpp, sql',
   editor: 'Example: code, vim, nvim',
   workdir: 'Example: /Users/name/leetcode',
   repo: 'Example: https://github.com/user/leetcode.git',

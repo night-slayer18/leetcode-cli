@@ -82,13 +82,6 @@ export async function submitCommand(fileOrId: string): Promise<void> {
     const [, problemId, titleSlug] = match;
     const ext = fileName.split('.').pop()!;
 
-    // Get language slug from extension
-    const lang = getLangSlugFromExtension(ext);
-    if (!lang) {
-      spinner.fail(`Unsupported file extension: .${ext}`);
-      return;
-    }
-
     // Read solution code
     const code = await readFile(filePath, 'utf-8');
 
@@ -96,6 +89,13 @@ export async function submitCommand(fileOrId: string): Promise<void> {
 
     // Get problem to retrieve question ID
     const problem = await leetcodeClient.getProblem(titleSlug);
+
+    // Get language slug from extension
+    const lang = getLangSlugFromExtension(ext, problem.codeSnippets);
+    if (!lang) {
+      spinner.fail(`Unsupported file extension: .${ext}`);
+      return;
+    }
 
     spinner.text = 'Submitting solution...';
 

@@ -77,17 +77,17 @@ export async function testCommand(fileOrId: string, options: TestOptions): Promi
     const titleSlug = match[2];
     const ext = fileName.split('.').pop()!;
 
-    const lang = getLangSlugFromExtension(ext);
-    if (!lang) {
-      spinner.fail(`Unsupported file extension: .${ext}`);
-      return;
-    }
-
     const code = await readFile(filePath, 'utf-8');
 
     spinner.text = 'Fetching problem details...';
 
     const problem = await leetcodeClient.getProblem(titleSlug);
+
+    const lang = getLangSlugFromExtension(ext, problem.codeSnippets);
+    if (!lang) {
+      spinner.fail(`Unsupported file extension: .${ext}`);
+      return;
+    }
 
     const testcases = options.testcase ?? problem.exampleTestcases ?? problem.sampleTestCase;
 
@@ -105,6 +105,13 @@ export async function testCommand(fileOrId: string, options: TestOptions): Promi
     displayTestResult(result, options.visualize ? problem.topicTags : undefined);
   } catch (error) {
     spinner.fail('Test failed');
+    if (filePath.toLowerCase().endsWith('.sql')) {
+      console.log(
+        chalk.yellow(
+          'SQL interpret mode may be unavailable for this problem on LeetCode. Try `leetcode submit <file>`.'
+        )
+      );
+    }
     if (error instanceof Error) {
       console.log(chalk.red(error.message));
     }

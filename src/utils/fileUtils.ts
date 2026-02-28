@@ -2,8 +2,9 @@
 import { readdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import { join } from 'path';
-import type { SupportedLanguage } from '../types.js';
+import type { SupportedLanguage, CodeSnippet } from '../types.js';
 import { LANGUAGE_EXTENSIONS } from './templates.js';
+import { resolveLeetCodeLangSlug } from './languages.js';
 
 // Max recursion depth for file searches (workDir/Difficulty/Category/file = 3 levels)
 const MAX_SEARCH_DEPTH = 5;
@@ -71,6 +72,7 @@ const EXT_TO_LANG_MAP: Record<string, SupportedLanguage> = {
   rs: 'rust',
   kt: 'kotlin',
   swift: 'swift',
+  sql: 'sql',
 };
 
 export function detectLanguageFromFile(filePath: string): SupportedLanguage | null {
@@ -78,21 +80,13 @@ export function detectLanguageFromFile(filePath: string): SupportedLanguage | nu
   return ext ? (EXT_TO_LANG_MAP[ext] ?? null) : null;
 }
 
-export function getLangSlugFromExtension(ext: string): string | null {
-  const langMap: Record<string, string> = {
-    ts: 'typescript',
-    js: 'javascript',
-    py: 'python3',
-    java: 'java',
-    cpp: 'cpp',
-    c: 'c',
-    cs: 'csharp',
-    go: 'golang',
-    rs: 'rust',
-    kt: 'kotlin',
-    swift: 'swift',
-  };
-  return langMap[ext.toLowerCase()] ?? null;
+export function getLangSlugFromExtension(
+  ext: string,
+  codeSnippets?: readonly Pick<CodeSnippet, 'lang' | 'langSlug'>[] | null
+): string | null {
+  const language = EXT_TO_LANG_MAP[ext.toLowerCase()];
+  if (!language) return null;
+  return resolveLeetCodeLangSlug(language, codeSnippets);
 }
 
 export function isSupportedExtension(ext: string): boolean {
