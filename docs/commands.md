@@ -243,6 +243,7 @@ leetcode p two-sum
 # Pick with specific language
 leetcode pick 1 -l python3
 leetcode pick 1 --lang java
+leetcode pick 175 --lang sql
 
 # Pick without opening editor
 leetcode pick 1 --no-open
@@ -504,6 +505,7 @@ leetcode config
 # Set default language
 leetcode config -l python3
 leetcode config --lang java
+leetcode config --lang sql
 
 # Set editor
 leetcode config -e code

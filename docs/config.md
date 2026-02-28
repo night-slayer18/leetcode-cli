@@ -24,6 +24,9 @@ leetcode config
 # Set Python as default language
 leetcode config -l python3
 
+# Set SQL as default language
+leetcode config -l sql
+
 # Set default work directory
 leetcode config -w ~/Development/my-leetcode
 
@@ -37,7 +40,7 @@ Config is stored per-workspace in `~/.leetcode/workspaces/<name>/config.json`.
 
 | Key        | Description                                          |
 | ---------- | ---------------------------------------------------- |
-| `lang`     | Default language extension (java, python3, cpp, etc) |
+| `lang`     | Default language extension (java, python3, sql, etc) |
 | `editor`   | Command to open files (code, vim, nano)              |
 | `workDir`  | Directory where solution files are saved             |
 | `syncRepo` | Remote Git repository URL                            |

@@ -156,6 +156,7 @@ leetcode pick 1
 
 # Specify language
 leetcode pick 1 --lang python3
+leetcode pick 175 --lang sql
 
 # Skip opening in editor
 leetcode pick 1 --no-open
@@ -365,6 +366,7 @@ leetcode config -i
 
 # Set specific options
 leetcode config --lang python3
+leetcode config --lang sql
 leetcode config --editor code
 leetcode config --workdir ~/leetcode
 leetcode config --repo https://github.com/username/leetcode-solutions.git
@@ -404,6 +406,7 @@ leetcode/
 | Rust       | `.rs`     |
 | Kotlin     | `.kt`     |
 | Swift      | `.swift`  |
+| SQL        | `.sql`    |
 
 ## Authentication
 

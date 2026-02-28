@@ -47,9 +47,12 @@ src/__tests__/
 ├── tui/
 │   └── problem-screen.test.ts # TUI problem drawer/navigation behavior
 ├── utils/
+│   ├── file-utils-sql.test.ts # SQL extension/lang slug resolution
+│   ├── languages.test.ts   # Shared language normalization and SQL dialect resolver
 │   └── visualize.test.ts   # Visual debugging output
 └── integration/
-    └── cli.test.ts         # Integration tests (runs actual CLI binary)
+    ├── cli.test.ts         # Integration tests (runs actual CLI binary)
+    └── cli-cross-os-e2e.test.ts # Cross-OS CLI command flow checks
 ```
 
 ## Test Categories
@@ -72,6 +75,15 @@ Run the actual compiled CLI binary to catch:
 - Commands not registered with Commander.js
 - Missing command aliases
 - Help text and error handling
+
+### Cross-OS E2E-Style Checks
+
+Deterministic CLI command-flow checks run in the CI OS matrix (Linux/macOS/Windows):
+
+- Config set/read with SQL language and path values
+- Workspace create/use/list/current command flows
+- Snapshot save/list/diff flow on real SQL files
+- Built CLI help output includes SQL language support
 
 ## Coverage
 

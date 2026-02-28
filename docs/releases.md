@@ -1,5 +1,35 @@
 # Release Notes
 
+## v2.4.0
+
+> **Release Date**: 2026-03-01
+> **Focus**: SQL Language Support + Cross-OS CLI E2E Coverage + Sync Security Hardening
+
+### 🚀 Features
+
+- Added `sql` as a first-class supported language for CLI and TUI flows.
+- `leetcode config -l sql` and `leetcode pick ... -l sql` are now supported.
+- SQL solution files are generated and recognized with `.sql` extension.
+
+### ⚙️ Improvements
+
+- Centralized language normalization and slug resolution logic in a shared utility.
+- Added SQL dialect resolution fallback (`mysql` default) for test/submit compatibility.
+- Updated config and help surfaces to display SQL as a supported language.
+- Replaced shell-interpolated command strings in `sync` with argument-vector execution for dynamic values.
+- Updated `git commit -m`, `git remote add origin`, and `gh repo create` dynamic flows to safer `execFileSync(command, args)` usage.
+
+### 🔒 Security
+
+- Resolves CodeQL alert `js/incomplete-sanitization` by removing custom shell-escaping dependence for user/config-derived arguments.
+
+### 🧪 Testing
+
+- Added dedicated SQL language unit tests for mapping, extension detection, and slug resolution.
+- Added deterministic cross-OS CLI E2E command-flow tests (config/workspace/snapshot/help) running in Linux/macOS/Windows CI matrix.
+
+---
+
 ## v2.3.0
 
 > **Release Date**: 2026-02-11
