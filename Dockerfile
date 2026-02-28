@@ -1,4 +1,4 @@
-FROM node:20-alpine AS builder
+FROM node:20-bookworm-slim AS builder
 
 WORKDIR /app
 
@@ -9,12 +9,9 @@ COPY . .
 RUN npm run build
 
 # Production image
-FROM node:20-alpine
+FROM node:20-bookworm-slim
 
 WORKDIR /app
-
-# Install runtime dependencies if any (none heavy usually)
-RUN npm install -g pnpm
 
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package.json ./package.json
@@ -23,9 +20,6 @@ COPY --from=builder /app/package-lock.json ./package-lock.json
 # Install production deps only
 RUN npm ci --omit=dev
 
-# Link the binary
-RUN npm link
-
 # Set entrypoint
-ENTRYPOINT ["leetcode"]
+ENTRYPOINT ["node", "dist/index.js"]
 CMD ["--help"]
