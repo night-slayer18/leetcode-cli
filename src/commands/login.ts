@@ -4,6 +4,7 @@ import chalk from 'chalk';
 import { leetcodeClient } from '../api/client.js';
 import * as credentialStore from '../storage/credentials.js';
 import type { LeetCodeCredentials } from '../types.js';
+import { config } from '../storage/config.js';
 
 const { credentials } = credentialStore;
 
@@ -16,6 +17,9 @@ export async function loginCommand(): Promise<void> {
       console.log(chalk.yellow('Environment credential mode is active but credentials are unavailable.'));
       return;
     }
+
+    const configuredSite = config.getLeetCodeSite();
+    (leetcodeClient as { setBaseUrl?: (site: 'com' | 'cn') => void }).setBaseUrl?.(configuredSite);
 
     const spinner = ora('Validating environment credentials...').start();
     try {
@@ -53,14 +57,24 @@ export async function loginCommand(): Promise<void> {
   console.log(chalk.cyan('LeetCode CLI Login'));
   console.log(chalk.gray('─'.repeat(40)));
   console.log();
-  console.log(chalk.yellow('To login, you need to provide your LeetCode session cookies.'));
-  console.log(chalk.gray('1. Open https://leetcode.com in your browser'));
+  console.log(chalk.yellow('To login, select site and provide your LeetCode session cookies.'));
+  console.log(chalk.gray('1. Select your LeetCode site (.com or .cn)'));
   console.log(chalk.gray('2. Login to your account'));
-  console.log(chalk.gray('3. Open DevTools (F12) → Application → Cookies → leetcode.com'));
+  console.log(chalk.gray('3. Open DevTools (F12) → Application → Cookies'));
   console.log(chalk.gray('4. Copy the values of LEETCODE_SESSION and csrftoken'));
   console.log();
 
   const answers = await inquirer.prompt([
+    {
+      type: 'list',
+      name: 'site',
+      message: 'LeetCode site:',
+      default: config.getLeetCodeSite(),
+      choices: [
+        { name: 'leetcode.com (Global)', value: 'com' },
+        { name: 'leetcode.cn (China)', value: 'cn' },
+      ],
+    },
     {
       type: 'password',
       name: 'session',
@@ -81,6 +95,10 @@ export async function loginCommand(): Promise<void> {
     session: answers.session.trim(),
     csrfToken: answers.csrfToken.trim(),
   };
+
+  const selectedSite: 'com' | 'cn' = answers.site === 'cn' ? 'cn' : 'com';
+  config.setLeetCodeSite(selectedSite);
+  (leetcodeClient as { setBaseUrl?: (site: 'com' | 'cn') => void }).setBaseUrl?.(selectedSite);
 
   const spinner = ora('Verifying credentials...').start();
 
@@ -143,6 +161,8 @@ export async function whoamiCommand(): Promise<void> {
   const spinner = ora('Checking session...').start();
 
   try {
+    const configuredSite = config.getLeetCodeSite();
+    (leetcodeClient as { setBaseUrl?: (site: 'com' | 'cn') => void }).setBaseUrl?.(configuredSite);
     leetcodeClient.setCredentials(creds);
     const { isSignedIn, username } = await leetcodeClient.checkAuth();
 

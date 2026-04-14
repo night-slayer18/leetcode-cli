@@ -2,6 +2,7 @@
 import got, { Got } from 'got';
 import { z } from 'zod';
 import type {
+  LeetCodeSite,
   LeetCodeCredentials,
   Problem,
   ProblemDetail,
@@ -12,6 +13,7 @@ import type {
   Submission,
   SubmissionDetails,
 } from '../types.js';
+import { config } from '../storage/config.js';
 import {
   ProblemSchema,
   ProblemDetailSchema,
@@ -36,23 +38,45 @@ import {
 } from './queries.js';
 
 const LEETCODE_BASE_URL = 'https://leetcode.com';
+const LEETCODE_BASE_URL_CN = 'https://leetcode.cn';
 
 export class LeetCodeClient {
   private client: Got;
   private credentials: LeetCodeCredentials | null = null;
+  private baseUrl: string = LEETCODE_BASE_URL;
 
   constructor() {
+    this.baseUrl = config.getLeetCodeSite() === 'cn' ? LEETCODE_BASE_URL_CN : LEETCODE_BASE_URL;
     this.client = got.extend({
-      prefixUrl: LEETCODE_BASE_URL,
+      prefixUrl: this.baseUrl,
       headers: {
         'Content-Type': 'application/json',
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-        Origin: LEETCODE_BASE_URL,
-        Referer: `${LEETCODE_BASE_URL}/`,
+        Origin: this.baseUrl,
+        Referer: `${this.baseUrl}/`,
       },
       timeout: { request: 30000 },
       retry: { limit: 2 },
     });
+  }
+
+  setBaseUrl(site: LeetCodeSite): void {
+    this.baseUrl = site === 'cn' ? LEETCODE_BASE_URL_CN : LEETCODE_BASE_URL;
+    this.client = got.extend({
+      prefixUrl: this.baseUrl,
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+        Origin: this.baseUrl,
+        Referer: `${this.baseUrl}/`,
+      },
+      timeout: { request: 30000 },
+      retry: { limit: 2 },
+    });
+
+    if (this.credentials) {
+      this.setCredentials(this.credentials);
+    }
   }
 
   setCredentials(credentials: LeetCodeCredentials): void {

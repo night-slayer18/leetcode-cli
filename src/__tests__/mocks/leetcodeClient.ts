@@ -98,6 +98,7 @@ export const mockUserStats = {
 // Create mock client
 export function createMockLeetCodeClient() {
   return {
+    setBaseUrl: vi.fn(),
     setCredentials: vi.fn(),
     checkAuth: vi.fn().mockResolvedValue({ isSignedIn: true, username: 'TestUser' }),
     getProblems: vi.fn().mockResolvedValue(mockProblems),

@@ -145,9 +145,12 @@ export type SupportedLanguage =
   | 'swift'
   | 'sql';
 
+export type LeetCodeSite = 'com' | 'cn';
+
 export interface UserConfig {
   language: SupportedLanguage;
   editor?: string;
   workDir: string;
   repo?: string;
+  leetcodeSite?: LeetCodeSite;
 }

@@ -9,6 +9,7 @@ export interface WorkspaceConfig {
   lang: string;
   editor?: string;
   syncRepo?: string;
+  leetcodeSite?: 'com' | 'cn';
 }
 
 export interface WorkspaceRegistry {

@@ -1,14 +1,21 @@
 import chalk from 'chalk';
 import { leetcodeClient } from '../api/client.js';
 import * as credentialStore from '../storage/credentials.js';
+import { config } from '../storage/config.js';
 
 const { credentials } = credentialStore;
+
+function applyConfiguredSite(): void {
+  const configuredSite = config.getLeetCodeSite();
+  (leetcodeClient as { setBaseUrl?: (site: 'com' | 'cn') => void }).setBaseUrl?.(configuredSite);
+}
 
 export async function validateSession(): Promise<boolean> {
   const creds = await credentials.get();
   if (!creds) return false;
 
   try {
+    applyConfiguredSite();
     leetcodeClient.setCredentials(creds);
     const { isSignedIn } = await leetcodeClient.checkAuth();
     return isSignedIn;
@@ -35,6 +42,7 @@ export async function requireAuth(): Promise<{ authorized: boolean; username?: s
   }
 
   try {
+    applyConfiguredSite();
     leetcodeClient.setCredentials(creds);
     const { isSignedIn, username } = await leetcodeClient.checkAuth();
 
@@ -57,6 +65,7 @@ export async function setupClientIfLoggedIn(): Promise<boolean> {
     return false;
   }
 
+  applyConfiguredSite();
   leetcodeClient.setCredentials(creds);
   return true;
 }
@@ -66,6 +75,7 @@ export async function getCurrentUsername(): Promise<string | null> {
   if (!creds) return null;
 
   try {
+    applyConfiguredSite();
     leetcodeClient.setCredentials(creds);
     const { isSignedIn, username } = await leetcodeClient.checkAuth();
     return isSignedIn ? (username ?? null) : null;

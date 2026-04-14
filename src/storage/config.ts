@@ -1,6 +1,6 @@
 // Configuration management - delegates to workspace storage
 import { join } from 'path';
-import type { SupportedLanguage, UserConfig } from '../types.js';
+import type { SupportedLanguage, UserConfig, LeetCodeSite } from '../types.js';
 import { workspaceStorage } from './workspaces.js';
 
 export const config = {
@@ -11,6 +11,7 @@ export const config = {
       editor: wsConfig.editor,
       workDir: wsConfig.workDir,
       repo: wsConfig.syncRepo,
+      leetcodeSite: wsConfig.leetcodeSite,
     };
   },
 
@@ -28,6 +29,10 @@ export const config = {
 
   setRepo(repo: string): void {
     workspaceStorage.setConfig({ syncRepo: repo });
+  },
+
+  setLeetCodeSite(site: LeetCodeSite): void {
+    workspaceStorage.setConfig({ leetcodeSite: site });
   },
 
   deleteRepo(): void {
@@ -50,6 +55,11 @@ export const config = {
 
   getRepo(): string | undefined {
     return workspaceStorage.getConfig().syncRepo;
+  },
+
+  getLeetCodeSite(): LeetCodeSite {
+    const site = workspaceStorage.getConfig().leetcodeSite;
+    return site === 'cn' ? 'cn' : 'com';
   },
 
   getPath(): string {
