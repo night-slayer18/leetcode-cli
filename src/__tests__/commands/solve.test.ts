@@ -101,7 +101,11 @@ import { pickCommand, batchPickCommand } from '../../commands/pick.js';
 import { testCommand } from '../../commands/test.js';
 import { submitCommand } from '../../commands/submit.js';
 import { leetcodeClient } from '../../api/client.js';
-import { findSolutionFile, findFileByName, getLangSlugFromExtension } from '../../utils/fileUtils.js';
+import {
+  findSolutionFile,
+  findFileByName,
+  getLangSlugFromExtension,
+} from '../../utils/fileUtils.js';
 import { writeFile } from 'fs/promises';
 import { existsSync } from 'fs';
 
@@ -175,7 +179,9 @@ describe('Solve Commands', () => {
 
       it('should not create a file when problem id lookup fails', async () => {
         vi.mocked(existsSync).mockReturnValue(false);
-        vi.mocked(leetcodeClient.getProblemById).mockRejectedValueOnce(new Error('Problem #1 not found'));
+        vi.mocked(leetcodeClient.getProblemById).mockRejectedValueOnce(
+          new Error('Problem #1 not found')
+        );
 
         const result = await pickCommand('1', { open: false });
 

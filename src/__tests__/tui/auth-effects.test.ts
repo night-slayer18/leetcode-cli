@@ -175,7 +175,10 @@ describe('TUI auth effects', () => {
 
     await flushAsync();
 
-    expect(dispatched).toContainEqual({ type: 'GLOBAL_ERROR', error: 'System keychain is unavailable.' });
+    expect(dispatched).toContainEqual({
+      type: 'GLOBAL_ERROR',
+      error: 'System keychain is unavailable.',
+    });
     expect(dispatched).toContainEqual({ type: 'AUTH_CHECK_COMPLETE', user: null });
   });
 

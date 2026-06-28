@@ -36,10 +36,7 @@ export function getCodeTemplate(
   return snippets[0] ?? null;
 }
 
-export function getPremiumPlaceholderCode(
-  language: SupportedLanguage,
-  title: string
-): string {
+export function getPremiumPlaceholderCode(language: SupportedLanguage, title: string): string {
   const commentStyle = getCommentStyle(language);
   return `${commentStyle.single} Premium Problem - ${title}\n${commentStyle.single} Solution stub not available - visit LeetCode to view`;
 }

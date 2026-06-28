@@ -185,7 +185,7 @@ export function update(msg: ConfigMsg, model: ConfigScreenModel): [ConfigScreenM
             showSiteConfirm: true,
             pendingSite: model.draftValue,
           },
-          Cmd.none()
+          Cmd.none(),
         ];
       }
 
@@ -206,7 +206,7 @@ export function update(msg: ConfigMsg, model: ConfigScreenModel): [ConfigScreenM
 
     case 'CONFIG_SITE_CONFIRM': {
       if (!model.showSiteConfirm || !model.pendingSite) return [model, Cmd.none()];
-      
+
       const option = getSelectedOption(model);
       const newOptions = [...model.options];
       newOptions[model.selectedOption] = { ...option, value: model.pendingSite };
@@ -219,16 +219,13 @@ export function update(msg: ConfigMsg, model: ConfigScreenModel): [ConfigScreenM
           pendingSite: null,
           draftValue: model.pendingSite,
         },
-        Cmd.batch(
-          Cmd.saveConfig(option.id, model.pendingSite),
-          Cmd.logout()
-        ),
+        Cmd.batch(Cmd.saveConfig(option.id, model.pendingSite), Cmd.logout()),
       ];
     }
 
     case 'CONFIG_SITE_CANCEL': {
       if (!model.showSiteConfirm) return [model, Cmd.none()];
-      
+
       const option = getSelectedOption(model);
       return [
         {

@@ -173,7 +173,9 @@ function toProblemFromListEntry(question: CnProblemListItem): Problem {
   };
 }
 
-export function normalizeCnDailyChallenge(input: { todayRecord?: CnDailyRecord[] }): DailyChallenge {
+export function normalizeCnDailyChallenge(input: {
+  todayRecord?: CnDailyRecord[];
+}): DailyChallenge {
   const record = input.todayRecord?.[0];
   if (!record || !record.question) {
     throw new Error('No daily challenge found for leetcode.cn');
@@ -193,7 +195,9 @@ export function normalizeCnProblemList(input: {
 }): { total: number; problems: Problem[] } {
   return {
     total: input.problemsetQuestionList.total,
-    problems: input.problemsetQuestionList.questions.map((question) => toProblemFromListEntry(question)),
+    problems: input.problemsetQuestionList.questions.map((question) =>
+      toProblemFromListEntry(question)
+    ),
   };
 }
 
@@ -253,7 +257,8 @@ export function normalizeCnUserProfile(
     countMap.set(key, value);
   }
 
-  const all = (countMap.get('Easy') ?? 0) + (countMap.get('Medium') ?? 0) + (countMap.get('Hard') ?? 0);
+  const all =
+    (countMap.get('Easy') ?? 0) + (countMap.get('Medium') ?? 0) + (countMap.get('Hard') ?? 0);
   countMap.set('All', Math.max(countMap.get('All') ?? 0, all));
 
   return {

@@ -68,7 +68,9 @@ const OPERATION_LABEL: Record<GraphQLOperation, string> = {
 };
 
 function isSchemaMismatchError(message: string): boolean {
-  return /(cannot query field|unknown argument|unknown type|did you mean|validation error)/i.test(message);
+  return /(cannot query field|unknown argument|unknown type|did you mean|validation error)/i.test(
+    message
+  );
 }
 
 export class LeetCodeClient {
@@ -227,7 +229,11 @@ export class LeetCodeClient {
     }
 
     if (this.site === 'leetcode.cn') {
-      const data = await this.graphql<unknown>('PROBLEM_LIST', this.queries.PROBLEM_LIST_QUERY, variables);
+      const data = await this.graphql<unknown>(
+        'PROBLEM_LIST',
+        this.queries.PROBLEM_LIST_QUERY,
+        variables
+      );
       const validated = CnProblemListSchema.parse(data);
       return normalizeCnProblemList(validated);
     }
@@ -246,16 +252,24 @@ export class LeetCodeClient {
 
   async getProblem(titleSlug: string): Promise<ProblemDetail> {
     if (this.site === 'leetcode.cn') {
-      const data = await this.graphql<unknown>('PROBLEM_DETAIL', this.queries.PROBLEM_DETAIL_QUERY, {
-        titleSlug,
-      });
+      const data = await this.graphql<unknown>(
+        'PROBLEM_DETAIL',
+        this.queries.PROBLEM_DETAIL_QUERY,
+        {
+          titleSlug,
+        }
+      );
       const validated = CnProblemDetailSchema.parse(data);
       return normalizeCnProblemDetail(validated);
     }
 
-    const data = await this.graphql<{ question: ProblemDetail }>('PROBLEM_DETAIL', this.queries.PROBLEM_DETAIL_QUERY, {
-      titleSlug,
-    });
+    const data = await this.graphql<{ question: ProblemDetail }>(
+      'PROBLEM_DETAIL',
+      this.queries.PROBLEM_DETAIL_QUERY,
+      {
+        titleSlug,
+      }
+    );
 
     const validated = ProblemDetailSchema.parse(data.question);
     return validated as ProblemDetail;
@@ -294,7 +308,10 @@ export class LeetCodeClient {
 
   async getDailyChallenge(): Promise<DailyChallenge> {
     if (this.site === 'leetcode.cn') {
-      const data = await this.graphql<unknown>('DAILY_CHALLENGE', this.queries.DAILY_CHALLENGE_QUERY);
+      const data = await this.graphql<unknown>(
+        'DAILY_CHALLENGE',
+        this.queries.DAILY_CHALLENGE_QUERY
+      );
       const validated = CnDailyChallengeSchema.parse(data);
       return normalizeCnDailyChallenge(validated);
     }
@@ -376,7 +393,9 @@ export class LeetCodeClient {
     advanced: Array<{ tagName: string; tagSlug: string; problemsSolved: number }>;
   }> {
     if (this.site === 'leetcode.cn') {
-      const data = await this.graphql<unknown>('SKILL_STATS', this.queries.SKILL_STATS_QUERY, { username });
+      const data = await this.graphql<unknown>('SKILL_STATS', this.queries.SKILL_STATS_QUERY, {
+        username,
+      });
       const validated = CnSkillStatsSchema.parse(data);
       return normalizeCnSkillStats(validated);
     }
@@ -401,7 +420,11 @@ export class LeetCodeClient {
   ): Promise<Submission[]> {
     const data = await this.graphql<{
       questionSubmissionList: { submissions: Submission[] };
-    }>('SUBMISSION_LIST', this.queries.SUBMISSION_LIST_QUERY, { questionSlug: slug, limit, offset });
+    }>('SUBMISSION_LIST', this.queries.SUBMISSION_LIST_QUERY, {
+      questionSlug: slug,
+      limit,
+      offset,
+    });
 
     const validated = z.array(SubmissionSchema).parse(data.questionSubmissionList.submissions);
     return validated;

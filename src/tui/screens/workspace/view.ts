@@ -31,7 +31,15 @@ export function view(model: WorkspaceScreenModel, width: number, height: number)
 
   const bodyHeight = Math.max(3, safeHeight - lines.length - 3);
   if (safeWidth >= 90) {
-    lines.push(...splitPane(renderWorkspaceList(model, safeWidth), renderWorkspaceEditor(model, safeWidth), safeWidth, bodyHeight, 0.43));
+    lines.push(
+      ...splitPane(
+        renderWorkspaceList(model, safeWidth),
+        renderWorkspaceEditor(model, safeWidth),
+        safeWidth,
+        bodyHeight,
+        0.43
+      )
+    );
   } else {
     const topHeight = Math.max(3, Math.floor(bodyHeight * 0.45));
     const bottomHeight = Math.max(3, bodyHeight - topHeight - 1);
@@ -122,7 +130,9 @@ function renderWorkspaceEditor(model: WorkspaceScreenModel, width: number): stri
   lines.push('');
   lines.push(
     chalk.hex(colors.textMuted)(
-      model.isEditing ? 'Editing field: Enter=Save Esc=Cancel' : 'Press Enter to edit selected field'
+      model.isEditing
+        ? 'Editing field: Enter=Save Esc=Cancel'
+        : 'Press Enter to edit selected field'
     )
   );
   return lines;
@@ -156,7 +166,10 @@ function renderFooter(model: WorkspaceScreenModel, width: number): string[] {
     [
       { key: '↑/↓', label: model.paneFocus === 'list' ? 'Select workspace' : 'Select field' },
       { key: 'Tab/h/l', label: 'Switch pane' },
-      { key: 'Enter', label: model.paneFocus === 'list' ? 'Switch/Edit' : model.isEditing ? 'Save' : 'Edit' },
+      {
+        key: 'Enter',
+        label: model.paneFocus === 'list' ? 'Switch/Edit' : model.isEditing ? 'Save' : 'Edit',
+      },
       { key: 'c', label: 'Create' },
       { key: 'd', label: 'Delete' },
       { key: 'Esc', label: 'Back/Cancel' },

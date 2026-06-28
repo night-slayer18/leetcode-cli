@@ -105,7 +105,12 @@ function lockFile(path: string): void {
 }
 
 function deriveKey(masterKey: string, salt: Buffer): Buffer {
-  return scryptSync(masterKey, salt, 32, { N: 32768, r: 8, p: 1, maxmem: 128 * 1024 * 1024 }) as Buffer;
+  return scryptSync(masterKey, salt, 32, {
+    N: 32768,
+    r: 8,
+    p: 1,
+    maxmem: 128 * 1024 * 1024,
+  }) as Buffer;
 }
 
 function encryptCredentials(creds: LeetCodeCredentials, masterKey: string): EncryptedCredentialsV2 {
@@ -142,7 +147,9 @@ function decryptCredentials(
 
     const decipher = createDecipheriv('aes-256-gcm', key, iv);
     decipher.setAuthTag(tag);
-    const plaintext = Buffer.concat([decipher.update(ciphertext), decipher.final()]).toString('utf8');
+    const plaintext = Buffer.concat([decipher.update(ciphertext), decipher.final()]).toString(
+      'utf8'
+    );
     const parsed = JSON.parse(plaintext);
     return isValidCredentials(parsed) ? parsed : null;
   } catch {
@@ -160,7 +167,8 @@ function parseKeychainSecret(secret: string): LeetCodeCredentials | null {
 }
 
 function classifyKeychainError(error: unknown): CredentialStatusReason {
-  const message = error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
+  const message =
+    error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
   const unavailablePatterns = [
     'not available',
     'unsupported',
@@ -297,9 +305,10 @@ async function readFromKeychain(
   }
 }
 
-function readFromEncryptedFile(
-  envPartial: boolean
-): { status: CredentialStoreStatus; creds: LeetCodeCredentials | null } {
+function readFromEncryptedFile(envPartial: boolean): {
+  status: CredentialStoreStatus;
+  creds: LeetCodeCredentials | null;
+} {
   const masterKey = process.env['LEETCODECLI_MASTER_KEY'];
   const path = ENCRYPTED_CREDENTIALS_FILE;
 
@@ -506,7 +515,12 @@ export const credentials = {
 
     try {
       await keytar.setPassword(KEYCHAIN_SERVICE, KEYCHAIN_ACCOUNT, JSON.stringify(creds));
-      return successResult('keychain', 'keychain', null, 'Credentials saved to the system keychain.');
+      return successResult(
+        'keychain',
+        'keychain',
+        null,
+        'Credentials saved to the system keychain.'
+      );
     } catch (error) {
       const reason = classifyKeychainError(error);
       return failureResult('keychain', reason, null, explainReason(reason));
@@ -548,7 +562,12 @@ export const credentials = {
 
     try {
       await keytar.deletePassword(KEYCHAIN_SERVICE, KEYCHAIN_ACCOUNT);
-      return successResult('keychain', 'keychain', null, 'Credentials removed from the system keychain.');
+      return successResult(
+        'keychain',
+        'keychain',
+        null,
+        'Credentials removed from the system keychain.'
+      );
     } catch (error) {
       const reason = classifyKeychainError(error);
       return failureResult('keychain', reason, null, explainReason(reason));

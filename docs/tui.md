@@ -83,4 +83,3 @@ If your terminal still looks wrong after an interrupted session, run:
 ```bash
 reset
 ```
-

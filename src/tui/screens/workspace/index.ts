@@ -12,7 +12,9 @@ type EditableWorkspaceConfig = {
 
 const EDIT_FIELDS: Array<keyof EditableWorkspaceConfig> = ['lang', 'workDir', 'editor', 'syncRepo'];
 
-function toEditableConfig(config: ReturnType<typeof workspaceStorage.getConfig>): EditableWorkspaceConfig {
+function toEditableConfig(
+  config: ReturnType<typeof workspaceStorage.getConfig>
+): EditableWorkspaceConfig {
   return {
     lang: config.lang ?? '',
     workDir: config.workDir ?? '',
@@ -92,20 +94,15 @@ export function update(
   switch (msg.type) {
     case 'WORKSPACE_UP':
       if (model.isEditing) return [model, Cmd.none()];
-      return [
-        syncSelection(model, model.workspaces, model.cursor - 1),
-        Cmd.none(),
-      ];
+      return [syncSelection(model, model.workspaces, model.cursor - 1), Cmd.none()];
 
     case 'WORKSPACE_DOWN':
       if (model.isEditing) return [model, Cmd.none()];
-      return [
-        syncSelection(model, model.workspaces, model.cursor + 1),
-        Cmd.none(),
-      ];
+      return [syncSelection(model, model.workspaces, model.cursor + 1), Cmd.none()];
 
     case 'WORKSPACE_SELECT': {
-      if (model.isEditing || model.showCreateInput || model.showDeleteConfirm) return [model, Cmd.none()];
+      if (model.isEditing || model.showCreateInput || model.showDeleteConfirm)
+        return [model, Cmd.none()];
       const target = model.workspaces[model.cursor];
       if (!target) return [model, Cmd.none()];
       if (target === model.activeWorkspace) {
@@ -122,7 +119,10 @@ export function update(
     }
 
     case 'WORKSPACE_FOCUS_LIST':
-      return [{ ...model, paneFocus: 'list', isEditing: false, isDirty: false, error: null }, Cmd.none()];
+      return [
+        { ...model, paneFocus: 'list', isEditing: false, isDirty: false, error: null },
+        Cmd.none(),
+      ];
 
     case 'WORKSPACE_FOCUS_EDITOR':
       return [{ ...model, paneFocus: 'editor', error: null }, Cmd.none()];
@@ -176,7 +176,8 @@ export function update(
       ];
 
     case 'WORKSPACE_EDIT_SAVE': {
-      if (!model.isEditing || !model.selectedWorkspace || !model.draftConfig) return [model, Cmd.none()];
+      if (!model.isEditing || !model.selectedWorkspace || !model.draftConfig)
+        return [model, Cmd.none()];
       const nextDraft = {
         lang: model.draftConfig.lang.trim(),
         workDir: model.draftConfig.workDir.trim(),
@@ -230,11 +231,17 @@ export function update(
 
     case 'WORKSPACE_CREATE_INPUT':
       if (!model.showCreateInput) return [model, Cmd.none()];
-      return [{ ...model, newWorkspaceName: model.newWorkspaceName + msg.char, error: null }, Cmd.none()];
+      return [
+        { ...model, newWorkspaceName: model.newWorkspaceName + msg.char, error: null },
+        Cmd.none(),
+      ];
 
     case 'WORKSPACE_CREATE_BACKSPACE':
       if (!model.showCreateInput) return [model, Cmd.none()];
-      return [{ ...model, newWorkspaceName: model.newWorkspaceName.slice(0, -1), error: null }, Cmd.none()];
+      return [
+        { ...model, newWorkspaceName: model.newWorkspaceName.slice(0, -1), error: null },
+        Cmd.none(),
+      ];
 
     case 'WORKSPACE_CREATE_CANCEL':
       return [{ ...model, showCreateInput: false, newWorkspaceName: '', error: null }, Cmd.none()];

@@ -5,7 +5,10 @@ import { DEFAULT_LEETCODE_SITE, normalizeLeetCodeSiteInput } from '../../../util
 export { view } from './view.js';
 
 function getConfiguredSite() {
-  return normalizeLeetCodeSiteInput(config.getSite?.() ?? config.getConfig?.().site ?? '') ?? DEFAULT_LEETCODE_SITE;
+  return (
+    normalizeLeetCodeSiteInput(config.getSite?.() ?? config.getConfig?.().site ?? '') ??
+    DEFAULT_LEETCODE_SITE
+  );
 }
 
 export function init(): [LoginScreenModel, Command] {

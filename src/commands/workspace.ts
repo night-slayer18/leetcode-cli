@@ -34,7 +34,9 @@ export async function workspaceListCommand(): Promise<void> {
     const marker = ws === active ? chalk.green('▸ ') : '  ';
     const name = ws === active ? chalk.green.bold(ws) : ws;
     console.log(`${marker}${name}`);
-    console.log(`    ${chalk.gray(config.workDir)} ${chalk.gray(`(${config.site ?? 'leetcode.com'})`)}`);
+    console.log(
+      `    ${chalk.gray(config.workDir)} ${chalk.gray(`(${config.site ?? 'leetcode.com'})`)}`
+    );
   }
   console.log();
 }

@@ -445,7 +445,12 @@ export type Command =
   | { readonly type: 'CMD_SWITCH_WORKSPACE'; readonly name: string }
   | { readonly type: 'CMD_FETCH_CHANGELOG' }
   | { readonly type: 'CMD_LOGOUT' }
-  | { readonly type: 'CMD_LOGIN'; readonly session: string; readonly csrf: string; readonly site: LeetCodeSite };
+  | {
+      readonly type: 'CMD_LOGIN';
+      readonly session: string;
+      readonly csrf: string;
+      readonly site: LeetCodeSite;
+    };
 
 export const Cmd = {
   none: (): Command => ({ type: 'CMD_NONE' }),

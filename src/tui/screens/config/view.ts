@@ -24,12 +24,22 @@ export function view(model: ConfigScreenModel, width: number, height: number): s
   const safeHeight = Math.max(8, height);
   const lines: string[] = [];
 
-  lines.push(...renderScreenTitle(`${icons.gear} Configuration`, 'Workspace-local CLI settings', safeWidth));
+  lines.push(
+    ...renderScreenTitle(`${icons.gear} Configuration`, 'Workspace-local CLI settings', safeWidth)
+  );
   lines.push(chalk.hex(colors.textMuted)(borders.horizontal.repeat(safeWidth)));
 
   const bodyHeight = Math.max(3, safeHeight - lines.length - 3);
   if (safeWidth >= 90) {
-    lines.push(...splitPane(renderOptionList(model, safeWidth), renderOptionDetails(model, safeWidth), safeWidth, bodyHeight, 0.4));
+    lines.push(
+      ...splitPane(
+        renderOptionList(model, safeWidth),
+        renderOptionDetails(model, safeWidth),
+        safeWidth,
+        bodyHeight,
+        0.4
+      )
+    );
   } else {
     const topHeight = Math.max(3, Math.floor(bodyHeight * 0.4));
     const bottomHeight = Math.max(3, bodyHeight - topHeight - 1);
@@ -78,7 +88,9 @@ function renderOptionDetails(model: ConfigScreenModel, width: number): string[] 
   lines.push(renderSectionHeader('Editor', paneWidth));
   lines.push('');
   lines.push(chalk.hex(colors.primary).bold(option.label));
-  lines.push(...wrapLines([chalk.hex(colors.textMuted)(option.description)], Math.max(12, paneWidth - 2)));
+  lines.push(
+    ...wrapLines([chalk.hex(colors.textMuted)(option.description)], Math.max(12, paneWidth - 2))
+  );
   lines.push('');
 
   const rawValue = model.isEditing ? `${model.draftValue}█` : model.draftValue;

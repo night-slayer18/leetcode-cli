@@ -97,14 +97,14 @@ Config is stored per-workspace in `~/.leetcode/workspaces/<name>/config.json`.
 
 Settings are now stored per-workspace for isolation:
 
-| Data        | Storage Location                            | Scope         |
-| ----------- | ------------------------------------------- | ------------- |
-| Config      | `~/.leetcode/workspaces/<name>/config.json` | Per-workspace |
-| Timer       | `~/.leetcode/workspaces/<name>/timer.json`  | Per-workspace |
-| Collab      | `~/.leetcode/workspaces/<name>/collab.json` | Per-workspace |
-| Snapshots   | `~/.leetcode/workspaces/<name>/snapshots/`  | Per-workspace |
-| Credentials | Keychain (default) or `~/.leetcode/credentials.v2.enc.json` (file backend) | Shared |
-| Bookmarks   | `~/.leetcode/bookmarks.json`                | Shared        |
+| Data        | Storage Location                                                           | Scope         |
+| ----------- | -------------------------------------------------------------------------- | ------------- |
+| Config      | `~/.leetcode/workspaces/<name>/config.json`                                | Per-workspace |
+| Timer       | `~/.leetcode/workspaces/<name>/timer.json`                                 | Per-workspace |
+| Collab      | `~/.leetcode/workspaces/<name>/collab.json`                                | Per-workspace |
+| Snapshots   | `~/.leetcode/workspaces/<name>/snapshots/`                                 | Per-workspace |
+| Credentials | Keychain (default) or `~/.leetcode/credentials.v2.enc.json` (file backend) | Shared        |
+| Bookmarks   | `~/.leetcode/bookmarks.json`                                               | Shared        |
 
 Use `leetcode workspace current` to see which workspace is active.
 
