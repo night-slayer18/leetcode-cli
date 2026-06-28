@@ -44,6 +44,7 @@ import {
 } from './commands/workspace.js';
 import { updateCommand, checkForUpdatesOnStartup } from './commands/update.js';
 import { changelogCommand } from './commands/changelog.js';
+import { starCommand } from './commands/star.js';
 import { getSupportedLanguagesLabel } from './utils/languages.js';
 
 import { launchTUI as launchNewTUI } from './tui/index.js';
@@ -613,6 +614,18 @@ ${chalk.yellow('Examples:')}
 `
   )
   .action((version, options) => changelogCommand(version, options));
+
+program
+  .command('star')
+  .description('Open the GitHub repo to star the project')
+  .addHelpText(
+    'after',
+    `
+${chalk.yellow('Why star?')}
+  Stars help other developers discover leetcode-cli and encourage contributions.
+`
+  )
+  .action(starCommand);
 
 program.showHelpAfterError('(add --help for additional information)');
 
