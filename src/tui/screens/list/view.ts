@@ -102,7 +102,8 @@ function renderSearchBar(model: ListScreenModel, width: number): string {
     const searchBox = chalk.bgHex(colors.bgHighlight).hex(colors.textBright)(
       ` ${buffer}${cursor} `.padEnd(boxWidth)
     );
-    const hint = width > 60 ? chalk.hex(colors.textMuted)('  (Enter to search, Esc to cancel)') : '';
+    const hint =
+      width > 60 ? chalk.hex(colors.textMuted)('  (Enter to search, Esc to cancel)') : '';
     return prefix + searchBox + hint;
   }
 
@@ -179,18 +180,17 @@ function renderFilters(model: ListScreenModel, width: number): string {
 
 function renderTableHeader(width: number): string {
   const cols = getTableColumns(width);
-  const titleWidth =
-    Math.max(
-      8,
-      width -
-    cols.selector -
-    cols.status -
-    cols.id -
-    cols.difficulty -
-    cols.acceptance -
-    cols.premium -
+  const titleWidth = Math.max(
+    8,
+    width -
+      cols.selector -
+      cols.status -
+      cols.id -
+      cols.difficulty -
+      cols.acceptance -
+      cols.premium -
       6
-    );
+  );
 
   const sections = [
     '  ' + padEnd('', cols.selector) + padEnd('', cols.status) + padEnd('ID', cols.id),
@@ -211,18 +211,17 @@ function renderTableHeader(width: number): string {
 
 function renderProblemRow(problem: Problem, isSelected: boolean, width: number): string {
   const cols = getTableColumns(width);
-  const titleWidth =
-    Math.max(
-      8,
-      width -
-    cols.selector -
-    cols.status -
-    cols.id -
-    cols.difficulty -
-    cols.acceptance -
-    cols.premium -
+  const titleWidth = Math.max(
+    8,
+    width -
+      cols.selector -
+      cols.status -
+      cols.id -
+      cols.difficulty -
+      cols.acceptance -
+      cols.premium -
       6
-    );
+  );
 
   const selector = isSelected ? chalk.hex(colors.primary).bold('▶ ') : '  ';
 
@@ -245,7 +244,8 @@ function renderProblemRow(problem: Problem, isSelected: boolean, width: number):
       : problem.difficulty === 'Medium'
         ? colors.warning
         : colors.error;
-  const diff = cols.difficulty > 0 ? chalk.hex(diffColor)(padEnd(problem.difficulty, cols.difficulty)) : '';
+  const diff =
+    cols.difficulty > 0 ? chalk.hex(diffColor)(padEnd(problem.difficulty, cols.difficulty)) : '';
   const acc =
     cols.acceptance > 0
       ? chalk.hex(colors.textMuted)(padStart(`${Math.round(problem.acRate)}%`, cols.acceptance))
@@ -289,7 +289,8 @@ function renderListFooter(model: ListScreenModel, width: number): string {
     keyHint('b', 'Bookmarks'),
     keyHint('↵', 'Open'),
   ];
-  const rightPart = width < 70 ? `${keyHint('j/k', 'Move')}  ${keyHint('↵', 'Open')}` : hints.join('  ');
+  const rightPart =
+    width < 70 ? `${keyHint('j/k', 'Move')}  ${keyHint('↵', 'Open')}` : hints.join('  ');
 
   const padding = width - stripAnsi(leftPart + moreInfo).length - stripAnsi(rightPart).length;
   return leftPart + moreInfo + (padding > 0 ? ' '.repeat(padding) : '  ') + rightPart;

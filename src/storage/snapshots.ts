@@ -86,7 +86,9 @@ export const snapshotStorage = {
     // Generate name if not provided
     const snapshotName = (name ?? `snapshot-${nextId}`).trim();
     if (!isValidSnapshotName(snapshotName)) {
-      return { error: 'Invalid snapshot name. Use 1-64 characters: letters, numbers, spaces, "-" or "_".' };
+      return {
+        error: 'Invalid snapshot name. Use 1-64 characters: letters, numbers, spaces, "-" or "_".',
+      };
     }
 
     // Check for duplicate name

@@ -9,6 +9,7 @@ import { requireAuth } from '../utils/auth.js';
 import { config } from '../storage/config.js';
 import { timerStorage } from '../storage/timer.js';
 import { displaySubmissionResult } from '../utils/display.js';
+import { maybeShowStarPrompt } from '../utils/star-prompt.js';
 import { findSolutionFile, findFileByName, getLangSlugFromExtension } from '../utils/fileUtils.js';
 import { isProblemId, isFileName, isPathInsideWorkDir } from '../utils/validation.js';
 
@@ -106,6 +107,8 @@ export async function submitCommand(fileOrId: string): Promise<void> {
 
     // Record timer if active and submission was accepted
     if (result.status_msg === 'Accepted') {
+      await maybeShowStarPrompt('accepted');
+
       const activeTimer = timerStorage.getActiveTimer();
       if (activeTimer && activeTimer.problemId === problemId) {
         const timerResult = timerStorage.stopTimer();

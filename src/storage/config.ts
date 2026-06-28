@@ -59,7 +59,9 @@ export const config = {
   },
 
   getSite(): LeetCodeSite {
-    return normalizeLeetCodeSiteInput(workspaceStorage.getConfig().site ?? '') ?? DEFAULT_LEETCODE_SITE;
+    return (
+      normalizeLeetCodeSiteInput(workspaceStorage.getConfig().site ?? '') ?? DEFAULT_LEETCODE_SITE
+    );
   },
 
   getPath(): string {

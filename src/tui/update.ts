@@ -673,19 +673,25 @@ function handleProblemKeyPress(model: AppModel, msg: AppMsg): [AppModel, Command
       else if (key.name === 'd') problemMsg = { type: 'PROBLEM_DIFF_SNAPSHOT' };
       else if (key.name === 'r') problemMsg = { type: 'PROBLEM_RESTORE_SNAPSHOT' };
     } else if (problemModel.drawerMode === 'hint') {
-      if (key.name === 'j' || key.name === 'down') problemMsg = { type: 'PROBLEM_HINT_SCROLL_DOWN' };
-      else if (key.name === 'k' || key.name === 'up') problemMsg = { type: 'PROBLEM_HINT_SCROLL_UP' };
+      if (key.name === 'j' || key.name === 'down')
+        problemMsg = { type: 'PROBLEM_HINT_SCROLL_DOWN' };
+      else if (key.name === 'k' || key.name === 'up')
+        problemMsg = { type: 'PROBLEM_HINT_SCROLL_UP' };
     } else if (problemModel.drawerMode === 'submissions') {
       if (key.name === 'j' || key.name === 'down')
         problemMsg = { type: 'PROBLEM_SUBMISSIONS_SCROLL_DOWN' };
       else if (key.name === 'k' || key.name === 'up')
         problemMsg = { type: 'PROBLEM_SUBMISSIONS_SCROLL_UP' };
     } else if (problemModel.drawerMode === 'note') {
-      if (key.name === 'j' || key.name === 'down') problemMsg = { type: 'PROBLEM_NOTE_SCROLL_DOWN' };
-      else if (key.name === 'k' || key.name === 'up') problemMsg = { type: 'PROBLEM_NOTE_SCROLL_UP' };
+      if (key.name === 'j' || key.name === 'down')
+        problemMsg = { type: 'PROBLEM_NOTE_SCROLL_DOWN' };
+      else if (key.name === 'k' || key.name === 'up')
+        problemMsg = { type: 'PROBLEM_NOTE_SCROLL_UP' };
     } else if (problemModel.drawerMode === 'diff') {
-      if (key.name === 'j' || key.name === 'down') problemMsg = { type: 'PROBLEM_DIFF_SCROLL_DOWN' };
-      else if (key.name === 'k' || key.name === 'up') problemMsg = { type: 'PROBLEM_DIFF_SCROLL_UP' };
+      if (key.name === 'j' || key.name === 'down')
+        problemMsg = { type: 'PROBLEM_DIFF_SCROLL_DOWN' };
+      else if (key.name === 'k' || key.name === 'up')
+        problemMsg = { type: 'PROBLEM_DIFF_SCROLL_UP' };
     }
   }
 
@@ -723,9 +729,7 @@ function handleProblemKeyPress(model: AppModel, msg: AppMsg): [AppModel, Command
   return [model, Cmd.none()];
 }
 
-function mapProblemGlobalAction(
-  keyName: string
-): import('./types.js').ProblemMsg | null {
+function mapProblemGlobalAction(keyName: string): import('./types.js').ProblemMsg | null {
   if (keyName === 'p') return { type: 'PROBLEM_PICK' };
   if (keyName === 't') return { type: 'PROBLEM_TEST' };
   if (keyName === 's') return { type: 'PROBLEM_SUBMIT' };
@@ -787,7 +791,7 @@ function handleGenericKeyPress(model: AppModel, msg: AppMsg): [AppModel, Command
     } else if (key.name === 'left') {
       configMsg = { type: 'CONFIG_FOCUS_LIST' };
     } else if (key.name === 'right') {
-       configMsg = { type: 'CONFIG_FOCUS_EDITOR' };
+      configMsg = { type: 'CONFIG_FOCUS_EDITOR' };
     } else {
       if (key.name === 'j' || key.name === 'down') configMsg = { type: 'CONFIG_OPTION_DOWN' };
       else if (key.name === 'k' || key.name === 'up') configMsg = { type: 'CONFIG_OPTION_UP' };
@@ -915,7 +919,8 @@ function handleWorkspaceKeyPress(model: AppModel, msg: AppMsg): [AppModel, Comma
     } else {
       if (key.name === 'j' || key.name === 'down') wsMsg = { type: 'WORKSPACE_FIELD_DOWN' };
       else if (key.name === 'k' || key.name === 'up') wsMsg = { type: 'WORKSPACE_FIELD_UP' };
-      else if (key.name === 'return' || key.name === 'enter') wsMsg = { type: 'WORKSPACE_EDIT_START' };
+      else if (key.name === 'return' || key.name === 'enter')
+        wsMsg = { type: 'WORKSPACE_EDIT_START' };
     }
   }
 
@@ -976,7 +981,13 @@ function handleLoginKeyPress(model: AppModel, msg: AppMsg): [AppModel, Command] 
   } else if (loginModel.step === 'site') {
     if (key.name === 'escape') {
       return updateLogin(model, { type: 'LOGIN_BACK' });
-    } else if (key.name === 'tab' || key.name === 'down' || key.name === 'up' || key.name === 'left' || key.name === 'right') {
+    } else if (
+      key.name === 'tab' ||
+      key.name === 'down' ||
+      key.name === 'up' ||
+      key.name === 'left' ||
+      key.name === 'right'
+    ) {
       return updateLogin(model, { type: 'LOGIN_SWITCH_SITE' });
     } else if (key.name === 'return' || key.name === 'enter') {
       return updateLogin(model, { type: 'LOGIN_SUBMIT' });

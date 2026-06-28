@@ -88,7 +88,9 @@ describe('credentials storage resolver', () => {
 
   it('should use keychain backend by default', async () => {
     const { credentials } = await loadCredentialsModule();
-    keytarMock.getPassword.mockResolvedValue(JSON.stringify({ session: 'kc-session', csrfToken: 'kc-csrf' }));
+    keytarMock.getPassword.mockResolvedValue(
+      JSON.stringify({ session: 'kc-session', csrfToken: 'kc-csrf' })
+    );
 
     await expect(credentials.get()).resolves.toEqual({
       session: 'kc-session',

@@ -44,6 +44,7 @@ See [TUI Guide](tui.md) for complete behavior and screen-specific shortcuts.
 Login to LeetCode with browser cookies.
 
 Notes:
+
 - `leetcode login` lets you choose site (`leetcode.com` or `leetcode.cn`) before cookie input.
 - Default credential backend is system keychain.
 - Set `LEETCODECLI_CREDENTIAL_BACKEND=file` with `LEETCODECLI_MASTER_KEY` for encrypted file mode.
@@ -58,6 +59,7 @@ Notes:
 Clear stored credentials.
 
 Note:
+
 - In env auth mode (`LEETCODE_SESSION` + `LEETCODE_CSRF_TOKEN`), unset env vars in your shell to log out.
 
 **Usage**: `leetcode logout`
@@ -922,6 +924,20 @@ leetcode changelog 2.0.0
 # Show only breaking changes
 leetcode changelog --breaking
 ```
+
+---
+
+## Star the Project
+
+### `leetcode star`
+
+Open the GitHub repository to star the project.
+
+**Usage**: `leetcode star`
+
+Stars help other developers discover leetcode-cli and encourage contributions.
+
+> **Note**: The CLI also shows a non-intrusive star prompt after accepted submissions at milestones (10th, 20th, 30th) and then every 40 submissions. The prompt resets every 30 days and can be permanently dismissed.
 
 ---
 

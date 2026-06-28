@@ -196,15 +196,30 @@ describe('TUI Problem Screen', () => {
     }
     expect(hintModel.activeHintIndex).toBe(0);
 
-    const [snapshotsOpen] = ProblemScreen.update({ type: 'PROBLEM_SHOW_SNAPSHOTS' }, hintModel, 32, 120);
+    const [snapshotsOpen] = ProblemScreen.update(
+      { type: 'PROBLEM_SHOW_SNAPSHOTS' },
+      hintModel,
+      32,
+      120
+    );
     let snapshotsModel = snapshotsOpen;
     for (let i = 0; i < 10; i++) {
-      [snapshotsModel] = ProblemScreen.update({ type: 'PROBLEM_SNAPSHOT_DOWN' }, snapshotsModel, 32, 120);
+      [snapshotsModel] = ProblemScreen.update(
+        { type: 'PROBLEM_SNAPSHOT_DOWN' },
+        snapshotsModel,
+        32,
+        120
+      );
     }
     expect(snapshotsModel.snapshotCursor).toBe(mockSnapshots.length - 1);
 
     for (let i = 0; i < 10; i++) {
-      [snapshotsModel] = ProblemScreen.update({ type: 'PROBLEM_SNAPSHOT_UP' }, snapshotsModel, 32, 120);
+      [snapshotsModel] = ProblemScreen.update(
+        { type: 'PROBLEM_SNAPSHOT_UP' },
+        snapshotsModel,
+        32,
+        120
+      );
     }
     expect(snapshotsModel.snapshotCursor).toBe(0);
   });

@@ -20,9 +20,7 @@ describe('languages utility', () => {
   it('should resolve sql dialect from snippets with mysql fallback', () => {
     expect(resolveSqlDialectLangSlug()).toBe('mysql');
 
-    const mssql = resolveSqlDialectLangSlug([
-      { lang: 'MS SQL Server', langSlug: 'mssql' },
-    ]);
+    const mssql = resolveSqlDialectLangSlug([{ lang: 'MS SQL Server', langSlug: 'mssql' }]);
     expect(mssql).toBe('mssql');
   });
 

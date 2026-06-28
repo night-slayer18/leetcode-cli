@@ -34,7 +34,10 @@ export function view(model: LoginScreenModel, width: number, height: number): st
       '',
       '1. Continue to choose your LeetCode site',
       '2. We will show the correct cookie domain on the next screen',
-      '3. Copy the values of ' + chalk.bold.cyan('LEETCODE_SESSION') + ' and ' + chalk.bold.cyan('csrftoken'),
+      '3. Copy the values of ' +
+        chalk.bold.cyan('LEETCODE_SESSION') +
+        ' and ' +
+        chalk.bold.cyan('csrftoken'),
       '',
       'Default storage: system keychain.',
       'Use LEETCODECLI_CREDENTIAL_BACKEND=file + LEETCODECLI_MASTER_KEY for encrypted file mode.',
@@ -116,7 +119,9 @@ export function view(model: LoginScreenModel, width: number, height: number): st
     );
 
     boxLines.push('');
-    boxLines.push(chalk.gray(`Cookie source: https://${domain} → DevTools → Application → Cookies → ${domain}`));
+    boxLines.push(
+      chalk.gray(`Cookie source: https://${domain} → DevTools → Application → Cookies → ${domain}`)
+    );
     boxLines.push('');
     if (model.error) {
       boxLines.push(center(chalk.red(model.error), contentWidth - 4));

@@ -93,7 +93,10 @@ export function update(
       return [{ ...model, scrollOffset: Math.max(0, model.scrollOffset - 1) }, Cmd.none()];
 
     case 'PROBLEM_SCROLL_DOWN':
-      return [{ ...model, scrollOffset: Math.min(bodyMaxScroll, model.scrollOffset + 1) }, Cmd.none()];
+      return [
+        { ...model, scrollOffset: Math.min(bodyMaxScroll, model.scrollOffset + 1) },
+        Cmd.none(),
+      ];
 
     case 'PROBLEM_PAGE_UP': {
       const page = Math.max(3, Math.floor(getBodyHeight(terminalHeight, model.drawerMode) * 0.8));
@@ -279,7 +282,10 @@ export function update(
     }
 
     case 'PROBLEM_HINT_SCROLL_UP':
-      return [{ ...model, drawerScrollOffset: Math.max(0, model.drawerScrollOffset - 1) }, Cmd.none()];
+      return [
+        { ...model, drawerScrollOffset: Math.max(0, model.drawerScrollOffset - 1) },
+        Cmd.none(),
+      ];
 
     case 'PROBLEM_HINT_SCROLL_DOWN':
       return [
@@ -359,7 +365,10 @@ export function update(
       return [closeDrawer(model), Cmd.none()];
 
     case 'PROBLEM_SUBMISSIONS_SCROLL_UP':
-      return [{ ...model, drawerScrollOffset: Math.max(0, model.drawerScrollOffset - 1) }, Cmd.none()];
+      return [
+        { ...model, drawerScrollOffset: Math.max(0, model.drawerScrollOffset - 1) },
+        Cmd.none(),
+      ];
 
     case 'PROBLEM_SUBMISSIONS_SCROLL_DOWN':
       return [
@@ -428,7 +437,10 @@ export function update(
       return [closeDrawer(model), Cmd.none()];
 
     case 'PROBLEM_NOTE_SCROLL_UP':
-      return [{ ...model, drawerScrollOffset: Math.max(0, model.drawerScrollOffset - 1) }, Cmd.none()];
+      return [
+        { ...model, drawerScrollOffset: Math.max(0, model.drawerScrollOffset - 1) },
+        Cmd.none(),
+      ];
 
     case 'PROBLEM_NOTE_SCROLL_DOWN':
       return [
@@ -463,7 +475,10 @@ export function update(
       return [closeDrawer(model), Cmd.none()];
 
     case 'PROBLEM_DIFF_SCROLL_UP':
-      return [{ ...model, drawerScrollOffset: Math.max(0, model.drawerScrollOffset - 1) }, Cmd.none()];
+      return [
+        { ...model, drawerScrollOffset: Math.max(0, model.drawerScrollOffset - 1) },
+        Cmd.none(),
+      ];
 
     case 'PROBLEM_DIFF_SCROLL_DOWN':
       return [
@@ -556,16 +571,23 @@ function getDrawerRows(model: ProblemScreenModel, drawerWidth: number): string[]
     }
 
     case 'note':
-      return wrapLines(formatNotePreview(model.noteContent || 'No notes found. Press e to edit.'), contentWidth);
+      return wrapLines(
+        formatNotePreview(model.noteContent || 'No notes found. Press e to edit.'),
+        contentWidth
+      );
 
     case 'diff':
-      return (model.diffContent || 'No diff available.').split('\n').map((line) => sanitizeText(line));
+      return (model.diffContent || 'No diff available.')
+        .split('\n')
+        .map((line) => sanitizeText(line));
 
     case 'testResult': {
       const result = model.testResult;
       if (!result) return ['No test result available.'];
-      if (result.compile_error) return ['Compile Error', ...wrapLines([result.compile_error], contentWidth)];
-      if (result.runtime_error) return ['Runtime Error', ...wrapLines([result.runtime_error], contentWidth)];
+      if (result.compile_error)
+        return ['Compile Error', ...wrapLines([result.compile_error], contentWidth)];
+      if (result.runtime_error)
+        return ['Runtime Error', ...wrapLines([result.runtime_error], contentWidth)];
       if (result.correct_answer) return ['All test cases passed'];
       return ['Wrong answer'];
     }

@@ -128,10 +128,7 @@ function renderDrawer(model: ProblemScreenModel, width: number, height: number):
   const visible = rows.slice(offset, offset + available);
 
   const lines: string[] = [
-    renderSectionHeader(
-      model.focusRegion === 'drawer' ? `${title} • Focused` : title,
-      width
-    ),
+    renderSectionHeader(model.focusRegion === 'drawer' ? `${title} • Focused` : title, width),
   ];
 
   lines.push(...visible.map((line) => truncate(line, width)));
@@ -161,17 +158,32 @@ function renderSnapshotsDrawer(model: ProblemScreenModel, width: number, height:
       const name = truncate(snap.name, 20).padEnd(20);
       const lang = truncate(snap.language, 10).padEnd(10);
       const row = `${pointer} ${String(snap.id).padStart(3)} ${name} ${lang} ${String(snap.lines).padStart(4)}L`;
-      lines.push(selected ? chalk.bgHex(colors.bgHighlight)(truncate(row, width).padEnd(Math.max(0, width - 1))) : row);
+      lines.push(
+        selected
+          ? chalk.bgHex(colors.bgHighlight)(truncate(row, width).padEnd(Math.max(0, width - 1)))
+          : row
+      );
     }
   }
 
   while (lines.length < height - 1) lines.push('');
-  lines.push(chalk.hex(colors.textMuted)(truncate(`${keyHint('j/k', 'Move')}  ${keyHint('d/r', 'Diff/Restore')}  ${keyHint('V/Esc', 'Close')}`, width)));
+  lines.push(
+    chalk.hex(colors.textMuted)(
+      truncate(
+        `${keyHint('j/k', 'Move')}  ${keyHint('d/r', 'Diff/Restore')}  ${keyHint('V/Esc', 'Close')}`,
+        width
+      )
+    )
+  );
 
   return lines.slice(0, height);
 }
 
-function getDrawerRows(model: ProblemScreenModel, mode: ProblemDrawerMode, width: number): string[] {
+function getDrawerRows(
+  model: ProblemScreenModel,
+  mode: ProblemDrawerMode,
+  width: number
+): string[] {
   const contentWidth = Math.max(10, width - 2);
 
   switch (mode) {
@@ -180,7 +192,9 @@ function getDrawerRows(model: ProblemScreenModel, mode: ProblemDrawerMode, width
       const index = model.activeHintIndex ?? 0;
       const raw = hints[index] ?? 'No hints available';
       const clean = sanitize(raw);
-      const header = chalk.hex(colors.primary).bold(`Hint ${index + 1}/${Math.max(1, hints.length)}`);
+      const header = chalk
+        .hex(colors.primary)
+        .bold(`Hint ${index + 1}/${Math.max(1, hints.length)}`);
       return [header, ...wrapLines([clean || 'No hint content'], contentWidth)];
     }
 
@@ -206,7 +220,10 @@ function getDrawerRows(model: ProblemScreenModel, mode: ProblemDrawerMode, width
     }
 
     case 'note':
-      return wrapLines(formatNotePreview(model.noteContent || 'No notes found. Press e to edit.'), contentWidth);
+      return wrapLines(
+        formatNotePreview(model.noteContent || 'No notes found. Press e to edit.'),
+        contentWidth
+      );
 
     case 'diff': {
       const content = model.diffContent || 'No diff available.';
@@ -255,14 +272,13 @@ function getDrawerRows(model: ProblemScreenModel, mode: ProblemDrawerMode, width
         model.successMessage ||
         model.error ||
         (model.isRunning ? 'Working...' : 'Ready');
-      const color =
-        model.error
-          ? colors.error
-          : model.successMessage
-            ? colors.success
-            : model.isRunning
-              ? colors.primary
-              : colors.textMuted;
+      const color = model.error
+        ? colors.error
+        : model.successMessage
+          ? colors.success
+          : model.isRunning
+            ? colors.primary
+            : colors.textMuted;
       return wrapLines([message], contentWidth).map((line) => chalk.hex(color)(line));
     }
 
@@ -382,7 +398,12 @@ function formatNotePreview(content: string): string[] {
   return lines.length > 0 ? lines : ['No notes found. Press e to edit.'];
 }
 
-function renderCenterMessage(message: string, width: number, height: number, color: string): string {
+function renderCenterMessage(
+  message: string,
+  width: number,
+  height: number,
+  color: string
+): string {
   const lines: string[] = [];
   const top = Math.max(0, Math.floor(height / 2) - 1);
   for (let i = 0; i < top; i++) lines.push('');

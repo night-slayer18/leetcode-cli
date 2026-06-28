@@ -57,7 +57,9 @@ export async function loginCommand(): Promise<void> {
 
     const envCreds = await credentials.get();
     if (!envCreds) {
-      console.log(chalk.yellow('Environment credential mode is active but credentials are unavailable.'));
+      console.log(
+        chalk.yellow('Environment credential mode is active but credentials are unavailable.')
+      );
       return;
     }
 
@@ -73,7 +75,9 @@ export async function loginCommand(): Promise<void> {
       }
 
       spinner.succeed(`Logged in as ${chalk.green(username)}`);
-      console.log(chalk.gray('Environment credential mode is read-only. Nothing was written to disk.'));
+      console.log(
+        chalk.gray('Environment credential mode is read-only. Nothing was written to disk.')
+      );
       return;
     } catch (error) {
       spinner.fail('Authentication failed');

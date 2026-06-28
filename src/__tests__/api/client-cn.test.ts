@@ -6,21 +6,21 @@ describe('LeetCodeClient cn getProblemById', () => {
     const client = new LeetCodeClient('leetcode.cn');
 
     const getProblemsSpy = vi.spyOn(client, 'getProblems').mockResolvedValueOnce({
-        total: 1,
-        problems: [
-          {
-            questionId: '1',
-            questionFrontendId: '1',
-            title: '两数之和',
-            titleSlug: 'two-sum',
-            difficulty: 'Easy',
-            isPaidOnly: false,
-            acRate: 52.3,
-            topicTags: [],
-            status: 'ac',
-          },
-        ],
-      });
+      total: 1,
+      problems: [
+        {
+          questionId: '1',
+          questionFrontendId: '1',
+          title: '两数之和',
+          titleSlug: 'two-sum',
+          difficulty: 'Easy',
+          isPaidOnly: false,
+          acRate: 52.3,
+          topicTags: [],
+          status: 'ac',
+        },
+      ],
+    });
 
     const getProblemSpy = vi.spyOn(client, 'getProblem').mockResolvedValue({
       questionId: '1',

@@ -123,7 +123,9 @@ describe('cn adapters', () => {
         acRate: '52.3',
         status: 'AC',
         topicTags: [{ name: 'Array', slug: 'array', translatedName: '数组' }],
-        codeSnippets: [{ lang: 'TypeScript', langSlug: 'typescript', code: 'function twoSum() {}' }],
+        codeSnippets: [
+          { lang: 'TypeScript', langSlug: 'typescript', code: 'function twoSum() {}' },
+        ],
         sampleTestCase: '[2,7,11,15]\n9',
         exampleTestcases: '[2,7,11,15]\n9',
         hints: ['Use a hash map.'],

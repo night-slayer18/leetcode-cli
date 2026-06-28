@@ -44,4 +44,3 @@ export function computeProblemViewport(
 
   return { bodyHeight, drawerHeight };
 }
-

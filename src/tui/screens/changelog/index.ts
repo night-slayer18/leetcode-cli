@@ -36,7 +36,10 @@ export function update(
 
     case 'CHANGELOG_FETCH_SUCCESS':
       const entries = parseReleases(msg.content);
-      return [{ ...model, loading: false, entries: entries, error: null, scrollOffset: 0 }, Cmd.none()];
+      return [
+        { ...model, loading: false, entries: entries, error: null, scrollOffset: 0 },
+        Cmd.none(),
+      ];
 
     case 'CHANGELOG_FETCH_ERROR':
       return [{ ...model, loading: false, error: msg.error }, Cmd.none()];

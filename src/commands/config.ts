@@ -78,15 +78,19 @@ export async function configCommand(options: ConfigOptions): Promise<void> {
             default: false,
           },
         ]);
-        
+
         if (!confirm.proceed) {
           console.log(chalk.gray('Change aborted. Staying on ' + currentSite));
           return;
         }
       }
-      
+
       await credentials.clear();
-      console.log(chalk.yellow(`⚠️  Logged out — run "leetcode login" to authenticate with ${normalizedSite}.`));
+      console.log(
+        chalk.yellow(
+          `⚠️  Logged out — run "leetcode login" to authenticate with ${normalizedSite}.`
+        )
+      );
     }
 
     config.setSite(normalizedSite);
@@ -159,12 +163,14 @@ export async function configInteractiveCommand(): Promise<void> {
         default: false,
       },
     ]);
-    
+
     if (confirm.proceed) {
       config.setSite(answers.site);
       await credentials.clear();
       console.log();
-      console.log(chalk.yellow(`⚠️  Logged out — run "leetcode login" to authenticate with ${answers.site}.`));
+      console.log(
+        chalk.yellow(`⚠️  Logged out — run "leetcode login" to authenticate with ${answers.site}.`)
+      );
     } else {
       console.log();
       console.log(chalk.gray('Site change aborted. Staying on ' + currentSite));
