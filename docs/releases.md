@@ -1,5 +1,30 @@
 # Release Notes
 
+## v3.2.0
+
+> **Release Date**: 2026-06-28
+> **Focus**: Community Engagement + Security
+
+### ⭐ Star Prompt & Command
+
+- New `leetcode star` command — opens the GitHub repo directly.
+- Non-intrusive star prompt after accepted submissions:
+  - **Milestones**: Shows at 10th, 20th, and 30th accepted submission (one-time each).
+  - **Recurring**: After all milestones, shows every 40 accepted submissions.
+  - **30-day reset**: Recurring counter resets if 30 days pass without reaching the threshold.
+  - **Dismissible**: Choose "Don't ask again" to permanently disable.
+  - Falls back to a passive one-liner in non-TTY environments.
+
+### 🔒 Security
+
+- Fixed high-severity dependency vulnerabilities (PR [#12](https://github.com/night-slayer18/leetcode-cli/pull/12)).
+
+### 🧹 Code Quality
+
+- Applied consistent formatting across the entire codebase (line wrapping, argument alignment).
+
+---
+
 ## v3.1.0
 
 > **Release Date**: 2026-05-01

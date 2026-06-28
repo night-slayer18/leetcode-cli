@@ -927,6 +927,20 @@ leetcode changelog --breaking
 
 ---
 
+## Star the Project
+
+### `leetcode star`
+
+Open the GitHub repository to star the project.
+
+**Usage**: `leetcode star`
+
+Stars help other developers discover leetcode-cli and encourage contributions.
+
+> **Note**: The CLI also shows a non-intrusive star prompt after accepted submissions at milestones (10th, 20th, 30th) and then every 40 submissions. The prompt resets every 30 days and can be permanently dismissed.
+
+---
+
 ## Global Options
 
 These work with any command:
