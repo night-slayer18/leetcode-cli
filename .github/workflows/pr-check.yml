@@ -1,0 +1,148 @@
+name: PR Review
+
+on:
+  pull_request:
+    branches: [main, dev]
+    types: [opened, edited, synchronize, reopened]
+  pull_request_target:
+    branches: [main, dev]
+    types: [opened]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  # ── 1. Validate PR title follows Conventional Commits ─────────────────────
+  lint-pr-title:
+    name: Lint PR Title
+    runs-on: ubuntu-latest
+    steps:
+      - uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            test
+            refactor
+            style
+            chore
+            ci
+            perf
+          requireScope: false
+          subjectPattern: ^(?![A-Z]).+$
+          subjectPatternError: |
+            The PR title "{subject}" should start with a lowercase letter.
+            Example: "feat: add dark mode" not "feat: Add dark mode"
+
+  # ── 2. Check PR description is not empty ──────────────────────────────────
+  check-pr-description:
+    name: Check PR Description
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check description is not empty
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const body = context.payload.pull_request.body;
+            if (!body || body.trim().length < 20) {
+              core.setFailed(
+                'PR description is too short or empty. ' +
+                'Please describe what this PR does and why. ' +
+                'See CONTRIBUTING.md for guidelines.'
+              );
+            }
+
+  # ── 3. Auto-label PRs based on conventional commit prefix ─────────────────
+  auto-label:
+    name: Auto Label
+    runs-on: ubuntu-latest
+    steps:
+      - name: Apply label based on PR title prefix
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const title = context.payload.pull_request.title || '';
+            const pr = context.payload.pull_request.number;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            const labelMap = {
+              'feat':     'enhancement',
+              'fix':      'bug',
+              'docs':     'documentation',
+              'test':     'testing',
+              'refactor': 'refactor',
+              'style':    'style',
+              'chore':    'chore',
+              'ci':       'ci/cd',
+              'perf':     'performance',
+            };
+
+            const match = title.match(/^(\w+)(?:\(.+\))?!?:/);
+            if (!match) return;
+
+            const label = labelMap[match[1]];
+            if (!label) return;
+
+            // Create label if it doesn't exist, then apply it
+            try {
+              await github.rest.issues.getLabel({ owner, repo, name: label });
+            } catch {
+              const colors = {
+                'enhancement':  '84b6eb',
+                'bug':          'ee0701',
+                'documentation':'0075ca',
+                'testing':      'bfd4f2',
+                'refactor':     'e4e669',
+                'style':        'fef2c0',
+                'chore':        'c2e0c6',
+                'ci/cd':        'f9d0c4',
+                'performance':  'cfd3d7',
+              };
+              await github.rest.issues.createLabel({
+                owner, repo, name: label,
+                color: colors[label] || 'ededed',
+              });
+            }
+
+            await github.rest.issues.addLabels({
+              owner, repo, issue_number: pr, labels: [label],
+            });
+
+  # ── 4. Post a helpful checklist comment on first-time PR open ─────────────
+  welcome-comment:
+    name: Post Contribution Checklist
+    runs-on: ubuntu-latest
+    if: github.event.action == 'opened'
+    steps:
+      - name: Post checklist comment
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const author = context.payload.pull_request.user.login;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: `Thanks for the PR, @${author}! 🎉
+
+            Before this gets reviewed, please make sure the following are checked:
+
+            - [ ] Tests pass locally (\`npm test\`)
+            - [ ] Type check passes (\`npm run typecheck\`)
+            - [ ] Lint passes (\`npm run lint\`)
+            - [ ] New features include tests
+            - [ ] Documentation updated if needed
+            - [ ] PR targets the \`dev\` branch (not \`main\`)
+
+            > See [CONTRIBUTING.md](https://github.com/night-slayer18/leetcode-cli/blob/dev/CONTRIBUTING.md) for full guidelines.
+
+            The CI pipeline will also run build, test, lint, and typecheck automatically.`
+            });
