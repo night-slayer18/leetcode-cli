@@ -17,14 +17,14 @@ jobs:
 
     steps:
       - name: Checkout dev
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: dev
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: npm
