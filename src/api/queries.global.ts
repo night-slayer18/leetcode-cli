@@ -169,6 +169,13 @@ export const SUBMISSION_DETAILS_QUERY = `
   query submissionDetails($submissionId: Int!) {
     submissionDetails(submissionId: $submissionId) {
       code
+      runtime
+      runtimeDisplay
+      runtimePercentile
+      memory
+      memoryDisplay
+      memoryPercentile
+      statusDisplay
       lang {
         name
       }

@@ -4,6 +4,7 @@ import chalk from 'chalk';
 import inquirer from 'inquirer';
 import ora from 'ora';
 import { config } from '../storage/config.js';
+import { leetcodeClient } from '../api/client.js';
 import path from 'path';
 
 function sanitizeRepoName(name: string): string {
@@ -205,13 +206,57 @@ export async function syncCommand(): Promise<void> {
     // Add
     execSync('git add .', { cwd: workDir });
 
-    // Commit with argument vector to avoid shell interpolation issues.
     const lines = status.trim().split('\n');
     const count = lines.length;
     const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
-    const message = `Sync: ${count} solutions - ${timestamp}`;
+    
+    // Fetch stats for all changed solution files.
+    // To prevent duplicate queries and rate limiting, we track processed title slugs.
+    const solutionsList: string[] = [];
+    const processedTitleSlugs = new Set<string>();
 
-    execFileSync('git', ['commit', '-m', message], { cwd: workDir });
+    for (const line of lines) {
+      // Format of line is: XY path or XY path1 -> path2
+      const cleanPath = line.substring(3).trim();
+      const parts = cleanPath.split(' -> ');
+      const targetPath = parts[parts.length - 1];
+      const fileName = path.basename(targetPath);
+      const match = fileName.match(/^(\d+)\.([^.]+)\./);
+
+      if (match) {
+        const [, problemId, titleSlug] = match;
+        if (!processedTitleSlugs.has(titleSlug)) {
+          processedTitleSlugs.add(titleSlug);
+          
+          try {
+            const submissions = await leetcodeClient.getSubmissionList(titleSlug, 5);
+            const lastAC = submissions.find((s) => s.statusDisplay === 'Accepted');
+            if (lastAC) {
+              const details = await leetcodeClient.getSubmissionDetails(parseInt(lastAC.id, 10));
+              const runtimeStr = details.runtimeDisplay || details.runtime || 'N/A';
+              const memoryStr = details.memoryDisplay || details.memory || 'N/A';
+              const runtimeBeats = details.runtimePercentile ? ` (beats ${details.runtimePercentile.toFixed(2)}%)` : '';
+              const memoryBeats = details.memoryPercentile ? ` (beats ${details.memoryPercentile.toFixed(2)}%)` : '';
+              
+              solutionsList.push(`- [${problemId}. ${titleSlug}] Runtime: ${runtimeStr}${runtimeBeats}, Memory: ${memoryStr}${memoryBeats}`);
+            } else {
+              solutionsList.push(`- [${problemId}. ${titleSlug}] No accepted submission stats found`);
+            }
+          } catch {
+            solutionsList.push(`- [${problemId}. ${titleSlug}] Stats unavailable`);
+          }
+        }
+      }
+    }
+
+    const title = `Sync: ${count} solutions - ${timestamp}`;
+    const gitCommitArgs = ['commit', '-m', title];
+    if (solutionsList.length > 0) {
+      const body = solutionsList.join('\n');
+      gitCommitArgs.push('-m', body);
+    }
+
+    execFileSync('git', gitCommitArgs, { cwd: workDir });
 
     // Try pushing to main or master
     try {
@@ -229,6 +274,7 @@ export async function syncCommand(): Promise<void> {
     spinner.succeed('Successfully synced solutions to remote');
   } catch (error: unknown) {
     spinner.fail('Sync failed');
+    console.error(error);
     if (error instanceof Error && error.message) {
       console.log(chalk.red(error.message));
     }

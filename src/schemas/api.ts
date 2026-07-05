@@ -165,6 +165,13 @@ export const SubmissionSchema = z.object({
 
 export const SubmissionDetailsSchema = z.object({
   code: z.string(),
+  runtime: z.string().optional().nullable(),
+  runtimeDisplay: z.string().optional().nullable(),
+  runtimePercentile: z.number().optional().nullable(),
+  memory: z.string().optional().nullable(),
+  memoryDisplay: z.string().optional().nullable(),
+  memoryPercentile: z.number().optional().nullable(),
+  statusDisplay: z.string().optional().nullable(),
   lang: z.object({
     name: z.string(),
   }),

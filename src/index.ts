@@ -45,6 +45,7 @@ import {
 import { updateCommand, checkForUpdatesOnStartup } from './commands/update.js';
 import { changelogCommand } from './commands/changelog.js';
 import { starCommand } from './commands/star.js';
+import { completionCommand } from './commands/completion.js';
 import { getSupportedLanguagesLabel } from './utils/languages.js';
 
 import { launchTUI as launchNewTUI } from './tui/index.js';
@@ -626,6 +627,23 @@ ${chalk.yellow('Why star?')}
 `
   )
   .action(starCommand);
+
+program
+  .command('completion <shell>')
+  .description('Generate shell autocompletion script')
+  .addHelpText(
+    'after',
+    `
+Supported shells:
+  - bash
+  - zsh
+  - fish
+
+Examples:
+  $ leetcode completion zsh > ~/.zsh/_leetcode
+`
+  )
+  .action(completionCommand);
 
 program.showHelpAfterError('(add --help for additional information)');
 
