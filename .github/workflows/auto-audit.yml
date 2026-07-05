@@ -1,0 +1,164 @@
+name: Auto Security Audit
+
+on:
+  schedule:
+    # Runs every 14 days at 04:00 UTC
+    - cron: '0 4 */14 * *'
+  workflow_dispatch: # Allow manual trigger anytime
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  audit-and-fix:
+    name: Audit & Auto-fix
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout dev
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # ── Check for vulnerabilities ─────────────────────────────────────────
+      - name: Check for vulnerabilities
+        id: audit
+        run: |
+          set +e
+          AUDIT_JSON=$(npm audit --json 2>/dev/null)
+          VULN_COUNT=$(echo "$AUDIT_JSON" | jq '
+            .metadata.vulnerabilities |
+            (.critical // 0) + (.high // 0) + (.moderate // 0) + (.low // 0)
+          ' 2>/dev/null || echo "0")
+
+          echo "vuln_count=$VULN_COUNT" >> "$GITHUB_OUTPUT"
+
+          if [ "$VULN_COUNT" -gt 0 ]; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            echo "::warning::Found $VULN_COUNT vulnerabilities — running audit fix"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::No vulnerabilities found — nothing to do"
+          fi
+
+      - name: No vulnerabilities found — exiting cleanly
+        if: steps.audit.outputs.found == 'false'
+        run: echo "npm audit is clean. Skipping the rest of the workflow."
+
+      # ── Run audit fix ──────────────────────────────────────────────────────
+      - name: Run npm audit fix
+        if: steps.audit.outputs.found == 'true'
+        run: npm audit fix
+
+      # ── Full CI verification ──────────────────────────────────────────────
+      - name: Install Linux keychain build deps
+        if: steps.audit.outputs.found == 'true'
+        run: sudo apt-get update && sudo apt-get install -y libsecret-1-dev pkg-config
+
+      - name: Type check
+        if: steps.audit.outputs.found == 'true'
+        run: npx tsc --noEmit
+
+      - name: Lint
+        if: steps.audit.outputs.found == 'true'
+        run: npm run lint
+
+      - name: Build
+        if: steps.audit.outputs.found == 'true'
+        run: npm run build
+
+      - name: Test
+        if: steps.audit.outputs.found == 'true'
+        run: npm test
+
+      # ── Check if audit fix actually changed anything ───────────────────────
+      - name: Check for file changes
+        if: steps.audit.outputs.found == 'true'
+        id: changes
+        run: |
+          if git diff --quiet; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::npm audit fix ran but made no changes (vulnerabilities may require manual review)"
+          else
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: No file changes — audit fix made no changes
+        if: steps.audit.outputs.found == 'true' && steps.changes.outputs.has_changes == 'false'
+        run: |
+          echo "Vulnerabilities were found but npm audit fix made no changes."
+          echo "Some vulnerabilities may require a manual semver-major update."
+          npm audit
+
+      # ── Commit, push, PR to dev, then PR to main ──────────────────────────
+      - name: Commit fix and open PR to dev
+        if: steps.audit.outputs.found == 'true' && steps.changes.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          DATE=$(date +%Y%m%d)
+          BRANCH="chore/auto-audit-fix-${DATE}"
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git checkout -b "$BRANCH"
+          git add package.json package-lock.json
+          git commit -m "fix(deps): auto npm audit fix ${DATE}"
+          git push origin "$BRANCH"
+
+          gh pr create \
+            --base dev \
+            --head "$BRANCH" \
+            --title "fix(deps): automated security audit fix (${DATE})" \
+            --body "## Automated Security Audit Fix
+
+          > This PR was generated automatically by the \`auto-audit.yml\` workflow.
+
+          ### Summary
+          - **Vulnerabilities found**: ${{ steps.audit.outputs.vuln_count }}
+          - Ran \`npm audit fix\` to resolve reported advisories
+          - All checks passed: typecheck ✅  lint ✅  build ✅  tests ✅
+
+          ### Next steps
+          This PR is set to auto-merge into \`dev\` once all required checks pass.
+          A follow-up PR from \`dev → main\` will be opened automatically after."
+
+          # Auto-merge into dev when all checks pass
+          gh pr merge "$BRANCH" --merge --auto
+
+      - name: Open PR from dev to main
+        if: steps.audit.outputs.found == 'true' && steps.changes.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          DATE=$(date +%Y%m%d)
+
+          # Wait for the dev merge to land before targeting main
+          sleep 30
+
+          gh pr create \
+            --base main \
+            --head dev \
+            --title "fix(deps): security audit fix (${DATE})" \
+            --body "## Security Audit Fix → main
+
+          Automatically opened after the audit fix was merged into \`dev\` and all CI checks passed.
+
+          See the dev PR for full details." \
+            || echo "::notice::PR dev→main already open or dev is already up to date with main"
+
+          # Auto-merge into main when all checks pass
+          gh pr merge dev --merge --auto || true
