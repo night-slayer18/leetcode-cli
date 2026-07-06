@@ -24,7 +24,7 @@ vi.mock('../../storage/config.js', () => ({
 vi.mock('../../api/client.js', () => ({
   leetcodeClient: {
     getSubmissionList: vi.fn().mockResolvedValue([
-      { id: '12345', statusDisplay: 'Accepted' },
+      { id: '12345', statusDisplay: 'Accepted', lang: 'typescript', runtime: '56ms', timestamp: '1720000000', memory: '42.1 MB' },
     ]),
     getSubmissionDetails: vi.fn().mockResolvedValue({
       code: 'class Solution {}',
@@ -86,7 +86,7 @@ describe('Sync Command', () => {
     vi.mocked(config.getRepo).mockReturnValue('https://github.com/user/repo.git');
     vi.mocked(execSync).mockReturnValue(Buffer.from(''));
     vi.mocked(leetcodeClient.getSubmissionList).mockResolvedValue([
-      { id: '12345', statusDisplay: 'Accepted' },
+      { id: '12345', statusDisplay: 'Accepted', lang: 'typescript', runtime: '56ms', timestamp: '1720000000', memory: '42.1 MB' },
     ]);
     vi.mocked(leetcodeClient.getSubmissionDetails).mockResolvedValue({
       code: 'class Solution {}',
@@ -199,7 +199,7 @@ describe('Sync Command', () => {
 
     it('should commit multiple solutions in a single commit with all stats in the body', async () => {
       vi.mocked(leetcodeClient.getSubmissionList).mockResolvedValue([
-        { id: '12345', statusDisplay: 'Accepted' },
+        { id: '12345', statusDisplay: 'Accepted', lang: 'typescript', runtime: '56ms', timestamp: '1720000000', memory: '42.1 MB' },
       ]);
       vi.mocked(execSync).mockImplementation((cmd) => {
         if (typeof cmd === 'string' && cmd === 'git status --porcelain') {
@@ -310,8 +310,8 @@ describe('Sync Command', () => {
 
     it('should fall back to "No accepted submission stats found" when no AC submission exists', async () => {
       vi.mocked(leetcodeClient.getSubmissionList).mockResolvedValue([
-        { id: '9999', statusDisplay: 'Wrong Answer' },
-        { id: '8888', statusDisplay: 'Time Limit Exceeded' },
+        { id: '9999', statusDisplay: 'Wrong Answer', lang: 'typescript', runtime: 'N/A', timestamp: '1720000000', memory: 'N/A' },
+        { id: '8888', statusDisplay: 'Time Limit Exceeded', lang: 'typescript', runtime: 'N/A', timestamp: '1720000001', memory: 'N/A' },
       ]);
       vi.mocked(execSync).mockImplementation((cmd) => {
         if (typeof cmd === 'string' && cmd === 'git status --porcelain') {

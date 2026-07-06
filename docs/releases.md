@@ -1,6 +1,52 @@
 # Release Notes
 
+## v3.3.0
+
+> **Release Date**: 2026-07-07
+> **Focus**: Shell Completion + Detailed Sync Stats + CI Overhaul
+
+### 🚀 Features
+
+#### Shell Autocompletion (`leetcode completion`)
+
+New command to generate tab-completion scripts for your shell.
+
+- `leetcode completion zsh` — Zsh completion script
+- `leetcode completion bash` — Bash completion script
+- `leetcode completion fish` — Fish completion script
+
+Completes commands, subcommands, flags, and valid option values (difficulty, status, language).
+
+**Setup** (Zsh example):
+```bash
+source <(leetcode completion zsh)   # Add to ~/.zshrc
+```
+
+#### Performance Stats in Git Sync Commits
+
+`leetcode sync` now embeds runtime and memory percentile stats in the git commit body for each changed solution file.
+
+Example commit:
+```
+Sync: 2 solutions - 2026-07-07 10:30:00
+
+- [1. two-sum] Runtime: 0ms (beats 100.00%), Memory: 17.4MB (beats 89.34%)
+- [42. trapping-rain-water] Runtime: 3ms (beats 76.21%), Memory: 21.2MB (beats 54.10%)
+```
+
+- Fetches the last accepted submission stats from the LeetCode API automatically.
+- Gracefully falls back to `Stats unavailable` on network errors.
+- Deduplicates API calls when the same problem appears multiple times in the diff.
+
+### 🧪 Testing
+
+- Expanded `sync` test suite from 3 → 15 tests covering all major code paths:
+  early exit guards, no-changes path, URL security validation, single/multi solution commits, API call deduplication, non-solution file handling, all API fallback branches, and push failure handling.
+
+---
+
 ## v3.2.0
+
 
 > **Release Date**: 2026-06-28
 > **Focus**: Community Engagement + Security
