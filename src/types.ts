@@ -117,6 +117,13 @@ export interface Submission {
 
 export interface SubmissionDetails {
   code: string;
+  runtime?: string | null;
+  runtimeDisplay?: string | null;
+  runtimePercentile?: number | null;
+  memory?: string | null;
+  memoryDisplay?: string | null;
+  memoryPercentile?: number | null;
+  statusDisplay?: string | null;
   lang: {
     name: string;
   };

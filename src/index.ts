@@ -45,6 +45,7 @@ import {
 import { updateCommand, checkForUpdatesOnStartup } from './commands/update.js';
 import { changelogCommand } from './commands/changelog.js';
 import { starCommand } from './commands/star.js';
+import { completionCommand } from './commands/completion.js';
 import { getSupportedLanguagesLabel } from './utils/languages.js';
 
 import { launchTUI as launchNewTUI } from './tui/index.js';
@@ -68,7 +69,7 @@ program
   .name('leetcode')
   .usage('[command] [options]')
   .description(chalk.bold.cyan('🔥 A modern LeetCode CLI built with TypeScript'))
-  .version('3.2.0', '-v, --version', 'Output the version number')
+  .version('3.3.0', '-v, --version', 'Output the version number')
   .helpOption('-h, --help', 'Display help for command')
   .addHelpText(
     'after',
@@ -626,6 +627,23 @@ ${chalk.yellow('Why star?')}
 `
   )
   .action(starCommand);
+
+program
+  .command('completion <shell>')
+  .description('Generate shell autocompletion script')
+  .addHelpText(
+    'after',
+    `
+Supported shells:
+  - bash
+  - zsh
+  - fish
+
+Examples:
+  $ leetcode completion zsh > ~/.zsh/_leetcode
+`
+  )
+  .action(completionCommand);
 
 program.showHelpAfterError('(add --help for additional information)');
 

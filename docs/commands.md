@@ -445,8 +445,18 @@ Sync all solutions to your configured Git repository.
 
 - Automatically handles `git init` if the working directory is not a git repo.
 - Can create a private GitHub repository automatically if `gh` CLI is installed.
-- Commits changes with stats (e.g., "Sync: 5 solutions - 2026-01-07...").
-- Pushes to the configured remote.
+- Commits all changes in a single commit with title: `Sync: N solutions - YYYY-MM-DD HH:MM:SS`.
+- **Performance stats in commit body**: for each changed solution file, fetches the last accepted submission's runtime and memory percentile from the LeetCode API and writes them into the commit body.
+- Pushes to the configured remote (`main` or `master`).
+
+**Commit format**:
+
+```
+Sync: 2 solutions - 2026-07-07 10:30:00
+
+- [1. two-sum] Runtime: 0ms (beats 100.00%), Memory: 17.4MB (beats 89.34%)
+- [42. trapping-rain-water] Runtime: 3ms (beats 76.21%), Memory: 21.2MB (beats 54.10%)
+```
 
 **Usage**:
 
@@ -923,6 +933,51 @@ leetcode changelog 2.0.0
 
 # Show only breaking changes
 leetcode changelog --breaking
+```
+
+---
+
+## Shell Completion
+
+### `leetcode completion <shell>`
+
+Generate a shell autocompletion script so you can press `[TAB]` to complete commands, subcommands, flags, and option values.
+
+**Arguments**:
+
+- `<shell>` - Target shell: `bash`, `zsh`, or `fish`
+
+**What it completes**:
+
+- All top-level commands and their aliases
+- Subcommands (`workspace`, `collab`, `snapshot`)
+- All flags and options with descriptions
+- Valid values for `--difficulty` (easy/medium/hard), `--status` (todo/solved/attempted), and more
+
+**Setup**:
+
+```bash
+# Zsh — add to ~/.zshrc
+source <(leetcode completion zsh)
+
+# Bash — add to ~/.bashrc
+source <(leetcode completion bash)
+
+# Fish — save to completions directory
+leetcode completion fish > ~/.config/fish/completions/leetcode.fish
+```
+
+**Examples in the terminal**:
+
+```bash
+$ leetcode [TAB]
+list  show  pick  test  submit  sync  stat  daily ...
+
+$ leetcode list --[TAB]
+--difficulty  --status  --tag  --search  --limit  --page
+
+$ leetcode list --difficulty [TAB]
+easy  medium  hard
 ```
 
 ---
