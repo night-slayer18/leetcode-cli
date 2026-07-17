@@ -500,7 +500,6 @@ You can run the CLI using Docker without installing Node.js.
    ```bash
    leetcode() {
      docker run -it --rm \
-       -w /root/leetcode \
        -v "$(pwd)/leetcode:/root/leetcode" \
        -v "$HOME/.leetcode:/root/.leetcode" \
        nightslayer/leetcode-cli:latest "$@"
@@ -512,7 +511,6 @@ You can run the CLI using Docker without installing Node.js.
    ```fish
    function leetcode
        docker run -it --rm \
-           -w /root/leetcode \
            -v (pwd)/leetcode:/root/leetcode \
            -v $HOME/.leetcode:/root/.leetcode \
            nightslayer/leetcode-cli:latest $argv
@@ -524,7 +522,6 @@ You can run the CLI using Docker without installing Node.js.
    ```powershell
    function leetcode {
      docker run -it --rm `
-       -w /root/leetcode `
        -v "${PWD}/leetcode:/root/leetcode" `
        -v "$env:USERPROFILE/.leetcode:/root/.leetcode" `
        nightslayer/leetcode-cli:latest $args
@@ -548,7 +545,6 @@ You can run the CLI using Docker without installing Node.js.
 2. **Run commands**:
    ```bash
    docker run -it --rm \
-     -w /root/leetcode \
      -v "$(pwd)/leetcode:/root/leetcode" \
      -v "$HOME/.leetcode:/root/.leetcode" \
      leetcode-cli list

@@ -19,7 +19,6 @@ Add to your shell config (functions forward arguments properly, aliases don't):
 ```bash
 leetcode() {
   docker run -it --rm \
-    -w /root/leetcode \
     -v "$(pwd)/leetcode:/root/leetcode" \
     -v "$HOME/.leetcode:/root/.leetcode" \
     nightslayer/leetcode-cli:latest "$@"
@@ -31,7 +30,6 @@ leetcode() {
 ```fish
 function leetcode
     docker run -it --rm \
-        -w /root/leetcode \
         -v (pwd)/leetcode:/root/leetcode \
         -v $HOME/.leetcode:/root/.leetcode \
         nightslayer/leetcode-cli:latest $argv
@@ -43,7 +41,6 @@ end
 ```powershell
 function leetcode {
   docker run -it --rm `
-    -w /root/leetcode `
     -v "${PWD}/leetcode:/root/leetcode" `
     -v "$env:USERPROFILE/.leetcode:/root/.leetcode" `
     nightslayer/leetcode-cli:latest $args
@@ -70,7 +67,6 @@ Use env credentials instead:
 docker run -it --rm \
   -e LEETCODE_SESSION=\"<your_session_cookie>\" \
   -e LEETCODE_CSRF_TOKEN=\"<your_csrf_cookie>\" \
-  -w /root/leetcode \
   -v \"$(pwd)/leetcode:/root/leetcode\" \
   nightslayer/leetcode-cli:latest list
 ```
@@ -90,7 +86,6 @@ If you prefer to build it yourself:
 2. **Run** (Bash/Zsh):
    ```bash
    docker run -it --rm \
-     -w /root/leetcode \
      -v "$(pwd)/leetcode:/root/leetcode" \
      -v "$HOME/.leetcode:/root/.leetcode" \
      leetcode-cli list
