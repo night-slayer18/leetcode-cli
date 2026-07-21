@@ -9,6 +9,7 @@ import { hintCommand } from './commands/hint.js';
 import { pickCommand, batchPickCommand } from './commands/pick.js';
 import { testCommand } from './commands/test.js';
 import { submitCommand } from './commands/submit.js';
+import { resetCommand } from './commands/reset.js';
 import { statCommand } from './commands/stat.js';
 import { dailyCommand } from './commands/daily.js';
 import { randomCommand } from './commands/random.js';
@@ -80,6 +81,7 @@ ${chalk.yellow('Examples:')}
   ${chalk.cyan('$ leetcode random -d medium')}   Get random medium problem
   ${chalk.cyan('$ leetcode pick 1')}            Start solving "Two Sum"
   ${chalk.cyan('$ leetcode test 1')}            Test your solution
+  ${chalk.cyan('$ leetcode reset 1')}           Reset solution to original stub
   ${chalk.cyan('$ leetcode submit 1')}          Submit your solution
 `
   );
@@ -260,6 +262,23 @@ ${chalk.gray('Testcases use \\n to separate multiple inputs.')}
 `
   )
   .action(testCommand);
+
+program
+  .command('reset <id>')
+  .description('Reset solution file to the original LeetCode stub')
+  .addHelpText(
+    'after',
+    `
+${chalk.yellow('Examples:')}
+  ${chalk.cyan('$ leetcode reset 1')}                 Reset problem 1 solution
+  ${chalk.cyan('$ leetcode reset two-sum')}           Reset by problem slug
+
+${chalk.gray('Overwrites the existing local solution file immediately.')}
+`
+  )
+  .action(async (id) => {
+    await resetCommand(id);
+  });
 
 program
   .command('submit <file>')
