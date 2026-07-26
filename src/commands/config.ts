@@ -128,7 +128,7 @@ export async function configInteractiveCommand(): Promise<void> {
     {
       type: 'input',
       name: 'editor',
-      message: 'Editor command (e.g., code, vim, nvim):',
+      message: 'Editor command (e.g., code, zed, vim, nvim):',
       default: currentConfig.editor ?? 'code',
     },
     {

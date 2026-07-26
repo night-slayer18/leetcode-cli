@@ -22,7 +22,7 @@ function buildOptions(currentConfig: ReturnType<typeof config.getConfig>): Confi
     {
       id: 'editor',
       label: 'Editor Command',
-      description: 'Command used to open files (example: code, vim, nano)',
+      description: 'Command used to open files (example: code, zed, vim, nano)',
       value: currentConfig.editor || '',
     },
     {
