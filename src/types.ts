@@ -74,6 +74,29 @@ export interface DailyChallenge {
   question: Problem;
 }
 
+export interface Contest {
+  title: string;
+  titleSlug: string;
+  startTime: number;
+  duration: number;
+  originStartTime?: number | null;
+  isVirtual?: boolean | null;
+  containsPremium?: boolean | null;
+}
+
+export interface ContestQuestion {
+  questionId: string;
+  questionFrontendId?: string;
+  title: string;
+  titleSlug: string;
+  difficulty?: 'Easy' | 'Medium' | 'Hard' | null;
+}
+
+export interface ContestDetail extends Contest {
+  description?: string | null;
+  questions: ContestQuestion[];
+}
+
 export interface SubmissionResult {
   status_code: number;
   status_msg: string;
