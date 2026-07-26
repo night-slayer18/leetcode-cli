@@ -6,7 +6,7 @@ const BASH_COMPLETION = `_leetcode_completion() {
   cur="\${COMP_WORDS[COMP_CWORD]}"
   prev="\${COMP_WORDS[COMP_CWORD-1]}"
 
-  local commands="login logout whoami list show pick pick-batch random test submit submissions diff timer workspace bookmark note sync today stat changelog update star"
+  local commands="login logout whoami list show pick pick-batch contest random test submit submissions diff timer workspace bookmark note sync today stat changelog update star"
 
   # Find command in the command line
   local cmd=""
@@ -69,6 +69,14 @@ const BASH_COMPLETION = `_leetcode_completion() {
         COMPREPLY=( \$(compgen -W "\$options" -- "\$cur") )
       fi
       ;;
+    contest)
+      local options="-l --lang --no-open"
+      if [[ "\$prev" == "-l" || "\$prev" == "--lang" ]]; then
+        COMPREPLY=( \$(compgen -W "typescript javascript python3 java cpp c csharp go rust kotlin swift sql" -- "\$cur") )
+      else
+        COMPREPLY=( \$(compgen -W "\$options" -- "\$cur") )
+      fi
+      ;;
     pick-batch|random)
       local options="-d --difficulty -t --tag -l --limit -o --offset -p --pick --no-open"
       if [[ "\$prev" == "-d" || "\$prev" == "--difficulty" ]]; then
@@ -126,9 +134,10 @@ _leetcode() {
     'whoami:Show current user profile'
     'list:List problems'
     'show:Show problem details'
-    'pick:Pick and generate solution file'
-    'pick-batch:Pick multiple problems'
-    'random:Pick a random problem'
+     'pick:Pick and generate solution file'
+     'pick-batch:Pick multiple problems'
+     'contest:Browse contests and pick a problem'
+     'random:Pick a random problem'
     'test:Test your solution'
     'submit:Submit your solution'
     'submissions:View past submissions'
@@ -217,7 +226,12 @@ _leetcode() {
           _arguments \\
             '(-l --language)'{-l,--language}'[Specify programming language]:language:(typescript javascript python3 java cpp c csharp go rust kotlin swift sql)' \\
             '(-e --editor)'{-e,--editor}'[Open solution file in editor]' \\
-            '--no-open[Do not open problem details or file]'
+             '--no-open[Do not open problem details or file]'
+           ;;
+        contest)
+          _arguments \\
+            '(-l --lang)'{-l,--lang}'[Specify programming language]:language:(typescript javascript python3 java cpp c csharp go rust kotlin swift sql)' \\
+            '--no-open[Do not open solution file in editor]'
           ;;
         pick-batch)
           _arguments \\
@@ -280,28 +294,29 @@ const FISH_COMPLETION = `# Disable standard file completion for commands
 complete -c leetcode -f
 
 # Main commands
-complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a login -d "Login to LeetCode"
-complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a logout -d "Logout from LeetCode"
-complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a whoami -d "Show current user profile"
-complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a list -d "List problems"
-complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a show -d "Show problem details"
-complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a pick -d "Pick and generate solution file"
-complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a pick-batch -d "Pick multiple problems"
-complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a random -d "Pick a random problem"
-complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a test -d "Test your solution"
-complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a submit -d "Submit your solution"
-complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a submissions -d "View past submissions"
-complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a diff -d "Compare solution with past submission"
-complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a timer -d "Manage interview timer"
-complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a workspace -d "Manage workspaces"
-complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a bookmark -d "Manage bookmarked problems"
-complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a note -d "Manage personal notes"
-complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a sync -d "Sync solutions to Git repository"
-complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a today -d "Show today progress"
-complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a stat -d "Show solving statistics"
-complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a changelog -d "Show version changelog"
-complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a update -d "Check for updates"
-complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a star -d "Open GitHub repo to star the project"
+complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch contest random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a login -d "Login to LeetCode"
+complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch contest random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a logout -d "Logout from LeetCode"
+complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch contest random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a whoami -d "Show current user profile"
+complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch contest random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a list -d "List problems"
+complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch contest random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a show -d "Show problem details"
+complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch contest random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a pick -d "Pick and generate solution file"
+complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch contest random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a pick-batch -d "Pick multiple problems"
+complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch contest random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a contest -d "Browse contests and pick a problem"
+complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch contest random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a random -d "Pick a random problem"
+complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch contest random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a test -d "Test your solution"
+complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch contest random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a submit -d "Submit your solution"
+complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch contest random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a submissions -d "View past submissions"
+complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch contest random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a diff -d "Compare solution with past submission"
+complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch contest random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a timer -d "Manage interview timer"
+complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch contest random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a workspace -d "Manage workspaces"
+complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch contest random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a bookmark -d "Manage bookmarked problems"
+complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch contest random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a note -d "Manage personal notes"
+complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch contest random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a sync -d "Sync solutions to Git repository"
+complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch contest random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a today -d "Show today progress"
+complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch contest random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a stat -d "Show solving statistics"
+complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch contest random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a changelog -d "Show version changelog"
+complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch contest random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a update -d "Check for updates"
+complete -c leetcode -n "not __fish_seen_subcommand_from login logout whoami list show pick pick-batch contest random test submit submissions diff timer workspace bookmark note sync today stat changelog update star" -a star -d "Open GitHub repo to star the project"
 
 # Workspace subcommands
 complete -c leetcode -n "__fish_seen_subcommand_from workspace" -a current -d "Show active workspace"
@@ -336,6 +351,10 @@ complete -c leetcode -n "__fish_seen_subcommand_from list" -s t -l tag -d "Filte
 complete -c leetcode -n "__fish_seen_subcommand_from list" -s q -l search -d "Search by keyword"
 complete -c leetcode -n "__fish_seen_subcommand_from list" -s l -l limit -d "Limit results"
 complete -c leetcode -n "__fish_seen_subcommand_from list" -s o -l offset -d "Offset results"
+
+# Contest options
+complete -c leetcode -n "__fish_seen_subcommand_from contest" -s l -l lang -x -a "typescript javascript python3 java cpp c csharp go rust kotlin swift sql" -d "Specify programming language"
+complete -c leetcode -n "__fish_seen_subcommand_from contest" -l no-open -d "Do not open solution file in editor"
 `;
 
 export async function completionCommand(shell: string): Promise<void> {
