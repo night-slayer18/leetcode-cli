@@ -77,6 +77,9 @@ leetcode config -s leetcode.cn
 # Set default work directory
 leetcode config -w ~/Development/my-leetcode
 
+# Use Zed to open generated solution files
+leetcode config --editor zed
+
 # Set Git repository
 leetcode config -r https://github.com/myuser/leetcode-solutions.git
 ```
@@ -88,7 +91,7 @@ Config is stored per-workspace in `~/.leetcode/workspaces/<name>/config.json`.
 | Key        | Description                                          |
 | ---------- | ---------------------------------------------------- |
 | `lang`     | Default language extension (java, python3, sql, etc) |
-| `editor`   | Command to open files (code, vim, nano)              |
+| `editor`   | Command to open files (code, zed, vim, nano)         |
 | `workDir`  | Directory where solution files are saved             |
 | `syncRepo` | Remote Git repository URL                            |
 | `site`     | LeetCode site (`leetcode.com` or `leetcode.cn`)      |
@@ -117,3 +120,17 @@ You can also manage workspace settings from TUI:
 3. Open **Config** (`c`) to edit active workspace defaults.
 
 Both screens use buffered editing (`Enter` to save, `Esc` to cancel).
+
+### Zed
+
+Set the editor command to `zed` to open generated contest and problem files in
+Zed:
+
+```bash
+leetcode config --editor zed
+```
+
+`zed`, `zeditor`, and `zed.exe` are supported across platforms. Zed is launched
+in the background with only the generated file path; VS Code-specific flags are
+not passed to it. The configured editor takes precedence over the `EDITOR`
+environment variable.

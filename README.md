@@ -120,6 +120,7 @@ The CLI keeps command semantics the same and applies site-specific GraphQL queri
 | `snapshot <cmd>`    | Save and restore solution versions       |
 | `diff <id>`         | Compare solution with past submissions   |
 | `collab <cmd>`      | Collaborative coding with a partner      |
+| `contest [slug]`     | Browse and pick from contest problems   |
 | `workspace <cmd>`   | Manage workspaces for different contexts |
 | `config`            | View or set configuration                |
 | `sync`              | Sync solutions to Git repository         |
@@ -311,6 +312,22 @@ leetcode collab status
 
 # Leave session
 leetcode collab leave
+```
+
+### Contest Problems
+
+```bash
+# Browse contests and select a problem interactively
+leetcode contest
+
+# Jump directly to a contest by slug
+leetcode contest weekly-contest-401
+
+# Override language for solution generation
+leetcode contest weekly-contest-401 -l python3
+
+# Skip opening in editor
+leetcode contest --no-open
 ```
 
 ### Solution Snapshots
