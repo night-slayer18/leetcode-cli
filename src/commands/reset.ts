@@ -1,15 +1,25 @@
 // Reset command - restore an existing solution file to the original LeetCode stub
-import { writeFile } from 'fs/promises';
-import { basename } from 'path';
+import { readFile, realpath, writeFile } from 'fs/promises';
+import { basename, extname } from 'path';
 import ora from 'ora';
 import chalk from 'chalk';
 import { leetcodeClient } from '../api/client.js';
 import { requireAuth } from '../utils/auth.js';
 import { config } from '../storage/config.js';
+import { snapshotStorage } from '../storage/snapshots.js';
 import { findSolutionFile, detectLanguageFromFile } from '../utils/fileUtils.js';
 import { generateSolutionFile, getPremiumPlaceholderCode } from '../utils/templates.js';
 import { isPathInsideWorkDir } from '../utils/validation.js';
 import { resolveSupportedLanguageFromLeetCodeSlug } from '../utils/languages.js';
+
+function isProblemNotFoundError(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+
+  return (
+    error.message.includes('expected object, received null') ||
+    /^Problem #.+ not found$/.test(error.message)
+  );
+}
 
 export async function resetCommand(idOrSlug: string): Promise<boolean> {
   const { authorized } = await requireAuth();
@@ -36,7 +46,9 @@ export async function resetCommand(idOrSlug: string): Promise<boolean> {
       return false;
     }
 
-    if (!isPathInsideWorkDir(filePath, workDir)) {
+    const [realFilePath, realWorkDir] = await Promise.all([realpath(filePath), realpath(workDir)]);
+
+    if (!isPathInsideWorkDir(realFilePath, realWorkDir)) {
       spinner.fail('Security Error: File path is outside the configured workspace');
       console.log(chalk.gray(`File: ${filePath}`));
       console.log(chalk.gray(`Workspace: ${workDir}`));
@@ -45,7 +57,7 @@ export async function resetCommand(idOrSlug: string): Promise<boolean> {
 
     const language = detectLanguageFromFile(filePath);
     if (!language) {
-      spinner.fail(`Unsupported file extension: ${basename(filePath)}`);
+      spinner.fail(`Unsupported file extension: ${extname(filePath) || '(none)'}`);
       return false;
     }
 
@@ -78,12 +90,34 @@ export async function resetCommand(idOrSlug: string): Promise<boolean> {
       problem.content ?? undefined
     );
 
+    const currentCode = await readFile(filePath, 'utf-8');
+    const backupName = `backup-before-reset-${Date.now()}`;
+    const backup = snapshotStorage.save(
+      problem.questionFrontendId,
+      problem.title,
+      currentCode,
+      language,
+      backupName
+    );
+
+    if ('error' in backup) {
+      spinner.fail('Failed to create reset backup');
+      console.log(chalk.red(backup.error));
+      return false;
+    }
+
     await writeFile(filePath, content, 'utf-8');
 
     spinner.succeed(`Reset ${chalk.green(basename(filePath))}`);
     console.log(chalk.gray(`Path: ${filePath}`));
+    console.log(chalk.gray(`Backup: ${backup.name}`));
     return true;
   } catch (error) {
+    if (isProblemNotFoundError(error)) {
+      spinner.fail(`Problem "${idOrSlug}" not found`);
+      return false;
+    }
+
     spinner.fail('Failed to reset solution');
     if (error instanceof Error) {
       console.log(chalk.red(error.message));
