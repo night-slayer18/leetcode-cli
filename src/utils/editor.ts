@@ -7,6 +7,21 @@ const TERMINAL_EDITORS = ['vim', 'nvim', 'vi', 'nano', 'emacs', 'micro', 'helix'
 
 const VSCODE_EDITORS = ['code', 'code-insiders', 'cursor', 'codium', 'vscodium'];
 
+const ZED_EDITORS = ['zed', 'zeditor', 'zed.exe'];
+
+function spawnDetached(editor: string, args: string[]): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const child = spawn(editor, args, {
+      detached: true,
+      stdio: 'ignore',
+    });
+
+    child.once('error', reject);
+    child.once('spawn', resolve);
+    child.unref();
+  });
+}
+
 export async function openInEditor(filePath: string, workDir?: string): Promise<void> {
   const editor = config.getEditor() ?? process.env.EDITOR ?? 'code';
   const workspace = workDir ?? config.getWorkDir();
@@ -28,12 +43,13 @@ export async function openInEditor(filePath: string, workDir?: string): Promise<
   }
 
   try {
+    if (ZED_EDITORS.includes(editor)) {
+      await spawnDetached(editor, [filePath]);
+      return;
+    }
+
     if (VSCODE_EDITORS.includes(editor)) {
-      const child = spawn(editor, ['-r', workspace, '-g', filePath], {
-        detached: true,
-        stdio: 'ignore',
-      });
-      child.unref();
+      await spawnDetached(editor, ['-r', workspace, '-g', filePath]);
       return;
     }
 

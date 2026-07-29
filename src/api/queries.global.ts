@@ -183,6 +183,40 @@ export const SUBMISSION_DETAILS_QUERY = `
   }
 `;
 
+export const CONTEST_LIST_QUERY = `
+  query allContests {
+    allContests {
+      title
+      titleSlug
+      startTime
+      duration
+      originStartTime
+      isVirtual
+      containsPremium
+    }
+  }
+`;
+
+export const CONTEST_DETAIL_QUERY = `
+  query contest($titleSlug: String!) {
+    contest(titleSlug: $titleSlug) {
+      title
+      titleSlug
+      startTime
+      duration
+      originStartTime
+      isVirtual
+      containsPremium
+      description
+      questions {
+        questionId
+        title
+        titleSlug
+      }
+    }
+  }
+`;
+
 export interface QueryPack {
   PROBLEM_LIST_QUERY: string;
   PROBLEM_DETAIL_QUERY: string;
@@ -193,6 +227,8 @@ export interface QueryPack {
   SUBMISSION_LIST_QUERY: string;
   RANDOM_PROBLEM_QUERY: string;
   SUBMISSION_DETAILS_QUERY: string;
+  CONTEST_LIST_QUERY: string;
+  CONTEST_DETAIL_QUERY: string;
 }
 
 export const GLOBAL_QUERY_PACK: QueryPack = {
@@ -205,4 +241,6 @@ export const GLOBAL_QUERY_PACK: QueryPack = {
   SUBMISSION_LIST_QUERY,
   RANDOM_PROBLEM_QUERY,
   SUBMISSION_DETAILS_QUERY,
+  CONTEST_LIST_QUERY,
+  CONTEST_DETAIL_QUERY,
 };

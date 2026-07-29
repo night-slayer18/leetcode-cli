@@ -150,6 +150,49 @@ export const CnProblemDetailSchema = z.object({
     hints: z.array(z.string()).optional(),
     stats: z.string().optional(),
   }),
+  });
+
+// --- Contest Schemas ---
+
+export const ContestSchema = z.object({
+  title: z.string(),
+  titleSlug: z.string(),
+  startTime: z.number(),
+  duration: z.number(),
+  originStartTime: z.number().nullable().optional(),
+  isVirtual: z.boolean().nullable().optional(),
+  containsPremium: z.boolean().nullable().optional(),
+});
+
+export const ContestQuestionSchema = z.object({
+  questionId: z.union([z.string(), z.number()]).transform(String),
+  title: z.string(),
+  titleSlug: z.string(),
+  difficulty: z.enum(['Easy', 'Medium', 'Hard']).nullable().optional(),
+});
+
+export const ContestDetailSchema = ContestSchema.extend({
+  description: z.string().nullable().optional(),
+  questions: z.array(ContestQuestionSchema),
+});
+
+export const ContestListSchema = z.object({
+  allContests: z.array(ContestSchema),
+});
+
+export const CnContestHistorySchema = z.object({
+  contestHistory: z.object({
+    totalNum: z.number(),
+    contests: z.array(
+      ContestSchema.extend({
+        description: z.string().nullable().optional(),
+      })
+    ),
+  }),
+});
+
+export const ContestDetailResponseSchema = z.object({
+  contest: ContestDetailSchema.nullable().optional(),
 });
 
 // --- Submission Schemas ---
@@ -304,6 +347,12 @@ export const UserStatusSchema = z.object({
 export type ValidatedProblem = z.infer<typeof ProblemSchema>;
 export type ValidatedProblemDetail = z.infer<typeof ProblemDetailSchema>;
 export type ValidatedDailyChallenge = z.infer<typeof DailyChallengeSchema>;
+export type ValidatedContest = z.infer<typeof ContestSchema>;
+export type ValidatedContestQuestion = z.infer<typeof ContestQuestionSchema>;
+export type ValidatedContestDetail = z.infer<typeof ContestDetailSchema>;
+export type ValidatedContestList = z.infer<typeof ContestListSchema>;
+export type ValidatedCnContestHistory = z.infer<typeof CnContestHistorySchema>;
+export type ValidatedContestDetailResponse = z.infer<typeof ContestDetailResponseSchema>;
 export type ValidatedSubmission = z.infer<typeof SubmissionSchema>;
 export type ValidatedSubmissionDetails = z.infer<typeof SubmissionDetailsSchema>;
 export type ValidatedTestResult = z.infer<typeof TestResultSchema>;

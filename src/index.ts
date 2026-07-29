@@ -7,6 +7,7 @@ import { listCommand } from './commands/list.js';
 import { showCommand } from './commands/show.js';
 import { hintCommand } from './commands/hint.js';
 import { pickCommand, batchPickCommand } from './commands/pick.js';
+import { contestCommand } from './commands/contest.js';
 import { testCommand } from './commands/test.js';
 import { submitCommand } from './commands/submit.js';
 import { resetCommand } from './commands/reset.js';
@@ -240,6 +241,24 @@ ${chalk.yellow('Examples:')}
 `
   )
   .action(batchPickCommand);
+
+program
+  .command('contest [slug]')
+  .alias('c')
+  .description('Browse contests and generate a solution for a contest problem')
+  .option('-l, --lang <language>', 'Programming language for the solution')
+  .option('--no-open', 'Do not open file in editor')
+  .addHelpText(
+    'after',
+    `
+${chalk.yellow('Examples:')}
+  ${chalk.cyan('$ leetcode contest')}                    Browse available contests
+  ${chalk.cyan('$ leetcode contest weekly-contest-1')}  Open a contest by slug
+  ${chalk.cyan('$ leetcode contest -l python3')}         Pick with specific language
+  ${chalk.cyan('$ leetcode contest --no-open')}          Create file without opening
+`
+  )
+  .action((slug, options) => contestCommand(slug, options));
 
 program
   .command('test <file>')

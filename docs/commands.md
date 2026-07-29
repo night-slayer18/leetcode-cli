@@ -225,6 +225,47 @@ leetcode random -d medium -t dp --pick --no-open
 
 ---
 
+### `leetcode contest [slug]` (alias: `c`)
+
+Browse contests and select a problem to solve.
+
+**Arguments**:
+
+- `[slug]` - Optional contest slug for direct selection (e.g., `weekly-contest-401`)
+
+**Options**:
+
+- `-l, --lang <language>` - Programming language for the solution
+- `--no-open` - Do not open file in editor
+
+**How it works**:
+
+- Without a slug: interactively select a contest, then select a problem by order
+- With a slug: jumps directly to problem selection within that contest
+- Selected problem delegates to the normal solution generation flow
+- Opens the file in your configured editor (supports Zed, VS Code, Vim, etc.)
+
+**Examples**:
+
+```bash
+# Browse contests and select a problem interactively
+leetcode contest
+leetcode c
+
+# Jump directly to a contest by slug
+leetcode contest weekly-contest-401
+leetcode contest c weekly-contest-401
+
+# Override language for solution generation
+leetcode contest weekly-contest-401 -l python3
+leetcode contest -l java
+
+# Skip opening in editor
+leetcode contest --no-open
+```
+
+---
+
 ## Solving Problems
 
 ### `leetcode pick <id>` (alias: `p`)
