@@ -344,6 +344,16 @@ leetcode contest weekly-contest-401 -l python3
 leetcode contest --no-open
 ```
 
+### Reset Solution
+
+```bash
+# Reset a solution file back to the original LeetCode stub (by problem ID)
+leetcode reset 1
+
+# Reset by problem slug
+leetcode reset two-sum
+```
+
 ### Solution Snapshots
 
 ```bash
