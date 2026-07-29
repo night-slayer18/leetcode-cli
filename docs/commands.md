@@ -263,6 +263,28 @@ leetcode pick 1 -l cpp --no-open
 
 ---
 
+### `leetcode reset <id>`
+
+Reset an existing local solution file back to the original LeetCode stub.
+
+This command overwrites the existing file immediately. It preserves the existing file path and language by detecting the file extension.
+
+**Arguments**:
+
+- `<id>` - Problem ID or slug
+
+**Examples**:
+
+```bash
+# By problem ID
+leetcode reset 1
+
+# By slug
+leetcode reset two-sum
+```
+
+---
+
 ### `leetcode test <file>` (alias: `t`)
 
 Test solution against sample test cases.
