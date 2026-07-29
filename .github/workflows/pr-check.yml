@@ -6,7 +6,7 @@ on:
     types: [opened, edited, synchronize, reopened]
   pull_request_target:
     branches: [main, dev]
-    types: [opened]
+    types: [opened, edited, synchronize, reopened]
 
 permissions:
   pull-requests: write
@@ -61,6 +61,9 @@ jobs:
   auto-label:
     name: Auto Label
     runs-on: ubuntu-latest
+    # Only run under pull_request_target which has a write-access GITHUB_TOKEN.
+    # pull_request from forks gets a read-only token → 403 on label API.
+    if: github.event_name == 'pull_request_target'
     steps:
       - name: Apply label based on PR title prefix
         uses: actions/github-script@v9
