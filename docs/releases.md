@@ -1,5 +1,55 @@
 # Release Notes
 
+## v3.4.0
+
+> **Release Date**: 2026-07-29
+> **Focus**: Contest Navigation + Solution Reset + Zed Editor Support + Security & CI Overhaul
+
+### 🚀 Features
+
+#### Contest Navigation (`leetcode contest [slug]`)
+
+Browse available LeetCode contests and pick contest problems interactively or directly by contest slug.
+
+- Browse global (`leetcode.com`) and China (`leetcode.cn`) contests
+- Select contest problems in 1-indexed contest order
+- Fully integrated with language selection (`-l/--lang`) and editor launching
+- Added shell completions for Fish and Zsh
+
+```bash
+leetcode contest                         # Browse contests interactively
+leetcode contest weekly-contest-401      # Open contest by slug directly
+```
+
+#### Solution Reset (`leetcode reset <id>`)
+
+Restores an existing solution file back to the original LeetCode code stub.
+
+- Automatically detects solution language from file extension
+- Safety snapshot backup (`backup-before-reset-<timestamp>`) created before overwriting
+- Validates workspace boundaries to prevent unintended file modifications
+
+```bash
+leetcode reset 1                         # Reset problem 1 solution
+leetcode reset two-sum                   # Reset by problem slug
+```
+
+#### Zed Editor Support
+
+Full support for Zed editor (`zed`, `zeditor`, `zed.exe`) across macOS, Linux, and Windows.
+
+```bash
+leetcode config --editor zed
+```
+
+### 🔒 Security & Maintenance
+
+- Upgraded `eslint` to `v10.8.0` and `@typescript-eslint` packages to `8.65.0`.
+- Fixed all 10 high-severity security vulnerabilities reported by `npm audit` (0 vulnerabilities remaining).
+- Fixed `auto-label` permission issue on fork PRs (`pull_request_target` event).
+
+---
+
 ## v3.3.0
 
 > **Release Date**: 2026-07-07
