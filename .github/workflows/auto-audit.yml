@@ -100,7 +100,9 @@ jobs:
         run: |
           echo "Vulnerabilities were found but npm audit fix made no changes."
           echo "Some vulnerabilities may require a manual semver-major update."
-          npm audit
+          # Use || true so non-fixable vulns emit a visible warning without
+          # failing the job (they require a manual semver-major update).
+          npm audit || true
 
       # ── Commit, push, PR to dev, then PR to main ──────────────────────────
       - name: Commit fix and open PR to dev

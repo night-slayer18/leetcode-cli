@@ -7,8 +7,10 @@ import { listCommand } from './commands/list.js';
 import { showCommand } from './commands/show.js';
 import { hintCommand } from './commands/hint.js';
 import { pickCommand, batchPickCommand } from './commands/pick.js';
+import { contestCommand } from './commands/contest.js';
 import { testCommand } from './commands/test.js';
 import { submitCommand } from './commands/submit.js';
+import { resetCommand } from './commands/reset.js';
 import { statCommand } from './commands/stat.js';
 import { dailyCommand } from './commands/daily.js';
 import { randomCommand } from './commands/random.js';
@@ -69,7 +71,7 @@ program
   .name('leetcode')
   .usage('[command] [options]')
   .description(chalk.bold.cyan('🔥 A modern LeetCode CLI built with TypeScript'))
-  .version('3.3.0', '-v, --version', 'Output the version number')
+  .version('3.4.0', '-v, --version', 'Output the version number')
   .helpOption('-h, --help', 'Display help for command')
   .addHelpText(
     'after',
@@ -80,6 +82,7 @@ ${chalk.yellow('Examples:')}
   ${chalk.cyan('$ leetcode random -d medium')}   Get random medium problem
   ${chalk.cyan('$ leetcode pick 1')}            Start solving "Two Sum"
   ${chalk.cyan('$ leetcode test 1')}            Test your solution
+  ${chalk.cyan('$ leetcode reset 1')}           Reset solution to original stub
   ${chalk.cyan('$ leetcode submit 1')}          Submit your solution
 `
   );
@@ -240,6 +243,24 @@ ${chalk.yellow('Examples:')}
   .action(batchPickCommand);
 
 program
+  .command('contest [slug]')
+  .alias('c')
+  .description('Browse contests and generate a solution for a contest problem')
+  .option('-l, --lang <language>', 'Programming language for the solution')
+  .option('--no-open', 'Do not open file in editor')
+  .addHelpText(
+    'after',
+    `
+${chalk.yellow('Examples:')}
+  ${chalk.cyan('$ leetcode contest')}                    Browse available contests
+  ${chalk.cyan('$ leetcode contest weekly-contest-1')}  Open a contest by slug
+  ${chalk.cyan('$ leetcode contest -l python3')}         Pick with specific language
+  ${chalk.cyan('$ leetcode contest --no-open')}          Create file without opening
+`
+  )
+  .action((slug, options) => contestCommand(slug, options));
+
+program
   .command('test <file>')
   .alias('t')
   .description('Test solution against sample test cases')
@@ -260,6 +281,23 @@ ${chalk.gray('Testcases use \\n to separate multiple inputs.')}
 `
   )
   .action(testCommand);
+
+program
+  .command('reset <id>')
+  .description('Reset solution file to the original LeetCode stub')
+  .addHelpText(
+    'after',
+    `
+${chalk.yellow('Examples:')}
+  ${chalk.cyan('$ leetcode reset 1')}                 Reset problem 1 solution
+  ${chalk.cyan('$ leetcode reset two-sum')}           Reset by problem slug
+
+${chalk.gray('Overwrites the existing local solution file immediately.')}
+`
+  )
+  .action(async (id) => {
+    await resetCommand(id);
+  });
 
 program
   .command('submit <file>')

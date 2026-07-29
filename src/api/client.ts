@@ -2,6 +2,8 @@
 import got, { Got } from 'got';
 import { z } from 'zod';
 import type {
+  Contest,
+  ContestDetail,
   DailyChallenge,
   LeetCodeCredentials,
   LeetCodeSite,
@@ -17,8 +19,11 @@ import {
   CnProblemDetailSchema,
   CnProblemListSchema,
   CnDailyChallengeSchema,
+  CnContestHistorySchema,
   CnSkillStatsSchema,
   CnUserProfileSchema,
+  ContestDetailResponseSchema,
+  ContestListSchema,
   DailyChallengeSchema,
   ProblemDetailSchema,
   ProblemSchema,
@@ -53,7 +58,9 @@ type GraphQLOperation =
   | 'USER_PROFILE'
   | 'SKILL_STATS'
   | 'SUBMISSION_LIST'
-  | 'SUBMISSION_DETAILS';
+  | 'SUBMISSION_DETAILS'
+  | 'CONTEST_LIST'
+  | 'CONTEST_DETAIL';
 
 const OPERATION_LABEL: Record<GraphQLOperation, string> = {
   USER_STATUS: 'user status',
@@ -65,6 +72,8 @@ const OPERATION_LABEL: Record<GraphQLOperation, string> = {
   SKILL_STATS: 'skill stats',
   SUBMISSION_LIST: 'submission list',
   SUBMISSION_DETAILS: 'submission details',
+  CONTEST_LIST: 'contest list',
+  CONTEST_DETAIL: 'contest detail',
 };
 
 function isSchemaMismatchError(message: string): boolean {
@@ -322,6 +331,65 @@ export class LeetCodeClient {
 
     const validated = DailyChallengeSchema.parse(data.activeDailyCodingChallengeQuestion);
     return validated as DailyChallenge;
+  }
+
+  async getContests(): Promise<Contest[]> {
+    if (this.site === 'leetcode.cn') {
+      const pageSize = 100;
+      const contests: Contest[] = [];
+      let pageNum = 1;
+      let totalNum = 0;
+
+      do {
+        const data = await this.graphql<unknown>(
+          'CONTEST_LIST',
+          this.queries.CONTEST_LIST_QUERY,
+          { pageNum, pageSize }
+        );
+        const validated = CnContestHistorySchema.parse(data);
+        const page = validated.contestHistory.contests;
+
+        if (pageNum === 1) {
+          totalNum = validated.contestHistory.totalNum;
+        }
+
+        if (totalNum > contests.length && page.length === 0) {
+          throw new Error('LeetCode CN contest history returned an incomplete page');
+        }
+
+        contests.push(
+          ...page.map((contest) => ({
+            title: contest.title,
+            titleSlug: contest.titleSlug,
+            startTime: contest.startTime,
+            duration: contest.duration,
+            originStartTime: contest.originStartTime,
+            isVirtual: contest.isVirtual,
+            containsPremium: contest.containsPremium,
+          }))
+        );
+        pageNum += 1;
+      } while (contests.length < totalNum);
+
+      return contests;
+    }
+
+    const data = await this.graphql<unknown>('CONTEST_LIST', this.queries.CONTEST_LIST_QUERY);
+    const validated = ContestListSchema.parse(data);
+    return validated.allContests;
+  }
+
+  async getContest(titleSlug: string): Promise<ContestDetail> {
+    const data = await this.graphql<unknown>('CONTEST_DETAIL', this.queries.CONTEST_DETAIL_QUERY, {
+      titleSlug,
+    });
+    const validated = ContestDetailResponseSchema.parse(data);
+
+    if (!validated.contest) {
+      throw new Error(`Contest "${titleSlug}" not found`);
+    }
+
+    return validated.contest;
   }
 
   async getRandomProblem(filters: ProblemListFilters = {}): Promise<string> {

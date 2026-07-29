@@ -17,6 +17,7 @@ A modern, feature-rich LeetCode CLI built with TypeScript.
 - 📋 **List problems** - Filter by difficulty, status, tags, and search
 - 📖 **Beautiful problem display** - Formatted output with examples and constraints
 - 📝 **Generate solution files** - Auto-organized by difficulty and category
+- ♻️ **Reset solution files** - Restore an existing local solution to the original stub
 - 🧪 **Test solutions** - Run against sample test cases
 - 📤 **Submit solutions** - Submit directly to LeetCode
 - 📊 **View statistics** - Track your progress
@@ -63,6 +64,9 @@ leetcode daily
 # Pick a problem and generate solution file
 leetcode pick 1
 
+# Reset an existing solution back to the original stub
+leetcode reset 1
+
 # Test your solution (any format works!)
 leetcode test 1                              # Problem ID
 leetcode test 1.two-sum.java                 # Filename
@@ -108,6 +112,7 @@ The CLI keeps command semantics the same and applies site-specific GraphQL queri
 | `hint <id>`         | Show hints for a problem                 |
 | `pick <id>`         | Generate solution file                   |
 | `pick-batch <ids>`  | Pick multiple problems                   |
+| `reset <id>`        | Reset solution file to original stub     |
 | `bookmark <action>` | Manage problem bookmarks                 |
 | `note <id>`         | Manage problem notes                     |
 | `daily`             | Show today's challenge                   |
@@ -120,6 +125,7 @@ The CLI keeps command semantics the same and applies site-specific GraphQL queri
 | `snapshot <cmd>`    | Save and restore solution versions       |
 | `diff <id>`         | Compare solution with past submissions   |
 | `collab <cmd>`      | Collaborative coding with a partner      |
+| `contest [slug]`     | Browse and pick from contest problems   |
 | `workspace <cmd>`   | Manage workspaces for different contexts |
 | `config`            | View or set configuration                |
 | `sync`              | Sync solutions to Git repository         |
@@ -176,6 +182,15 @@ leetcode pick 175 --lang sql
 
 # Skip opening in editor
 leetcode pick 1 --no-open
+```
+
+### Reset Problem
+
+Reset an existing local solution file back to the original LeetCode stub. This overwrites the file immediately.
+
+```bash
+leetcode reset 1
+leetcode reset two-sum
 ```
 
 ### Test & Submit
@@ -311,6 +326,32 @@ leetcode collab status
 
 # Leave session
 leetcode collab leave
+```
+
+### Contest Problems
+
+```bash
+# Browse contests and select a problem interactively
+leetcode contest
+
+# Jump directly to a contest by slug
+leetcode contest weekly-contest-401
+
+# Override language for solution generation
+leetcode contest weekly-contest-401 -l python3
+
+# Skip opening in editor
+leetcode contest --no-open
+```
+
+### Reset Solution
+
+```bash
+# Reset a solution file back to the original LeetCode stub (by problem ID)
+leetcode reset 1
+
+# Reset by problem slug
+leetcode reset two-sum
 ```
 
 ### Solution Snapshots

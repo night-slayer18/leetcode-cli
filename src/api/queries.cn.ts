@@ -1,6 +1,7 @@
 // GraphQL queries for leetcode.cn (China schema)
 import {
   DAILY_CHALLENGE_QUERY as DAILY_CHALLENGE_QUERY_GLOBAL,
+  CONTEST_DETAIL_QUERY as CONTEST_DETAIL_QUERY_GLOBAL,
   RANDOM_PROBLEM_QUERY,
   SUBMISSION_DETAILS_QUERY,
   SUBMISSION_LIST_QUERY,
@@ -156,6 +157,26 @@ export const SKILL_STATS_QUERY_CN = `
   }
 `;
 
+export const CONTEST_LIST_QUERY_CN = `
+  query contestHistory($pageNum: Int!, $pageSize: Int) {
+    contestHistory(pageNum: $pageNum, pageSize: $pageSize) {
+      totalNum
+      contests {
+        containsPremium
+        title
+        titleSlug
+        description
+        startTime
+        duration
+        originStartTime
+        isVirtual
+      }
+    }
+  }
+`;
+
+export const CONTEST_DETAIL_QUERY_CN = CONTEST_DETAIL_QUERY_GLOBAL;
+
 export const CN_QUERY_PACK: QueryPack = {
   PROBLEM_LIST_QUERY: PROBLEM_LIST_QUERY_CN,
   PROBLEM_DETAIL_QUERY: PROBLEM_DETAIL_QUERY_CN,
@@ -166,6 +187,8 @@ export const CN_QUERY_PACK: QueryPack = {
   SUBMISSION_LIST_QUERY,
   RANDOM_PROBLEM_QUERY,
   SUBMISSION_DETAILS_QUERY,
+  CONTEST_LIST_QUERY: CONTEST_LIST_QUERY_CN,
+  CONTEST_DETAIL_QUERY: CONTEST_DETAIL_QUERY_CN,
 };
 
 // Export for testing or targeted use
