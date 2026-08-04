@@ -2,6 +2,7 @@ import type { ConfigScreenModel, ConfigMsg, Command } from '../../types.js';
 import { Cmd } from '../../types.js';
 import { config } from '../../../storage/config.js';
 import { DEFAULT_LEETCODE_SITE, normalizeLeetCodeSiteInput } from '../../../utils/site.js';
+import { normalizeThemeInput, SUPPORTED_THEMES } from '../../theme.js';
 
 type ConfigOption = ConfigScreenModel['options'][number];
 
@@ -18,6 +19,12 @@ function buildOptions(currentConfig: ReturnType<typeof config.getConfig>): Confi
       label: 'LeetCode Site',
       description: 'Target site for API operations (leetcode.com or leetcode.cn)',
       value: currentConfig.site || DEFAULT_LEETCODE_SITE,
+    },
+    {
+      id: 'theme',
+      label: 'Color Theme',
+      description: `Color palette for the TUI (${SUPPORTED_THEMES.join(', ')})`,
+      value: currentConfig.theme ?? 'auto',
     },
     {
       id: 'editor',
@@ -54,6 +61,9 @@ function validate(option: ConfigOption, value: string): string | null {
   }
   if (option.id === 'site' && !normalizeLeetCodeSiteInput(trimmed)) {
     return 'Site must be leetcode.com or leetcode.cn';
+  }
+  if (option.id === 'theme' && !normalizeThemeInput(trimmed)) {
+    return `Theme must be one of: ${SUPPORTED_THEMES.join(', ')}`;
   }
   return null;
 }

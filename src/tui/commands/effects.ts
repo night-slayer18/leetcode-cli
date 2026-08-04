@@ -18,6 +18,7 @@ import { requestExit } from '../runtime.js';
 import got from 'got';
 import { configureLeetCodeClientSite } from '../../utils/auth.js';
 import { normalizeLeetCodeSiteInput } from '../../utils/site.js';
+import { applyTheme, normalizeThemeInput } from '../theme.js';
 
 const RELEASES_URL =
   'https://raw.githubusercontent.com/night-slayer18/leetcode-cli/main/docs/releases.md';
@@ -266,6 +267,14 @@ function saveConfig(key: string, value: string): void {
     case 'repo':
       config.setRepo(value);
       break;
+    case 'theme': {
+      const theme = normalizeThemeInput(value);
+      if (theme) {
+        config.setTheme(theme);
+        applyTheme(theme);
+      }
+      break;
+    }
   }
 }
 

@@ -177,10 +177,13 @@ export type SupportedLanguage =
 
 export type LeetCodeSite = 'leetcode.com' | 'leetcode.cn';
 
+export type ThemeName = 'dark' | 'light' | 'auto';
+
 export interface UserConfig {
   language: SupportedLanguage;
   editor?: string;
   workDir: string;
   repo?: string;
   site?: LeetCodeSite;
+  theme?: ThemeName;
 }
