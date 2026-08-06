@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
 import { isValidWorkspaceName } from '../utils/validation.js';
-import type { LeetCodeSite } from '../types.js';
+import type { LeetCodeSite, ThemeName } from '../types.js';
 
 export interface WorkspaceConfig {
   workDir: string;
@@ -11,6 +11,7 @@ export interface WorkspaceConfig {
   editor?: string;
   syncRepo?: string;
   site?: LeetCodeSite;
+  theme?: ThemeName;
 }
 
 export interface WorkspaceRegistry {

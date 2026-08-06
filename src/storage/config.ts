@@ -1,8 +1,10 @@
 // Configuration management - delegates to workspace storage
 import { join } from 'path';
-import type { LeetCodeSite, SupportedLanguage, UserConfig } from '../types.js';
+import type { LeetCodeSite, SupportedLanguage, ThemeName, UserConfig } from '../types.js';
 import { workspaceStorage } from './workspaces.js';
 import { DEFAULT_LEETCODE_SITE, normalizeLeetCodeSiteInput } from '../utils/site.js';
+
+const DEFAULT_THEME: ThemeName = 'auto';
 
 export const config = {
   getConfig(): UserConfig {
@@ -13,6 +15,7 @@ export const config = {
       workDir: wsConfig.workDir,
       repo: wsConfig.syncRepo,
       site: normalizeLeetCodeSiteInput(wsConfig.site ?? '') ?? DEFAULT_LEETCODE_SITE,
+      theme: wsConfig.theme ?? DEFAULT_THEME,
     };
   },
 
@@ -34,6 +37,10 @@ export const config = {
 
   setSite(site: LeetCodeSite): void {
     workspaceStorage.setConfig({ site });
+  },
+
+  setTheme(theme: ThemeName): void {
+    workspaceStorage.setConfig({ theme });
   },
 
   deleteRepo(): void {
@@ -62,6 +69,10 @@ export const config = {
     return (
       normalizeLeetCodeSiteInput(workspaceStorage.getConfig().site ?? '') ?? DEFAULT_LEETCODE_SITE
     );
+  },
+
+  getTheme(): ThemeName {
+    return workspaceStorage.getConfig().theme ?? DEFAULT_THEME;
   },
 
   getPath(): string {

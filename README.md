@@ -427,7 +427,16 @@ leetcode config --lang sql
 leetcode config --editor code
 leetcode config --workdir ~/leetcode
 leetcode config --repo https://github.com/username/leetcode-solutions.git
+
+# Pick a color theme for the TUI (dark, light, or auto)
+leetcode config --theme light
+leetcode config --theme dark
+leetcode config --theme auto
 ```
+
+The `--theme` setting is workspace-scoped. `auto` (the default) probes the
+terminal for its background color via OSC 11 and falls back to `COLORFGBG`,
+then to `dark`, if the terminal doesn't reply.
 
 ## Folder Structure
 
