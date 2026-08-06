@@ -1,9 +1,6 @@
 name: PR Review
 
 on:
-  pull_request:
-    branches: [main, dev]
-    types: [opened, edited, synchronize, reopened]
   pull_request_target:
     branches: [main, dev]
     types: [opened, edited, synchronize, reopened]
