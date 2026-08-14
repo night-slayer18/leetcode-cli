@@ -62,9 +62,9 @@ export const CnDailyChallengeSchema = z.object({
             questionId: z.union([z.string(), z.number()]).optional(),
             frontendQuestionId: z.union([z.string(), z.number()]).optional(),
             questionFrontendId: z.union([z.string(), z.number()]).optional(),
-            difficulty: z.string().optional(),
+            difficulty: z.string().nullable().optional(),
             title: z.string().optional(),
-            titleCn: z.string().optional(),
+            titleCn: z.string().nullable().optional(),
             titleSlug: z.string().optional(),
             paidOnly: z.boolean().optional(),
             isPaidOnly: z.boolean().optional(),
@@ -73,16 +73,19 @@ export const CnDailyChallengeSchema = z.object({
             topicTags: z
               .array(
                 z.object({
-                  name: z.string().optional(),
-                  nameTranslated: z.string().optional(),
-                  id: z.union([z.string(), z.number()]).optional(),
+                  name: z.string().nullable().optional(),
+                  nameTranslated: z.string().nullable().optional(),
+                  id: z.union([z.string(), z.number()]).nullable().optional(),
                 })
               )
+              .nullable()
               .optional(),
           })
+          .nullable()
           .optional(),
       })
     )
+    .nullable()
     .optional(),
 });
 
@@ -93,21 +96,22 @@ export const CnProblemListSchema = z.object({
       z.object({
         frontendQuestionId: z.union([z.string(), z.number()]).optional(),
         title: z.string().optional(),
-        titleCn: z.string().optional(),
+        titleCn: z.string().nullable().optional(),
         titleSlug: z.string().optional(),
-        difficulty: z.string().optional(),
+        difficulty: z.string().nullable().optional(),
         paidOnly: z.boolean().optional(),
         acRate: z.union([z.number(), z.string()]).optional(),
         status: z.string().nullable().optional(),
         topicTags: z
           .array(
             z.object({
-              name: z.string().optional(),
-              nameTranslated: z.string().optional(),
-              id: z.union([z.string(), z.number()]).optional(),
-              slug: z.string().optional(),
+              name: z.string().nullable().optional(),
+              nameTranslated: z.string().nullable().optional(),
+              id: z.union([z.string(), z.number()]).nullable().optional(),
+              slug: z.string().nullable().optional(),
             })
           )
+          .nullable()
           .optional(),
       })
     ),
@@ -119,21 +123,22 @@ export const CnProblemDetailSchema = z.object({
     questionId: z.union([z.string(), z.number()]).optional(),
     questionFrontendId: z.union([z.string(), z.number()]).optional(),
     title: z.string().optional(),
-    translatedTitle: z.string().optional(),
+    translatedTitle: z.string().nullable().optional(),
     titleSlug: z.string().optional(),
     translatedContent: z.string().nullable().optional(),
-    difficulty: z.string().optional(),
+    difficulty: z.string().nullable().optional(),
     isPaidOnly: z.boolean().optional(),
     acRate: z.union([z.number(), z.string()]).optional(),
     status: z.string().nullable().optional(),
     topicTags: z
       .array(
         z.object({
-          name: z.string().optional(),
-          slug: z.string().optional(),
-          translatedName: z.string().optional(),
+          name: z.string().nullable().optional(),
+          slug: z.string().nullable().optional(),
+          translatedName: z.string().nullable().optional(),
         })
       )
+      .nullable()
       .optional(),
     codeSnippets: z
       .array(
@@ -145,12 +150,12 @@ export const CnProblemDetailSchema = z.object({
       )
       .nullable()
       .optional(),
-    sampleTestCase: z.string().optional(),
-    exampleTestcases: z.string().optional(),
-    hints: z.array(z.string()).optional(),
-    stats: z.string().optional(),
+    sampleTestCase: z.string().nullable().optional(),
+    exampleTestcases: z.string().nullable().optional(),
+    hints: z.array(z.string()).nullable().optional(),
+    stats: z.string().nullable().optional(),
   }),
-  });
+});
 
 // --- Contest Schemas ---
 
