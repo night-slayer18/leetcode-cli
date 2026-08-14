@@ -61,9 +61,9 @@ interface CnProblemDetailShape {
 }
 
 interface CnDailyRecord {
-  date?: string;
-  link?: string;
-  question?: CnQuestion;
+  date?: string | null;
+  link?: string | null;
+  question?: CnQuestion | null;
 }
 
 interface CnAcceptedItem {
@@ -176,7 +176,7 @@ function toProblemFromListEntry(question: CnProblemListItem): Problem {
 }
 
 export function normalizeCnDailyChallenge(input: {
-  todayRecord?: CnDailyRecord[];
+  todayRecord?: CnDailyRecord[] | null;
 }): DailyChallenge {
   const record = input.todayRecord?.[0];
   if (!record || !record.question) {
