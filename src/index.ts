@@ -71,7 +71,7 @@ program
   .name('leetcode')
   .usage('[command] [options]')
   .description(chalk.bold.cyan('🔥 A modern LeetCode CLI built with TypeScript'))
-  .version('3.4.0', '-v, --version', 'Output the version number')
+  .version('3.5.0', '-v, --version', 'Output the version number')
   .helpOption('-h, --help', 'Display help for command')
   .addHelpText(
     'after',
@@ -451,6 +451,7 @@ program
   .option('-e, --editor <editor>', 'Set editor command')
   .option('-w, --workdir <path>', 'Set working directory for solutions')
   .option('-r, --repo [url]', 'Set Git repository URL (omit value to clear)')
+  .option('--theme <theme>', 'Set color theme (dark, light, auto)')
   .option('-i, --interactive', 'Interactive configuration')
   .addHelpText(
     'after',
@@ -463,6 +464,7 @@ ${chalk.yellow('Examples:')}
   ${chalk.cyan('$ leetcode config -w ~/leetcode')}    Set solutions folder
   ${chalk.cyan('$ leetcode config -r https://...')}   Set git repository
   ${chalk.cyan('$ leetcode config --repo')}            Clear git repository
+  ${chalk.cyan('$ leetcode config --theme light')}    Use light color theme
   ${chalk.cyan('$ leetcode config -i')}               Interactive setup
 
 ${chalk.gray(`Supported languages: ${getSupportedLanguagesLabel()}`)}

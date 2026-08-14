@@ -104,7 +104,7 @@ jobs:
           # failing the job (they require a manual semver-major update).
           npm audit || true
 
-      # ── Commit, push, PR to dev, then PR to main ──────────────────────────
+      # ── Commit, push, and open PR to dev ───────────────────────────────────
       - name: Commit fix and open PR to dev
         if: steps.audit.outputs.found == 'true' && steps.changes.outputs.has_changes == 'true'
         env:
@@ -118,7 +118,7 @@ jobs:
 
           git checkout -b "$BRANCH"
           git add package.json package-lock.json
-          git commit -m "fix(deps): auto npm audit fix ${DATE}"
+          git commit -s -m "fix(deps): auto npm audit fix ${DATE}"
           git push origin "$BRANCH"
 
           gh pr create \
@@ -135,32 +135,4 @@ jobs:
           - All checks passed: typecheck ✅  lint ✅  build ✅  tests ✅
 
           ### Next steps
-          This PR is set to auto-merge into \`dev\` once all required checks pass.
-          A follow-up PR from \`dev → main\` will be opened automatically after."
-
-          # Auto-merge into dev when all checks pass
-          gh pr merge "$BRANCH" --merge --auto
-
-      - name: Open PR from dev to main
-        if: steps.audit.outputs.found == 'true' && steps.changes.outputs.has_changes == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          DATE=$(date +%Y%m%d)
-
-          # Wait for the dev merge to land before targeting main
-          sleep 30
-
-          gh pr create \
-            --base main \
-            --head dev \
-            --title "fix(deps): security audit fix (${DATE})" \
-            --body "## Security Audit Fix → main
-
-          Automatically opened after the audit fix was merged into \`dev\` and all CI checks passed.
-
-          See the dev PR for full details." \
-            || echo "::notice::PR dev→main already open or dev is already up to date with main"
-
-          # Auto-merge into main when all checks pass
-          gh pr merge dev --merge --auto || true
+          Please review and merge this PR into \`dev\` manually."

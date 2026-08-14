@@ -10,6 +10,7 @@ import {
   normalizeLeetCodeSiteInput,
   SUPPORTED_LEETCODE_SITES,
 } from '../utils/site.js';
+import { normalizeThemeInput, SUPPORTED_THEMES } from '../tui/theme.js';
 
 interface ConfigOptions {
   lang?: string;
@@ -17,12 +18,20 @@ interface ConfigOptions {
   workdir?: string;
   repo?: string | boolean;
   site?: string;
+  theme?: string;
 }
 
 export async function configCommand(options: ConfigOptions): Promise<void> {
   const hasRepoOption = options.repo !== undefined;
 
-  if (!options.lang && !options.editor && !options.workdir && !hasRepoOption && !options.site) {
+  if (
+    !options.lang &&
+    !options.editor &&
+    !options.workdir &&
+    !hasRepoOption &&
+    !options.site &&
+    !options.theme
+  ) {
     await showCurrentConfig();
     return;
   }
@@ -96,12 +105,24 @@ export async function configCommand(options: ConfigOptions): Promise<void> {
     config.setSite(normalizedSite);
     console.log(chalk.green(`✓ Site set to ${normalizedSite}`));
   }
+
+  if (options.theme) {
+    const normalizedTheme = normalizeThemeInput(options.theme);
+    if (!normalizedTheme) {
+      console.log(chalk.red(`Unsupported theme: ${options.theme}`));
+      console.log(chalk.gray(`Supported: ${SUPPORTED_THEMES.join(', ')}`));
+      return;
+    }
+    config.setTheme(normalizedTheme);
+    console.log(chalk.green(`✓ Theme set to ${normalizedTheme}`));
+  }
 }
 
 export async function configInteractiveCommand(): Promise<void> {
   const currentConfig = config.getConfig();
   const workspace = config.getActiveWorkspace();
   const currentSite = normalizeLeetCodeSiteInput(currentConfig.site ?? '') ?? DEFAULT_LEETCODE_SITE;
+  const currentTheme = currentConfig.theme ?? 'auto';
 
   console.log();
   console.log(chalk.bold.cyan(`📁 Configuring workspace: ${workspace}`));
@@ -126,6 +147,13 @@ export async function configInteractiveCommand(): Promise<void> {
       default: currentSite,
     },
     {
+      type: 'list',
+      name: 'theme',
+      message: 'Color theme:',
+      choices: SUPPORTED_THEMES.map((t) => ({ name: t, value: t })),
+      default: currentTheme,
+    },
+    {
       type: 'input',
       name: 'editor',
       message: 'Editor command (e.g., code, zed, vim, nvim):',
@@ -148,6 +176,7 @@ export async function configInteractiveCommand(): Promise<void> {
   config.setLanguage(answers.language);
   config.setEditor(answers.editor);
   config.setWorkDir(answers.workDir);
+  config.setTheme(answers.theme);
   if (answers.repo) {
     config.setRepo(answers.repo);
   } else {
@@ -198,6 +227,7 @@ async function showCurrentConfig(): Promise<void> {
   console.log();
   console.log(chalk.gray('Language:    '), chalk.white(currentConfig.language));
   console.log(chalk.gray('Site:        '), chalk.white(site));
+  console.log(chalk.gray('Theme:       '), chalk.white(currentConfig.theme ?? 'auto'));
   console.log(chalk.gray('Editor:      '), chalk.white(currentConfig.editor ?? '(not set)'));
   console.log(chalk.gray('Work Dir:    '), chalk.white(currentConfig.workDir));
   console.log(chalk.gray('Repo URL:    '), chalk.white(currentConfig.repo ?? '(not set)'));

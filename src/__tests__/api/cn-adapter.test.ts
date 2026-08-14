@@ -151,6 +151,85 @@ describe('cn adapters', () => {
     expect(result.companyTags).toBeNull();
   });
 
+  it('handles null translatedName in topicTags without failing validation', () => {
+    const raw = {
+      question: {
+        questionId: '22',
+        questionFrontendId: '22',
+        title: 'Generate Parentheses',
+        translatedTitle: '括号生成',
+        titleSlug: 'generate-parentheses',
+        translatedContent: '<p>数字 n 代表生成括号的对数...</p>',
+        difficulty: 'Medium',
+        isPaidOnly: false,
+        acRate: 0.78,
+        status: null,
+        topicTags: [
+          { name: 'String', slug: 'string', translatedName: '字符串' },
+          { name: 'Dynamic Programming', slug: 'dynamic-programming', translatedName: '动态规划' },
+          { name: 'Backtracking', slug: 'backtracking', translatedName: '回溯' },
+          { name: 'SpecialTagWithoutTranslation', slug: 'special', translatedName: null },
+        ],
+        codeSnippets: null,
+        sampleTestCase: '3',
+        exampleTestcases: '3\n1',
+        hints: null,
+        stats: null,
+      },
+    };
+
+    const parsed = CnProblemDetailSchema.parse(raw);
+    const result = normalizeCnProblemDetail(parsed);
+
+    expect(result.title).toBe('括号生成');
+    expect(result.topicTags).toEqual([
+      { name: '字符串', slug: 'string' },
+      { name: '动态规划', slug: 'dynamic-programming' },
+      { name: '回溯', slug: 'backtracking' },
+      { name: 'SpecialTagWithoutTranslation', slug: 'special' },
+    ]);
+    expect(result.hints).toEqual([]);
+    expect(result.stats).toBe('{}');
+  });
+
+  it('handles null nameTranslated in problem list and daily challenge schemas', () => {
+    const listParsed = CnProblemListSchema.parse({
+      problemsetQuestionList: {
+        total: 1,
+        questions: [
+          {
+            frontendQuestionId: '22',
+            title: 'Generate Parentheses',
+            titleCn: '括号生成',
+            titleSlug: 'generate-parentheses',
+            difficulty: 'Medium',
+            paidOnly: false,
+            topicTags: [{ name: 'Backtracking', nameTranslated: null, slug: 'backtracking' }],
+          },
+        ],
+      },
+    });
+
+    const listResult = normalizeCnProblemList(listParsed);
+    expect(listResult.problems[0]?.topicTags).toEqual([{ name: 'Backtracking', slug: 'backtracking' }]);
+
+    const dailyResult = normalizeCnDailyChallenge({
+      todayRecord: [
+        {
+          date: '2026-08-14',
+          question: {
+            questionId: '22',
+            title: 'Generate Parentheses',
+            titleCn: null,
+            topicTags: [{ name: 'Backtracking', nameTranslated: null, id: null }],
+          },
+        },
+      ],
+    });
+    expect(dailyResult.question.title).toBe('Generate Parentheses');
+    expect(dailyResult.question.topicTags).toEqual([{ name: 'Backtracking', slug: 'backtracking' }]);
+  });
+
   it('normalizes cn profile payload into shared user profile shape', () => {
     const profile = normalizeCnUserProfile('night-slayer', {
       userProfilePublicProfile: {

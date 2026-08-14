@@ -1,69 +1,69 @@
 import type { DailyChallenge, Problem, ProblemDetail } from '../../types.js';
 
 interface CnTopicTag {
-  name?: string;
-  nameTranslated?: string;
-  id?: string | number;
+  name?: string | null;
+  nameTranslated?: string | null;
+  id?: string | number | null;
 }
 
 interface CnQuestion {
-  questionId?: string | number;
-  frontendQuestionId?: string | number;
-  questionFrontendId?: string | number;
-  difficulty?: string;
-  title?: string;
-  titleCn?: string;
-  titleSlug?: string;
-  paidOnly?: boolean;
-  isPaidOnly?: boolean;
-  acRate?: number | string;
+  questionId?: string | number | null;
+  frontendQuestionId?: string | number | null;
+  questionFrontendId?: string | number | null;
+  difficulty?: string | null;
+  title?: string | null;
+  titleCn?: string | null;
+  titleSlug?: string | null;
+  paidOnly?: boolean | null;
+  isPaidOnly?: boolean | null;
+  acRate?: number | string | null;
   status?: string | null;
-  topicTags?: CnTopicTag[];
+  topicTags?: CnTopicTag[] | null;
 }
 
 interface CnProblemListItem {
-  frontendQuestionId?: string | number;
-  title?: string;
-  titleCn?: string;
-  titleSlug?: string;
-  difficulty?: string;
-  paidOnly?: boolean;
-  acRate?: number | string;
+  frontendQuestionId?: string | number | null;
+  title?: string | null;
+  titleCn?: string | null;
+  titleSlug?: string | null;
+  difficulty?: string | null;
+  paidOnly?: boolean | null;
+  acRate?: number | string | null;
   status?: string | null;
-  topicTags?: Array<CnTopicTag & { slug?: string }>;
+  topicTags?: Array<CnTopicTag & { slug?: string | null }> | null;
 }
 
 interface CnProblemDetailTag {
-  name?: string;
-  slug?: string;
-  translatedName?: string;
+  name?: string | null;
+  slug?: string | null;
+  translatedName?: string | null;
 }
 
 interface CnProblemDetailShape {
   question: {
-    questionId?: string | number;
-    questionFrontendId?: string | number;
-    title?: string;
-    translatedTitle?: string;
-    titleSlug?: string;
+    questionId?: string | number | null;
+    questionFrontendId?: string | number | null;
+    title?: string | null;
+    translatedTitle?: string | null;
+    titleSlug?: string | null;
     translatedContent?: string | null;
-    difficulty?: string;
-    isPaidOnly?: boolean;
-    acRate?: number | string;
+    difficulty?: string | null;
+    isPaidOnly?: boolean | null;
+    acRate?: number | string | null;
     status?: string | null;
-    topicTags?: CnProblemDetailTag[];
+    topicTags?: CnProblemDetailTag[] | null;
     codeSnippets?: Array<{ lang: string; langSlug: string; code: string }> | null;
-    sampleTestCase?: string;
-    exampleTestcases?: string;
-    hints?: string[];
-    stats?: string;
+    sampleTestCase?: string | null;
+    exampleTestcases?: string | null;
+    hints?: string[] | null;
+    stats?: string | null;
   };
 }
 
 interface CnDailyRecord {
-  date?: string;
-  link?: string;
-  question?: CnQuestion;
+  date?: string | null;
+  link?: string | null;
+  question?: CnQuestion | null;
 }
 
 interface CnAcceptedItem {
@@ -102,7 +102,7 @@ interface CnSkillShape {
   } | null;
 }
 
-function toTitleCaseDifficulty(difficulty?: string): Problem['difficulty'] {
+function toTitleCaseDifficulty(difficulty?: string | null): Problem['difficulty'] {
   const value = (difficulty ?? '').toLowerCase();
   if (value === 'easy') return 'Easy';
   if (value === 'hard') return 'Hard';
@@ -132,7 +132,7 @@ function toProblem(question: CnQuestion): Problem {
     const tagName = tag.nameTranslated || tag.name || 'Tag';
     return {
       name: tagName,
-      slug: tag.id !== undefined ? String(tag.id) : toSlug(tagName),
+      slug: tag.id !== undefined && tag.id !== null ? String(tag.id) : toSlug(tagName),
     };
   });
 
@@ -156,7 +156,9 @@ function toProblemFromListEntry(question: CnProblemListItem): Problem {
     const tagName = tag.nameTranslated || tag.name || 'Tag';
     return {
       name: tagName,
-      slug: tag.slug || (tag.id !== undefined ? String(tag.id) : toSlug(tagName)),
+      slug:
+        tag.slug ||
+        (tag.id !== undefined && tag.id !== null ? String(tag.id) : toSlug(tagName)),
     };
   });
 
@@ -174,7 +176,7 @@ function toProblemFromListEntry(question: CnProblemListItem): Problem {
 }
 
 export function normalizeCnDailyChallenge(input: {
-  todayRecord?: CnDailyRecord[];
+  todayRecord?: CnDailyRecord[] | null;
 }): DailyChallenge {
   const record = input.todayRecord?.[0];
   if (!record || !record.question) {

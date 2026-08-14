@@ -82,7 +82,16 @@ leetcode config --editor zed
 
 # Set Git repository
 leetcode config -r https://github.com/myuser/leetcode-solutions.git
+
+# Set TUI color theme (dark, light, or auto)
+leetcode config --theme light
+leetcode config --theme dark
+leetcode config --theme auto
 ```
+
+The `--theme` setting is workspace-scoped. `auto` (the default) probes the
+terminal for its background color via OSC 11 and falls back to `COLORFGBG`,
+then to `dark`, if the terminal doesn't reply.
 
 ## Settings
 
@@ -95,6 +104,7 @@ Config is stored per-workspace in `~/.leetcode/workspaces/<name>/config.json`.
 | `workDir`  | Directory where solution files are saved             |
 | `syncRepo` | Remote Git repository URL                            |
 | `site`     | LeetCode site (`leetcode.com` or `leetcode.cn`)      |
+| `theme`    | TUI color theme (`dark`, `light`, or `auto`)         |
 
 ## Workspace-Aware Storage
 
