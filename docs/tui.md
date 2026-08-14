@@ -69,6 +69,20 @@ Both screens use buffered editing:
 - `Esc`: cancel current edit or go back.
 - `Tab` / `h` / `l`: switch pane focus.
 
+## Color Themes
+
+The TUI supports dark and light themes, configured per workspace:
+
+- **`auto`** (default): Automatically detects terminal background color by querying via OSC 11, falling back to the `COLORFGBG` environment variable or dark theme if unresponded within 100ms.
+- **`dark`**: Classic dark palette with vibrant accents.
+- **`light`**: High-readability light theme tailored for light terminal backgrounds.
+
+Theme changes can be selected in the TUI **Config** screen (applies immediately on save) or via:
+
+```bash
+leetcode config --theme <dark|light|auto>
+```
+
 ## Terminal Cleanup Guarantees
 
 When leaving TUI (quit or opening external editor), the app restores terminal state:

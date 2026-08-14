@@ -1,5 +1,46 @@
 # Release Notes
 
+## v3.5.0
+
+> **Release Date**: 2026-08-14
+> **Focus**: TUI Color Themes (Light/Dark/Auto) + LeetCode China Tag Null Fix + CI/CD Workflow Overhaul
+
+### 🚀 Features
+
+#### Color Theme Setting (`leetcode config --theme <dark|light|auto>`)
+
+Added workspace-scoped color theme support for the Terminal UI (TUI) with dark, light, and auto modes.
+
+- **Modes**:
+  - `auto` (default): Automatically detects terminal background color by querying the terminal via OSC 11, falling back to `COLORFGBG` or dark mode if the terminal does not respond within 100ms.
+  - `dark`: High-contrast dark theme palette tailored for dark terminals.
+  - `light`: Clean, readable light theme palette optimized for light terminal backgrounds.
+- Configurable via CLI flag: `leetcode config --theme <dark|light|auto>`
+- Configurable interactively in the TUI **Config** screen with immediate live palette hot-reloading on save.
+
+```bash
+# Pick a color theme for the TUI
+leetcode config --theme light
+leetcode config --theme dark
+leetcode config --theme auto
+```
+
+### 🐛 Bug Fixes
+
+#### LeetCode China Null Tag Validation ([#24](https://github.com/night-slayer18/leetcode-cli/issues/24))
+
+- Fixed an `API Response Validation Failed` error when running `show` or `pick` against `leetcode.cn` for problems containing tags without Chinese translations.
+- Updated `CnProblemDetailSchema`, `CnProblemListSchema`, and `CnDailyChallengeSchema` Zod definitions to treat `translatedName`, `nameTranslated`, and associated optional metadata as nullable.
+- Gracefully falls back to the English tag `name` when Chinese translations are `null`.
+
+### ⚙️ CI/CD & Maintenance
+
+- **Concurrency Controls**: Added concurrency groups with `cancel-in-progress` to PR review and CI workflows to cancel redundant runs on push updates.
+- **Manual CI Dispatch**: Added `workflow_dispatch` trigger to the main CI workflow.
+- **Security Audit Cleanup**: Removed auto-merge logic from security audit automation workflows.
+
+---
+
 ## v3.4.0
 
 > **Release Date**: 2026-07-29

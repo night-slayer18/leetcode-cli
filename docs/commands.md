@@ -579,6 +579,7 @@ View or set configuration.
 - `-e, --editor <editor>` - Set editor command
 - `-w, --workdir <path>` - Set working directory for solutions
 - `-r, --repo [url]` - Set or clear Git repository URL
+- `-t, --theme <theme>` - Set TUI color theme (`dark`, `light`, or `auto`)
 - `-i, --interactive` - Interactive configuration mode
 
 **Examples**:
@@ -599,6 +600,12 @@ leetcode config --site leetcode.cn
 # Set editor
 leetcode config -e code
 leetcode config --editor vim
+leetcode config --editor zed
+
+# Set TUI color theme
+leetcode config --theme light
+leetcode config --theme dark
+leetcode config --theme auto
 
 # Set working directory
 leetcode config -w ~/leetcode
@@ -613,7 +620,7 @@ leetcode config -i
 leetcode config --interactive
 
 # Set multiple options
-leetcode config -l cpp -e code -w ~/leetcode
+leetcode config -l cpp -e code -w ~/leetcode --theme auto
 ```
 
 ---
