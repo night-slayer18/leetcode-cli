@@ -22,7 +22,8 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier --write \"**/*.{ts,json,md,yml,yaml}\"",
     "format:check": "prettier --check \"**/*.{ts,json,md,yml,yaml}\"",
-    "release": "node release.mjs"
+    "release": "node release.mjs",
+    "prepare": "husky"
   },
   "keywords": [
     "leetcode",
@@ -60,6 +61,8 @@
     "zod": "^4.3.5"
   },
   "devDependencies": {
+    "@commitlint/cli": "^21.2.2",
+    "@commitlint/config-conventional": "^21.2.2",
     "@types/diff": "^7.0.2",
     "@types/inquirer": "^9.0.7",
     "@types/node": "^22.10.2",
@@ -68,6 +71,8 @@
     "@typescript-eslint/parser": "^8.65.0",
     "@vitest/coverage-v8": "^4.0.16",
     "eslint": "^10.8.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.3.0",
     "prettier": "^3.8.0",
     "tsup": "^8.3.5",
     "typescript": "^5.7.2",
