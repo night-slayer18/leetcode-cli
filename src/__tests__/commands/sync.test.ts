@@ -8,6 +8,11 @@ vi.mock('../../storage/credentials.js', () => ({
   },
 }));
 
+vi.mock('../../utils/auth.js', () => ({
+  setupClientIfLoggedIn: vi.fn().mockResolvedValue(true),
+  configureLeetCodeClientSite: vi.fn(),
+}));
+
 vi.mock('../../storage/config.js', () => ({
   config: {
     getConfig: vi.fn(() => ({
@@ -74,6 +79,7 @@ vi.mock('inquirer', () => ({
 import { syncCommand } from '../../commands/sync.js';
 import { config } from '../../storage/config.js';
 import { leetcodeClient } from '../../api/client.js';
+import { setupClientIfLoggedIn } from '../../utils/auth.js';
 import { execSync, execFileSync } from 'child_process';
 import { existsSync } from 'fs';
 
@@ -85,6 +91,7 @@ describe('Sync Command', () => {
     vi.mocked(config.getWorkDir).mockReturnValue('/tmp/leetcode');
     vi.mocked(config.getRepo).mockReturnValue('https://github.com/user/repo.git');
     vi.mocked(execSync).mockReturnValue(Buffer.from(''));
+    vi.mocked(setupClientIfLoggedIn).mockResolvedValue(true);
     vi.mocked(leetcodeClient.getSubmissionList).mockResolvedValue([
       { id: '12345', statusDisplay: 'Accepted', lang: 'typescript', runtime: '56ms', timestamp: '1720000000', memory: '42.1 MB' },
     ]);
@@ -95,6 +102,108 @@ describe('Sync Command', () => {
       memoryDisplay: '42.1MB',
       memoryPercentile: 76.2,
       lang: { name: 'typescript' },
+    });
+  });
+
+  // ─── Credential loading (the "Stats unavailable" root-cause fix) ──────────
+
+  describe('credential loading', () => {
+    it('should call setupClientIfLoggedIn before any API call', async () => {
+      // Track call order
+      const order: string[] = [];
+      vi.mocked(setupClientIfLoggedIn).mockImplementation(async () => {
+        order.push('auth');
+        return true;
+      });
+      vi.mocked(leetcodeClient.getSubmissionList).mockImplementation(async () => {
+        order.push('api');
+        return [{ id: '1', statusDisplay: 'Accepted', lang: 'typescript', runtime: '0ms', timestamp: '0', memory: '0 MB' }];
+      });
+      vi.mocked(execSync).mockImplementation((cmd) => {
+        if (typeof cmd === 'string' && cmd === 'git status --porcelain') {
+          return ' M Easy/Array/1.two-sum.ts\n';
+        }
+        return Buffer.from('');
+      });
+
+      await syncCommand();
+
+      expect(order[0]).toBe('auth');
+      expect(order[1]).toBe('api');
+    });
+
+    it('should call setupClientIfLoggedIn even when there are no changes to sync', async () => {
+      vi.mocked(execSync).mockImplementation((cmd) => {
+        if (typeof cmd === 'string' && cmd === 'git status --porcelain') {
+          return '';
+        }
+        return Buffer.from('');
+      });
+
+      await syncCommand();
+
+      expect(setupClientIfLoggedIn).toHaveBeenCalledOnce();
+    });
+
+    it('should call setupClientIfLoggedIn even when work directory does not exist', async () => {
+      vi.mocked(existsSync).mockReturnValue(false);
+
+      await syncCommand();
+
+      expect(setupClientIfLoggedIn).toHaveBeenCalledOnce();
+    });
+
+    it('should still fetch stats and commit when setupClientIfLoggedIn returns false (not logged in)', async () => {
+      // Even if credentials aren't found, sync should proceed — the API will
+      // fall back to "Stats unavailable" rather than crashing the whole command.
+      vi.mocked(setupClientIfLoggedIn).mockResolvedValue(false);
+      vi.mocked(leetcodeClient.getSubmissionList).mockRejectedValue(new Error('Unauthorized'));
+      vi.mocked(execSync).mockImplementation((cmd) => {
+        if (typeof cmd === 'string' && cmd === 'git status --porcelain') {
+          return ' M Easy/Array/1.two-sum.ts\n';
+        }
+        return Buffer.from('');
+      });
+
+      await syncCommand();
+
+      // Should still commit, just with "Stats unavailable" body
+      expect(execFileSync).toHaveBeenCalledWith(
+        'git',
+        expect.arrayContaining(['commit', '-m', expect.stringContaining('Sync:'), '-m', expect.stringContaining('Stats unavailable')]),
+        expect.any(Object)
+      );
+    });
+
+    it('should produce correct stats in commit body when credentials are loaded', async () => {
+      // This is the regression test for the original bug:
+      // before the fix, stats were always "Stats unavailable" because credentials
+      // were never loaded. With the fix, the commit body should contain real stats.
+      vi.mocked(execSync).mockImplementation((cmd) => {
+        if (typeof cmd === 'string' && cmd === 'git status --porcelain') {
+          return ' M Easy/Array/20.valid-parentheses.ts\n M Easy/String/125.valid-palindrome.ts\n';
+        }
+        return Buffer.from('');
+      });
+
+      await syncCommand();
+
+      expect(setupClientIfLoggedIn).toHaveBeenCalledOnce();
+      expect(leetcodeClient.getSubmissionList).toHaveBeenCalledTimes(2);
+
+      const commitCall = vi.mocked(execFileSync).mock.calls.find(
+        (call) => call[0] === 'git' && Array.isArray(call[1]) && (call[1] as string[]).includes('commit')
+      );
+      const args = commitCall?.[1] as string[];
+      const bodyIdx = args.lastIndexOf('-m');
+      const body = args[bodyIdx + 1];
+
+      // Both problems should have real stats, NOT "Stats unavailable"
+      expect(body).toContain('valid-parentheses');
+      expect(body).toContain('valid-palindrome');
+      expect(body).not.toContain('Stats unavailable');
+      expect(body).toContain('Runtime: 56ms (beats 84.50%)');
+      expect(body).toContain('Memory: 42.1MB (beats 76.20%)');
     });
   });
 
