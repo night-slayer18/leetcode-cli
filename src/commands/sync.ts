@@ -5,6 +5,7 @@ import inquirer from 'inquirer';
 import ora from 'ora';
 import { config } from '../storage/config.js';
 import { leetcodeClient } from '../api/client.js';
+import { setupClientIfLoggedIn } from '../utils/auth.js';
 import path from 'path';
 
 function sanitizeRepoName(name: string): string {
@@ -167,6 +168,8 @@ async function setupRemote(workDir: string): Promise<string> {
 }
 
 export async function syncCommand(): Promise<void> {
+  await setupClientIfLoggedIn();
+
   const workDir = config.getWorkDir();
 
   if (!existsSync(workDir)) {
@@ -209,7 +212,7 @@ export async function syncCommand(): Promise<void> {
     const lines = status.trim().split('\n');
     const count = lines.length;
     const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
-    
+
     // Fetch stats for all changed solution files.
     // To prevent duplicate queries and rate limiting, we track processed title slugs.
     const solutionsList: string[] = [];
@@ -227,7 +230,7 @@ export async function syncCommand(): Promise<void> {
         const [, problemId, titleSlug] = match;
         if (!processedTitleSlugs.has(titleSlug)) {
           processedTitleSlugs.add(titleSlug);
-          
+
           try {
             const submissions = await leetcodeClient.getSubmissionList(titleSlug, 5);
             const lastAC = submissions.find((s) => s.statusDisplay === 'Accepted');
@@ -237,7 +240,7 @@ export async function syncCommand(): Promise<void> {
               const memoryStr = details.memoryDisplay || details.memory || 'N/A';
               const runtimeBeats = details.runtimePercentile ? ` (beats ${details.runtimePercentile.toFixed(2)}%)` : '';
               const memoryBeats = details.memoryPercentile ? ` (beats ${details.memoryPercentile.toFixed(2)}%)` : '';
-              
+
               solutionsList.push(`- [${problemId}. ${titleSlug}] Runtime: ${runtimeStr}${runtimeBeats}, Memory: ${memoryStr}${memoryBeats}`);
             } else {
               solutionsList.push(`- [${problemId}. ${titleSlug}] No accepted submission stats found`);
