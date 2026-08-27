@@ -71,7 +71,7 @@ program
   .name('leetcode')
   .usage('[command] [options]')
   .description(chalk.bold.cyan('🔥 A modern LeetCode CLI built with TypeScript'))
-  .version('3.5.0', '-v, --version', 'Output the version number')
+  .version('3.5.1', '-v, --version', 'Output the version number')
   .helpOption('-h, --help', 'Display help for command')
   .addHelpText(
     'after',

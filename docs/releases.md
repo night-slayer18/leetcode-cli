@@ -1,5 +1,35 @@
 # Release Notes
 
+## v3.5.1
+
+> **Release Date**: 2026-08-27
+> **Focus**: Sync Stats Hotfix — credential loading + API schema fix
+
+### 🐛 Bug Fixes
+
+#### `leetcode sync` always showed "Stats unavailable"
+
+Two root causes were identified and fixed via live API probe:
+
+- **Missing credential loading**: `syncCommand()` called the LeetCode submission API without loading stored session credentials onto the HTTP client. Git authentication (SSH / PAT) is independent of the LeetCode session, so the command could push to GitHub while still being unauthenticated against the LeetCode API. Fixed by calling `setupClientIfLoggedIn()` at the start of `syncCommand()`.
+
+- **Schema type mismatch**: `SubmissionDetailsSchema` declared `runtime` and `memory` as `string`, but the LeetCode API returns them as `number` (raw milliseconds / bytes). Zod rejected every response, causing the `catch` block to fire for every user on every problem, regardless of auth status. Fixed by accepting `number | string` for both fields and making `lang` nullable to handle old submissions.
+
+#### Files changed
+- `src/commands/sync.ts` — `setupClientIfLoggedIn()` called at entry
+- `src/schemas/api.ts` — `SubmissionDetailsSchema` corrected field types
+- `src/types.ts` — `SubmissionDetails` interface updated to match
+
+### 🧪 Testing
+
+- Added `credential loading` test suite (5 tests) to `sync.test.ts`:
+  - Verifies `setupClientIfLoggedIn` is called before any API call
+  - Verifies auth runs even when there are no changes or work directory is missing
+  - Regression test using the exact problem slugs (`valid-parentheses`, `valid-palindrome`) from the original bug report — asserts commit body contains real stats, not "Stats unavailable"
+- Total sync tests: 20 (was 15)
+
+---
+
 ## v3.5.0
 
 > **Release Date**: 2026-08-14

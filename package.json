@@ -1,6 +1,6 @@
 {
   "name": "@night-slayer18/leetcode-cli",
-  "version": "3.5.0",
+  "version": "3.5.1",
   "description": "A modern LeetCode CLI built with TypeScript",
   "type": "module",
   "main": "dist/index.js",
@@ -21,7 +21,8 @@
     "lint:fix": "eslint src --ext .ts --fix",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write \"**/*.{ts,json,md,yml,yaml}\"",
-    "format:check": "prettier --check \"**/*.{ts,json,md,yml,yaml}\""
+    "format:check": "prettier --check \"**/*.{ts,json,md,yml,yaml}\"",
+    "release": "node release.mjs"
   },
   "keywords": [
     "leetcode",
