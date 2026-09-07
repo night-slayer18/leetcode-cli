@@ -28,6 +28,7 @@ import {
   ProblemDetailSchema,
   ProblemSchema,
   SubmissionDetailsSchema,
+  CnSubmissionDetailsSchema,
   SubmissionResultSchema,
   SubmissionSchema,
   TestResultSchema,
@@ -141,11 +142,9 @@ export class LeetCodeClient {
     return this.credentials;
   }
 
-  private resolveGraphQLEndpoints(operation: GraphQLOperation): readonly string[] {
+  private resolveGraphQLEndpoints(): readonly string[] {
     if (this.site === 'leetcode.cn') {
-      if (operation === 'SUBMISSION_LIST' || operation === 'SUBMISSION_DETAILS') {
-        return ['graphql/noj-go/', 'graphql/'];
-      }
+      // Submission queries also belong to this schema, not graphql/noj-go/.
       return ['graphql/'];
     }
 
@@ -170,7 +169,7 @@ export class LeetCodeClient {
     query: string,
     variables: Record<string, unknown> = {}
   ): Promise<T> {
-    const endpoints = this.resolveGraphQLEndpoints(operation);
+    const endpoints = this.resolveGraphQLEndpoints();
     let lastError: unknown = null;
 
     for (const endpoint of endpoints) {
@@ -500,10 +499,17 @@ export class LeetCodeClient {
 
   async getSubmissionDetails(submissionId: number): Promise<SubmissionDetails> {
     const data = await this.graphql<{
-      submissionDetails: SubmissionDetails;
+      submissionDetails: unknown;
     }>('SUBMISSION_DETAILS', this.queries.SUBMISSION_DETAILS_QUERY, { submissionId });
 
-    const validated = SubmissionDetailsSchema.parse(data.submissionDetails);
+    if (data.submissionDetails == null) {
+      throw new Error(
+        `Submission ${submissionId} is unavailable. Check your login and access to this submission.`
+      );
+    }
+    const schema =
+      this.site === 'leetcode.cn' ? CnSubmissionDetailsSchema : SubmissionDetailsSchema;
+    const validated = schema.parse(data.submissionDetails);
     return validated;
   }
 

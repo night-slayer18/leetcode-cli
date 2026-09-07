@@ -3,8 +3,6 @@ import {
   DAILY_CHALLENGE_QUERY as DAILY_CHALLENGE_QUERY_GLOBAL,
   CONTEST_DETAIL_QUERY as CONTEST_DETAIL_QUERY_GLOBAL,
   RANDOM_PROBLEM_QUERY,
-  SUBMISSION_DETAILS_QUERY,
-  SUBMISSION_LIST_QUERY,
   USER_STATUS_QUERY,
   type QueryPack,
 } from './queries.global.js';
@@ -177,6 +175,40 @@ export const CONTEST_LIST_QUERY_CN = `
 
 export const CONTEST_DETAIL_QUERY_CN = CONTEST_DETAIL_QUERY_GLOBAL;
 
+// CN uses different root fields; aliases preserve the shared client response shape.
+export const SUBMISSION_LIST_QUERY_CN = `
+  query submissionList($questionSlug: String!, $limit: Int, $offset: Int) {
+    questionSubmissionList: submissionList(
+      questionSlug: $questionSlug
+      limit: $limit
+      offset: $offset
+    ) {
+      submissions {
+        id
+        statusDisplay
+        lang
+        runtime
+        timestamp
+        memory
+      }
+    }
+  }
+`;
+
+export const SUBMISSION_DETAILS_QUERY_CN = `
+  query submissionDetails($submissionId: ID!) {
+    submissionDetails: submissionDetail(submissionId: $submissionId) {
+      code
+      runtime
+      runtimePercentile
+      memory
+      memoryPercentile
+      statusDisplay
+      lang
+    }
+  }
+`;
+
 export const CN_QUERY_PACK: QueryPack = {
   PROBLEM_LIST_QUERY: PROBLEM_LIST_QUERY_CN,
   PROBLEM_DETAIL_QUERY: PROBLEM_DETAIL_QUERY_CN,
@@ -184,9 +216,9 @@ export const CN_QUERY_PACK: QueryPack = {
   USER_PROFILE_QUERY: USER_PROFILE_QUERY_CN,
   SKILL_STATS_QUERY: SKILL_STATS_QUERY_CN,
   DAILY_CHALLENGE_QUERY: DAILY_CHALLENGE_QUERY_CN,
-  SUBMISSION_LIST_QUERY,
+  SUBMISSION_LIST_QUERY: SUBMISSION_LIST_QUERY_CN,
   RANDOM_PROBLEM_QUERY,
-  SUBMISSION_DETAILS_QUERY,
+  SUBMISSION_DETAILS_QUERY: SUBMISSION_DETAILS_QUERY_CN,
   CONTEST_LIST_QUERY: CONTEST_LIST_QUERY_CN,
   CONTEST_DETAIL_QUERY: CONTEST_DETAIL_QUERY_CN,
 };
