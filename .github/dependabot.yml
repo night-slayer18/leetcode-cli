@@ -7,8 +7,16 @@ updates:
     target-branch: 'dev'
     open-pull-requests-limit: 10
     groups:
+      dependencies:
+        dependency-type: 'production'
+        update-types:
+          - 'minor'
+          - 'patch'
       dev-dependencies:
         dependency-type: 'development'
+        update-types:
+          - 'minor'
+          - 'patch'
 
   - package-ecosystem: 'github-actions'
     directory: '/'
@@ -16,3 +24,7 @@ updates:
       interval: 'weekly'
     target-branch: 'dev'
     open-pull-requests-limit: 10
+    groups:
+      github-actions:
+        patterns:
+          - '*'
