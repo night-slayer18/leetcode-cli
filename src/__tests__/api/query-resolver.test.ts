@@ -6,10 +6,7 @@ import { DAILY_CHALLENGE_QUERY as DAILY_CHALLENGE_QUERY_GLOBAL } from '../../api
 import { CONTEST_DETAIL_QUERY as CONTEST_DETAIL_QUERY_GLOBAL } from '../../api/queries.global.js';
 import { CONTEST_LIST_QUERY as CONTEST_LIST_QUERY_GLOBAL } from '../../api/queries.global.js';
 import { DAILY_CHALLENGE_QUERY_CN } from '../../api/queries.cn.js';
-import {
-  CONTEST_DETAIL_QUERY_CN,
-  CONTEST_LIST_QUERY_CN,
-} from '../../api/queries.cn.js';
+import { CONTEST_DETAIL_QUERY_CN, CONTEST_LIST_QUERY_CN } from '../../api/queries.cn.js';
 
 describe('query resolver', () => {
   it('returns global query pack for leetcode.com', () => {

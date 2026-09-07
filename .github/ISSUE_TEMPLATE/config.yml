@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: GitHub Discussions / Questions
+    url: https://github.com/night-slayer18/leetcode-cli/discussions
+    about: Ask questions or discuss with the community.

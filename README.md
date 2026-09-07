@@ -125,7 +125,7 @@ The CLI keeps command semantics the same and applies site-specific GraphQL queri
 | `snapshot <cmd>`    | Save and restore solution versions       |
 | `diff <id>`         | Compare solution with past submissions   |
 | `collab <cmd>`      | Collaborative coding with a partner      |
-| `contest [slug]`     | Browse and pick from contest problems   |
+| `contest [slug]`    | Browse and pick from contest problems    |
 | `workspace <cmd>`   | Manage workspaces for different contexts |
 | `config`            | View or set configuration                |
 | `sync`              | Sync solutions to Git repository         |

@@ -34,11 +34,10 @@ describe('openInEditor', () => {
     child.emit('spawn');
     await opening;
 
-    expect(spawnMock).toHaveBeenCalledWith(
-      editor,
-      ['/tmp/leetcode/Easy/Array/1.two-sum.ts'],
-      { detached: true, stdio: 'ignore' }
-    );
+    expect(spawnMock).toHaveBeenCalledWith(editor, ['/tmp/leetcode/Easy/Array/1.two-sum.ts'], {
+      detached: true,
+      stdio: 'ignore',
+    });
     expect(child.unref).toHaveBeenCalledOnce();
     expect(openMock).not.toHaveBeenCalled();
   });

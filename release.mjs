@@ -7,9 +7,9 @@
  *   3. Typecheck → lint → build → tests
  *
  * Usage:
- *   npm run release patch   # 3.5.1 → 3.5.2
- *   npm run release minor   # 3.5.1 → 3.6.0
- *   npm run release major   # 3.5.1 → 4.0.0
+ *   npm run release patch   # 3.5.2 → 3.5.3
+ *   npm run release minor   # 3.5.2 → 3.6.0
+ *   npm run release major   # 3.5.2 → 4.0.0
  *   npm run release 3.6.0   # explicit version
  */
 

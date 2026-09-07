@@ -140,7 +140,11 @@ export async function contestCommand(
       return;
     }
 
-    if (operation === 'fetch contest' && error instanceof Error && /not found/i.test(error.message)) {
+    if (
+      operation === 'fetch contest' &&
+      error instanceof Error &&
+      /not found/i.test(error.message)
+    ) {
       failSpinner('Contest unavailable');
       console.log(chalk.yellow(`Contest "${selectedContestSlug ?? ''}" is unavailable.`));
       return;

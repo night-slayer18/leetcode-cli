@@ -223,6 +223,14 @@ export const SubmissionDetailsSchema = z.object({
   lang: z.object({ name: z.string() }).nullable().optional(),
 });
 
+// CN returns the language as a scalar rather than Global's { name } object.
+export const CnSubmissionDetailsSchema = SubmissionDetailsSchema.extend({
+  lang: z.string().nullable().optional(),
+}).transform(({ lang, ...details }) => ({
+  ...details,
+  lang: lang == null ? lang : { name: lang },
+}));
+
 export const TestResultSchema = z.object({
   status_code: z.number(),
   status_msg: z.string(),

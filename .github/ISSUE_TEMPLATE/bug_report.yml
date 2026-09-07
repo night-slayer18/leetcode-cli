@@ -1,0 +1,89 @@
+name: Bug Report
+description: Report a bug or error in leetcode-cli
+title: 'fix: '
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+        Please make sure you are running the latest version of `leetcode-cli` before reporting.
+
+  - type: input
+    id: version
+    attributes:
+      label: CLI Version
+      description: What version of leetcode-cli are you using? (Run `leetcode --version`)
+      placeholder: e.g. 3.5.1
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      description: What OS are you running?
+      options:
+        - macOS
+        - Linux (Ubuntu/Debian)
+        - Linux (Arch/Fedora/Other)
+        - Windows (WSL)
+        - Windows (Native/PowerShell/CMD)
+        - Docker
+    validations:
+      required: true
+
+  - type: input
+    id: node-version
+    attributes:
+      label: Node.js Version
+      description: What version of Node.js are you using? (Run `node --version`)
+      placeholder: e.g. v22.10.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: site
+    attributes:
+      label: LeetCode Site
+      description: Which site are you authenticated against?
+      options:
+        - leetcode.com (Global)
+        - leetcode.cn (China)
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Problem Description
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to Reproduce
+      description: Steps to reproduce the behavior.
+      placeholder: |
+        1. Run 'leetcode ...'
+        2. Enter '...'
+        3. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: A clear and concise description of what you expected to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Log Output or Screenshots
+      description: Please copy and paste any relevant logs, terminal output, or stack traces.
+      render: shell

@@ -157,8 +157,7 @@ function toProblemFromListEntry(question: CnProblemListItem): Problem {
     return {
       name: tagName,
       slug:
-        tag.slug ||
-        (tag.id !== undefined && tag.id !== null ? String(tag.id) : toSlug(tagName)),
+        tag.slug || (tag.id !== undefined && tag.id !== null ? String(tag.id) : toSlug(tagName)),
     };
   });
 

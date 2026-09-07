@@ -1,5 +1,39 @@
 # Release Notes
 
+## v3.5.2
+
+> **Release Date**: 2026-09-07
+> **Focus**: LeetCode China Submission History, Download & Diff Hotfix
+
+### 🐛 Bug Fixes
+
+#### LeetCode China Submission History & Details ([#27](https://github.com/night-slayer18/leetcode-cli/pull/27))
+
+Fixed `leetcode submissions`, `--download`, and `leetcode diff` failures when configured with `leetcode.cn`:
+
+- **Schema root field alignment**: LeetCode China's GraphQL API exposes `submissionList` and `submissionDetail` (singular) rather than Global's `questionSubmissionList` and `submissionDetails` (plural). Configured query aliasing to preserve the shared response shape across both platforms.
+- **Endpoint routing**: Removed incompatible failover to `/graphql/noj-go/` for submission queries, directing all LeetCode China queries cleanly to `/graphql/`.
+- **Submission detail ID parameter**: Updated China submission detail queries to use `$submissionId: ID!` as required by the CN GraphQL schema.
+- **Language metadata normalization**: Normalized China's scalar `lang` string (e.g., `"python3"`) into `{ name: lang }` via `CnSubmissionDetailsSchema` so downstream solution file download and diff consumers operate consistently on both platforms.
+- **Unavailable submission error handling**: Explicitly catch `null` submission details to report a clear, readable error when submissions are inaccessible or private.
+
+#### Files changed
+
+- `src/api/queries.cn.ts` — Added `SUBMISSION_LIST_QUERY_CN` and `SUBMISSION_DETAILS_QUERY_CN`
+- `src/schemas/api.ts` — Added `CnSubmissionDetailsSchema` with language scalar transform
+- `src/api/client.ts` — Fixed endpoint resolution and schema selection for submission details
+- `docs/testing.md` — Added manual verification instructions and API regression docs
+
+### 🧪 Testing
+
+- Added `src/__tests__/api/client-submissions.test.ts` with 6 API regression tests:
+  - Validates submission list querying and pagination across `leetcode.cn` and `leetcode.com`
+  - Validates submission details retrieval and language normalization across both schemas
+  - Validates empty submission histories and unavailable submission error handling
+- Total test suite: 356 tests passed across 38 suites
+
+---
+
 ## v3.5.1
 
 > **Release Date**: 2026-08-27
@@ -16,6 +50,7 @@ Two root causes were identified and fixed via live API probe:
 - **Schema type mismatch**: `SubmissionDetailsSchema` declared `runtime` and `memory` as `string`, but the LeetCode API returns them as `number` (raw milliseconds / bytes). Zod rejected every response, causing the `catch` block to fire for every user on every problem, regardless of auth status. Fixed by accepting `number | string` for both fields and making `lang` nullable to handle old submissions.
 
 #### Files changed
+
 - `src/commands/sync.ts` — `setupClientIfLoggedIn()` called at entry
 - `src/schemas/api.ts` — `SubmissionDetailsSchema` corrected field types
 - `src/types.ts` — `SubmissionDetails` interface updated to match
@@ -139,6 +174,7 @@ New command to generate tab-completion scripts for your shell.
 Completes commands, subcommands, flags, and valid option values (difficulty, status, language).
 
 **Setup** (Zsh example):
+
 ```bash
 source <(leetcode completion zsh)   # Add to ~/.zshrc
 ```
@@ -148,6 +184,7 @@ source <(leetcode completion zsh)   # Add to ~/.zshrc
 `leetcode sync` now embeds runtime and memory percentile stats in the git commit body for each changed solution file.
 
 Example commit:
+
 ```
 Sync: 2 solutions - 2026-07-07 10:30:00
 
@@ -167,7 +204,6 @@ Sync: 2 solutions - 2026-07-07 10:30:00
 ---
 
 ## v3.2.0
-
 
 > **Release Date**: 2026-06-28
 > **Focus**: Community Engagement + Security

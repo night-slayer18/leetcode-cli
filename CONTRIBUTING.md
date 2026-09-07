@@ -53,6 +53,7 @@ npm run lint
 ```
 
 For a live rebuild during development:
+
 ```bash
 npm run dev
 ```
@@ -62,18 +63,22 @@ npm run dev
 ## Making Changes
 
 1. **Sync with upstream** before branching:
+
    ```bash
    git checkout dev
    git pull upstream dev
    ```
 
 2. **Create a branch** from `dev` (not `main`):
+
    ```bash
    git checkout -b feat/my-feature
    ```
+
    > All PRs should target the `dev` branch. `main` is release-only.
 
 3. Make your changes, then **verify everything passes**:
+
    ```bash
    npm run typecheck
    npm run lint
@@ -90,6 +95,7 @@ npm run dev
 We follow the **[Conventional Commits](https://www.conventionalcommits.org/)** specification. This keeps the changelog clean and makes it easy to understand what changed and why.
 
 **Format:**
+
 ```
 <type>(<optional scope>): <short description>
 
@@ -98,19 +104,20 @@ We follow the **[Conventional Commits](https://www.conventionalcommits.org/)** s
 
 **Types:**
 
-| Type | When to use |
-|------|-------------|
-| `feat` | A new feature |
-| `fix` | A bug fix |
-| `docs` | Documentation changes only |
-| `test` | Adding or updating tests |
+| Type       | When to use                                     |
+| ---------- | ----------------------------------------------- |
+| `feat`     | A new feature                                   |
+| `fix`      | A bug fix                                       |
+| `docs`     | Documentation changes only                      |
+| `test`     | Adding or updating tests                        |
 | `refactor` | Code change that is neither a fix nor a feature |
-| `style` | Formatting, whitespace (no logic change) |
-| `chore` | Build process, tooling, dependency updates |
-| `ci` | CI/CD workflow changes |
-| `perf` | Performance improvements |
+| `style`    | Formatting, whitespace (no logic change)        |
+| `chore`    | Build process, tooling, dependency updates      |
+| `ci`       | CI/CD workflow changes                          |
+| `perf`     | Performance improvements                        |
 
 **Examples:**
+
 ```bash
 feat(tui): add dark mode toggle to config screen
 fix(submit): handle null percentile from leetcode API
@@ -129,6 +136,7 @@ chore: bump got to v14
 ### Title
 
 Your PR title must follow the same Conventional Commits format:
+
 ```
 feat: add random problem filter by topic tag
 fix(login): handle expired session gracefully
@@ -139,6 +147,7 @@ An automated check will validate this and fail if the format is incorrect.
 ### Description
 
 Please include in your PR description:
+
 - **What** the change does
 - **Why** it is needed (link to an issue if applicable)
 - **How** to test it manually (if applicable)

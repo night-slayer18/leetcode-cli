@@ -238,12 +238,20 @@ export async function syncCommand(): Promise<void> {
               const details = await leetcodeClient.getSubmissionDetails(parseInt(lastAC.id, 10));
               const runtimeStr = details.runtimeDisplay || details.runtime || 'N/A';
               const memoryStr = details.memoryDisplay || details.memory || 'N/A';
-              const runtimeBeats = details.runtimePercentile ? ` (beats ${details.runtimePercentile.toFixed(2)}%)` : '';
-              const memoryBeats = details.memoryPercentile ? ` (beats ${details.memoryPercentile.toFixed(2)}%)` : '';
+              const runtimeBeats = details.runtimePercentile
+                ? ` (beats ${details.runtimePercentile.toFixed(2)}%)`
+                : '';
+              const memoryBeats = details.memoryPercentile
+                ? ` (beats ${details.memoryPercentile.toFixed(2)}%)`
+                : '';
 
-              solutionsList.push(`- [${problemId}. ${titleSlug}] Runtime: ${runtimeStr}${runtimeBeats}, Memory: ${memoryStr}${memoryBeats}`);
+              solutionsList.push(
+                `- [${problemId}. ${titleSlug}] Runtime: ${runtimeStr}${runtimeBeats}, Memory: ${memoryStr}${memoryBeats}`
+              );
             } else {
-              solutionsList.push(`- [${problemId}. ${titleSlug}] No accepted submission stats found`);
+              solutionsList.push(
+                `- [${problemId}. ${titleSlug}] No accepted submission stats found`
+              );
             }
           } catch {
             solutionsList.push(`- [${problemId}. ${titleSlug}] Stats unavailable`);

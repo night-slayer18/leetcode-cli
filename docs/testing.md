@@ -140,6 +140,32 @@ describe('myCommand', () => {
 });
 ```
 
+## China submission API regression
+
+Run `npx vitest run src/__tests__/api/client-submissions.test.ts` to check both sites'
+submission queries, pagination, detail normalization, and unavailable submissions.
+
+For a live check, build first, select `leetcode.cn`, and log in with a China account:
+
+```bash
+npm run build
+node dist/index.js config --site leetcode.cn
+node dist/index.js login
+node dist/index.js submissions 1
+node dist/index.js submissions 1 --download
+node dist/index.js diff 1
+```
+
+Use a problem with an accepted submission in that account. `--download` writes a
+submission-specific file into the configured solutions directory. `diff` requires
+a local solution file; use `pick <id> --no-open` and save your solution if needed.
+
+China uses `submissionList` and `submissionDetail` on `/graphql/`; the Global root
+fields (`questionSubmissionList` and `submissionDetails`) produce schema errors
+on China. China detail IDs use `ID!`, and `lang` is a string rather than an object.
+The client aliases the root fields and normalizes the language for shared commands.
+Do not include account cookies or personal submission code in test fixtures.
+
 ## CI Integration
 
 Tests run automatically on every push via GitHub Actions. The CI workflow:
