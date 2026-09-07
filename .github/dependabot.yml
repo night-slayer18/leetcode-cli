@@ -5,26 +5,23 @@ updates:
     schedule:
       interval: 'weekly'
     target-branch: 'dev'
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
+    ignore:
+      - dependency-name: '*'
+        update-types:
+          - 'version-update:semver-major'
     groups:
-      dependencies:
-        dependency-type: 'production'
-        update-types:
-          - 'minor'
-          - 'patch'
-      dev-dependencies:
-        dependency-type: 'development'
-        update-types:
-          - 'minor'
-          - 'patch'
+      npm-all:
+        patterns:
+          - '*'
 
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule:
       interval: 'weekly'
     target-branch: 'dev'
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
     groups:
-      github-actions:
+      github-actions-all:
         patterns:
           - '*'
