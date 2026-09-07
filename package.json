@@ -51,7 +51,7 @@
     "conf": "^13.0.1",
     "diff": "^8.0.2",
     "got": "^14.4.4",
-    "inquirer": "^12.1.0",
+    "inquirer": "^14.2.1",
     "keytar": "^7.9.0",
     "marked": "^15.0.4",
     "marked-terminal": "^7.2.1",
