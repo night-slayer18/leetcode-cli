@@ -60,7 +60,7 @@ describe('LeetCodeClient contests', () => {
         isVirtual: false,
         containsPremium: false,
         description: null,
-          questions: [
+        questions: [
           {
             questionId: '2',
             title: 'Second',
@@ -144,10 +144,14 @@ describe('LeetCodeClient contests', () => {
         containsPremium: true,
       },
     ]);
-    expect(graphql).toHaveBeenCalledWith('CONTEST_LIST', expect.stringContaining('contestHistory'), {
-      pageNum: 1,
-      pageSize: 100,
-    });
+    expect(graphql).toHaveBeenCalledWith(
+      'CONTEST_LIST',
+      expect.stringContaining('contestHistory'),
+      {
+        pageNum: 1,
+        pageSize: 100,
+      }
+    );
   });
 
   it('fetches additional CN contest history pages in API order', async () => {

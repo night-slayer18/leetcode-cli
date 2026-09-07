@@ -29,7 +29,14 @@ vi.mock('../../storage/config.js', () => ({
 vi.mock('../../api/client.js', () => ({
   leetcodeClient: {
     getSubmissionList: vi.fn().mockResolvedValue([
-      { id: '12345', statusDisplay: 'Accepted', lang: 'typescript', runtime: '56ms', timestamp: '1720000000', memory: '42.1 MB' },
+      {
+        id: '12345',
+        statusDisplay: 'Accepted',
+        lang: 'typescript',
+        runtime: '56ms',
+        timestamp: '1720000000',
+        memory: '42.1 MB',
+      },
     ]),
     getSubmissionDetails: vi.fn().mockResolvedValue({
       code: 'class Solution {}',
@@ -93,7 +100,14 @@ describe('Sync Command', () => {
     vi.mocked(execSync).mockReturnValue(Buffer.from(''));
     vi.mocked(setupClientIfLoggedIn).mockResolvedValue(true);
     vi.mocked(leetcodeClient.getSubmissionList).mockResolvedValue([
-      { id: '12345', statusDisplay: 'Accepted', lang: 'typescript', runtime: '56ms', timestamp: '1720000000', memory: '42.1 MB' },
+      {
+        id: '12345',
+        statusDisplay: 'Accepted',
+        lang: 'typescript',
+        runtime: '56ms',
+        timestamp: '1720000000',
+        memory: '42.1 MB',
+      },
     ]);
     vi.mocked(leetcodeClient.getSubmissionDetails).mockResolvedValue({
       code: 'class Solution {}',
@@ -117,7 +131,16 @@ describe('Sync Command', () => {
       });
       vi.mocked(leetcodeClient.getSubmissionList).mockImplementation(async () => {
         order.push('api');
-        return [{ id: '1', statusDisplay: 'Accepted', lang: 'typescript', runtime: '0ms', timestamp: '0', memory: '0 MB' }];
+        return [
+          {
+            id: '1',
+            statusDisplay: 'Accepted',
+            lang: 'typescript',
+            runtime: '0ms',
+            timestamp: '0',
+            memory: '0 MB',
+          },
+        ];
       });
       vi.mocked(execSync).mockImplementation((cmd) => {
         if (typeof cmd === 'string' && cmd === 'git status --porcelain') {
@@ -170,7 +193,13 @@ describe('Sync Command', () => {
       // Should still commit, just with "Stats unavailable" body
       expect(execFileSync).toHaveBeenCalledWith(
         'git',
-        expect.arrayContaining(['commit', '-m', expect.stringContaining('Sync:'), '-m', expect.stringContaining('Stats unavailable')]),
+        expect.arrayContaining([
+          'commit',
+          '-m',
+          expect.stringContaining('Sync:'),
+          '-m',
+          expect.stringContaining('Stats unavailable'),
+        ]),
         expect.any(Object)
       );
     });
@@ -191,9 +220,12 @@ describe('Sync Command', () => {
       expect(setupClientIfLoggedIn).toHaveBeenCalledOnce();
       expect(leetcodeClient.getSubmissionList).toHaveBeenCalledTimes(2);
 
-      const commitCall = vi.mocked(execFileSync).mock.calls.find(
-        (call) => call[0] === 'git' && Array.isArray(call[1]) && (call[1] as string[]).includes('commit')
-      );
+      const commitCall = vi
+        .mocked(execFileSync)
+        .mock.calls.find(
+          (call) =>
+            call[0] === 'git' && Array.isArray(call[1]) && (call[1] as string[]).includes('commit')
+        );
       const args = commitCall?.[1] as string[];
       const bodyIdx = args.lastIndexOf('-m');
       const body = args[bodyIdx + 1];
@@ -247,7 +279,11 @@ describe('Sync Command', () => {
 
       await syncCommand();
 
-      expect(execFileSync).not.toHaveBeenCalledWith('git', expect.arrayContaining(['commit']), expect.any(Object));
+      expect(execFileSync).not.toHaveBeenCalledWith(
+        'git',
+        expect.arrayContaining(['commit']),
+        expect.any(Object)
+      );
       expect(leetcodeClient.getSubmissionList).not.toHaveBeenCalled();
     });
   });
@@ -300,7 +336,9 @@ describe('Sync Command', () => {
           '-m',
           expect.stringContaining('Sync: 1 solutions'),
           '-m',
-          expect.stringContaining('- [1. two-sum] Runtime: 56ms (beats 84.50%), Memory: 42.1MB (beats 76.20%)'),
+          expect.stringContaining(
+            '- [1. two-sum] Runtime: 56ms (beats 84.50%), Memory: 42.1MB (beats 76.20%)'
+          ),
         ]),
         expect.any(Object)
       );
@@ -308,7 +346,14 @@ describe('Sync Command', () => {
 
     it('should commit multiple solutions in a single commit with all stats in the body', async () => {
       vi.mocked(leetcodeClient.getSubmissionList).mockResolvedValue([
-        { id: '12345', statusDisplay: 'Accepted', lang: 'typescript', runtime: '56ms', timestamp: '1720000000', memory: '42.1 MB' },
+        {
+          id: '12345',
+          statusDisplay: 'Accepted',
+          lang: 'typescript',
+          runtime: '56ms',
+          timestamp: '1720000000',
+          memory: '42.1 MB',
+        },
       ]);
       vi.mocked(execSync).mockImplementation((cmd) => {
         if (typeof cmd === 'string' && cmd === 'git status --porcelain') {
@@ -321,7 +366,10 @@ describe('Sync Command', () => {
 
       expect(leetcodeClient.getSubmissionList).toHaveBeenCalledTimes(2);
       expect(leetcodeClient.getSubmissionList).toHaveBeenCalledWith('two-sum', 5);
-      expect(leetcodeClient.getSubmissionList).toHaveBeenCalledWith('binary-tree-level-order-traversal', 5);
+      expect(leetcodeClient.getSubmissionList).toHaveBeenCalledWith(
+        'binary-tree-level-order-traversal',
+        5
+      );
 
       expect(execFileSync).toHaveBeenCalledWith(
         'git',
@@ -419,8 +467,22 @@ describe('Sync Command', () => {
 
     it('should fall back to "No accepted submission stats found" when no AC submission exists', async () => {
       vi.mocked(leetcodeClient.getSubmissionList).mockResolvedValue([
-        { id: '9999', statusDisplay: 'Wrong Answer', lang: 'typescript', runtime: 'N/A', timestamp: '1720000000', memory: 'N/A' },
-        { id: '8888', statusDisplay: 'Time Limit Exceeded', lang: 'typescript', runtime: 'N/A', timestamp: '1720000001', memory: 'N/A' },
+        {
+          id: '9999',
+          statusDisplay: 'Wrong Answer',
+          lang: 'typescript',
+          runtime: 'N/A',
+          timestamp: '1720000000',
+          memory: 'N/A',
+        },
+        {
+          id: '8888',
+          statusDisplay: 'Time Limit Exceeded',
+          lang: 'typescript',
+          runtime: 'N/A',
+          timestamp: '1720000001',
+          memory: 'N/A',
+        },
       ]);
       vi.mocked(execSync).mockImplementation((cmd) => {
         if (typeof cmd === 'string' && cmd === 'git status --porcelain') {
@@ -462,9 +524,12 @@ describe('Sync Command', () => {
 
       await syncCommand();
 
-      const commitCall = vi.mocked(execFileSync).mock.calls.find(
-        (call) => call[0] === 'git' && Array.isArray(call[1]) && (call[1] as string[]).includes('commit')
-      );
+      const commitCall = vi
+        .mocked(execFileSync)
+        .mock.calls.find(
+          (call) =>
+            call[0] === 'git' && Array.isArray(call[1]) && (call[1] as string[]).includes('commit')
+        );
       const args = commitCall?.[1] as string[];
       const bodyIdx = args.lastIndexOf('-m');
       const body = args[bodyIdx + 1];

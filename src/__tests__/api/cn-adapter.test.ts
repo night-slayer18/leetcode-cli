@@ -211,7 +211,9 @@ describe('cn adapters', () => {
     });
 
     const listResult = normalizeCnProblemList(listParsed);
-    expect(listResult.problems[0]?.topicTags).toEqual([{ name: 'Backtracking', slug: 'backtracking' }]);
+    expect(listResult.problems[0]?.topicTags).toEqual([
+      { name: 'Backtracking', slug: 'backtracking' },
+    ]);
 
     const dailyResult = normalizeCnDailyChallenge({
       todayRecord: [
@@ -227,7 +229,9 @@ describe('cn adapters', () => {
       ],
     });
     expect(dailyResult.question.title).toBe('Generate Parentheses');
-    expect(dailyResult.question.topicTags).toEqual([{ name: 'Backtracking', slug: 'backtracking' }]);
+    expect(dailyResult.question.topicTags).toEqual([
+      { name: 'Backtracking', slug: 'backtracking' },
+    ]);
   });
 
   it('normalizes cn profile payload into shared user profile shape', () => {

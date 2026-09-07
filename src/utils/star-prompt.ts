@@ -33,10 +33,7 @@ function getPendingMilestone(totalAccepted: number, shownMilestones: number[]): 
 /**
  * Check whether all milestones are exhausted and the recurring interval has been reached.
  */
-function isRecurringReady(
-  shownMilestones: number[],
-  submissionsSinceLastPrompt: number
-): boolean {
+function isRecurringReady(shownMilestones: number[], submissionsSinceLastPrompt: number): boolean {
   const allMilestonesShown = STAR_PROMPT_MILESTONES.every((m) => shownMilestones.includes(m));
   if (!allMilestonesShown) return false;
   return submissionsSinceLastPrompt >= STAR_PROMPT_RECURRING_INTERVAL;

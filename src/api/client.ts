@@ -340,11 +340,10 @@ export class LeetCodeClient {
       let totalNum = 0;
 
       do {
-        const data = await this.graphql<unknown>(
-          'CONTEST_LIST',
-          this.queries.CONTEST_LIST_QUERY,
-          { pageNum, pageSize }
-        );
+        const data = await this.graphql<unknown>('CONTEST_LIST', this.queries.CONTEST_LIST_QUERY, {
+          pageNum,
+          pageSize,
+        });
         const validated = CnContestHistorySchema.parse(data);
         const page = validated.contestHistory.contests;
 
