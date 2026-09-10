@@ -9,6 +9,15 @@ export function isFileName(input: string): boolean {
   return !input.includes('/') && !input.includes('\\') && input.includes('.');
 }
 
+const TITLE_SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+/**
+ * A LeetCode problem name in title-slug form, e.g. "two-sum".
+ */
+export function isTitleSlug(input: string): boolean {
+  return TITLE_SLUG_REGEX.test(input.trim());
+}
+
 const WORKSPACE_NAME_REGEX = /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$/;
 const SNAPSHOT_NAME_REGEX = /^[a-zA-Z0-9][a-zA-Z0-9 _-]{0,63}$/;
 

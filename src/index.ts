@@ -414,7 +414,7 @@ ${chalk.yellow('Examples:')}
   .action(bookmarkCommand);
 
 program
-  .command('note <id> [action]')
+  .command('note <id|name> [action]')
   .description('View or edit notes for a problem')
   .addHelpText(
     'after',
@@ -425,8 +425,11 @@ ${chalk.yellow('Actions:')}
 
 ${chalk.yellow('Examples:')}
   ${chalk.cyan('$ leetcode note 1')}                  Edit notes for problem 1
+  ${chalk.cyan('$ leetcode note two-sum')}            Edit notes by problem name
   ${chalk.cyan('$ leetcode note 1 edit')}             Edit notes (explicit)
-  ${chalk.cyan('$ leetcode note 1 view')}             View notes in terminal
+  ${chalk.cyan('$ leetcode note two-sum view')}       View notes in terminal
+
+${chalk.gray('Problem names resolve to the same note file as the problem ID.')}
 `
   )
   .action(notesCommand);
