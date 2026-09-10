@@ -114,7 +114,7 @@ The CLI keeps command semantics the same and applies site-specific GraphQL queri
 | `pick-batch <ids>`  | Pick multiple problems                   |
 | `reset <id>`        | Reset solution file to original stub     |
 | `bookmark <action>` | Manage problem bookmarks                 |
-| `note <id>`         | Manage problem notes                     |
+| `note <id\|name>`   | Manage problem notes                     |
 | `daily`             | Show today's challenge                   |
 | `random`            | Get a random problem                     |
 | `test <id\|file>`   | Test solution against sample cases       |
@@ -125,7 +125,7 @@ The CLI keeps command semantics the same and applies site-specific GraphQL queri
 | `snapshot <cmd>`    | Save and restore solution versions       |
 | `diff <id>`         | Compare solution with past submissions   |
 | `collab <cmd>`      | Collaborative coding with a partner      |
-| `contest [slug]`     | Browse and pick from contest problems   |
+| `contest [slug]`    | Browse and pick from contest problems    |
 | `workspace <cmd>`   | Manage workspaces for different contexts |
 | `config`            | View or set configuration                |
 | `sync`              | Sync solutions to Git repository         |
@@ -262,8 +262,9 @@ leetcode pick-batch 1 2 3 -l python3
 leetcode bookmark add 1
 leetcode bookmark list
 
-# Keep personal notes
+# Keep personal notes (by problem ID or name)
 leetcode note 1 edit
+leetcode note two-sum edit
 ```
 
 ### User Statistics
