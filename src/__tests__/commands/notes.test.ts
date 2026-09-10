@@ -28,21 +28,26 @@ vi.mock('../../storage/bookmarks.js', () => ({
   },
 }));
 
-vi.mock('../../api/client.js', () => ({
-  leetcodeClient: {
-    setCredentials: vi.fn(),
-    checkAuth: vi.fn().mockResolvedValue({ isSignedIn: true, username: 'TestUser' }),
-    getProblemById: vi.fn().mockResolvedValue({
-      questionId: '1',
-      questionFrontendId: '1',
-      title: 'Two Sum',
-      titleSlug: 'two-sum',
-      difficulty: 'Easy',
-      status: 'ac',
-      topicTags: [{ name: 'Array' }],
-    }),
-  },
-}));
+vi.mock('../../api/client.js', () => {
+  const problem = {
+    questionId: '1',
+    questionFrontendId: '1',
+    title: 'Two Sum',
+    titleSlug: 'two-sum',
+    difficulty: 'Easy',
+    status: 'ac',
+    topicTags: [{ name: 'Array' }],
+  };
+
+  return {
+    leetcodeClient: {
+      setCredentials: vi.fn(),
+      checkAuth: vi.fn().mockResolvedValue({ isSignedIn: true, username: 'TestUser' }),
+      getProblemById: vi.fn().mockResolvedValue(problem),
+      getProblem: vi.fn().mockResolvedValue(problem),
+    },
+  };
+});
 
 vi.mock('fs/promises', () => ({
   readFile: vi.fn().mockResolvedValue('# Notes for Two Sum\n\nThis is a test note.'),
@@ -71,8 +76,10 @@ vi.mock('ora', () => ({
 import { notesCommand } from '../../commands/notes.js';
 import { bookmarkCommand } from '../../commands/bookmark.js';
 import { bookmarks } from '../../storage/bookmarks.js';
+import { leetcodeClient } from '../../api/client.js';
 import { existsSync } from 'fs';
-import { readFile } from 'fs/promises';
+import { readFile, writeFile } from 'fs/promises';
+import { join } from 'path';
 
 describe('Notes and Bookmark Commands', () => {
   beforeEach(() => {
@@ -96,10 +103,51 @@ describe('Notes and Bookmark Commands', () => {
       expect(openInEditor).toHaveBeenCalled();
     });
 
-    it('should handle invalid problem ID', async () => {
-      await notesCommand('invalid', 'view');
+    it('should handle invalid problem ID or name', async () => {
+      await notesCommand('Two Sum', 'view');
 
-      expect(outputContains('Invalid problem ID')).toBe(true);
+      expect(outputContains('Invalid problem ID or name')).toBe(true);
+      expect(leetcodeClient.getProblem).not.toHaveBeenCalled();
+    });
+
+    it('should resolve a problem name to its note file', async () => {
+      vi.mocked(existsSync).mockReturnValue(true);
+
+      await notesCommand('two-sum', 'view');
+
+      expect(leetcodeClient.getProblem).toHaveBeenCalledWith('two-sum');
+      expect(readFile).toHaveBeenCalledWith(join('/tmp/leetcode', '.notes', '1.md'), 'utf-8');
+    });
+
+    it('should reuse the resolved problem for the note template', async () => {
+      // Note file does not exist yet, but the notes directory does.
+      vi.mocked(existsSync).mockImplementation((path) => !String(path).endsWith('1.md'));
+
+      await notesCommand('two-sum', 'edit');
+
+      expect(leetcodeClient.getProblem).toHaveBeenCalledTimes(1);
+      expect(leetcodeClient.getProblemById).not.toHaveBeenCalled();
+      expect(vi.mocked(writeFile).mock.calls[0][1]).toContain('# 1. Two Sum');
+    });
+
+    it('should report a problem name that does not exist', async () => {
+      vi.mocked(leetcodeClient.getProblem).mockRejectedValueOnce(
+        new Error('Invalid input: expected object, received null')
+      );
+
+      await notesCommand('not-a-real-problem', 'view');
+
+      expect(readFile).not.toHaveBeenCalled();
+      expect(outputContains('Check the problem name')).toBe(true);
+    });
+
+    it('should surface an unexpected lookup failure', async () => {
+      vi.mocked(leetcodeClient.getProblem).mockRejectedValueOnce(new Error('connect ETIMEDOUT'));
+
+      await notesCommand('two-sum', 'view');
+
+      expect(readFile).not.toHaveBeenCalled();
+      expect(outputContains('connect ETIMEDOUT')).toBe(true);
     });
   });
 
