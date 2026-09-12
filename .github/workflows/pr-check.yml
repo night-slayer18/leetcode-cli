@@ -118,35 +118,3 @@ jobs:
             await github.rest.issues.addLabels({
               owner, repo, issue_number: pr, labels: [label],
             });
-
-  # ── 4. Post a helpful checklist comment on first-time PR open ─────────────
-  welcome-comment:
-    name: Post Contribution Checklist
-    runs-on: ubuntu-latest
-    if: github.event.action == 'opened'
-    steps:
-      - name: Post checklist comment
-        uses: actions/github-script@v9
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const author = context.payload.pull_request.user.login;
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.payload.pull_request.number,
-              body: `Thanks for the PR, @${author}! 🎉
-
-            Before this gets reviewed, please make sure the following are checked:
-
-            - [ ] Tests pass locally (\`npm test\`)
-            - [ ] Type check passes (\`npm run typecheck\`)
-            - [ ] Lint passes (\`npm run lint\`)
-            - [ ] New features include tests
-            - [ ] Documentation updated if needed
-            - [ ] PR targets the \`dev\` branch (not \`main\`)
-
-            > See [CONTRIBUTING.md](https://github.com/night-slayer18/leetcode-cli/blob/dev/CONTRIBUTING.md) for full guidelines.
-
-            The CI pipeline will also run build, test, lint, and typecheck automatically.`
-            });
