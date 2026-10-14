@@ -3,12 +3,11 @@ import { readFile, writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
 import chalk from 'chalk';
-import ora from 'ora';
 import { config } from '../storage/config.js';
 import { requireAuth } from '../utils/auth.js';
 import { openInEditor } from '../utils/editor.js';
 import { leetcodeClient } from '../api/client.js';
-import { isProblemId, isTitleSlug } from '../utils/validation.js';
+import { resolveProblemIdentifier } from '../utils/problem-resolver.js';
 import type { ProblemDetail } from '../types.js';
 
 type NoteAction = 'view' | 'edit';
@@ -18,7 +17,7 @@ export async function notesCommand(
   action?: string,
   options: { silent?: boolean } = {}
 ): Promise<void> {
-  const resolved = await resolveProblem(idOrName, options);
+  const resolved = await resolveProblemIdentifier(idOrName, options);
   if (!resolved) return;
 
   const { problemId, problem } = resolved;
@@ -35,62 +34,6 @@ export async function notesCommand(
     await viewNote(notePath, problemId);
   } else {
     await editNote(notePath, problemId, problem, options);
-  }
-}
-
-interface ResolvedProblem {
-  problemId: string;
-  problem: ProblemDetail | null;
-}
-
-/**
- * Accept either a problem ID ("1") or a problem name ("two-sum").
- * Names are looked up on LeetCode so both forms share the same note file.
- */
-async function resolveProblem(
-  idOrName: string,
-  options: { silent?: boolean }
-): Promise<ResolvedProblem | null> {
-  const slug = idOrName.trim();
-
-  if (isProblemId(slug)) {
-    return { problemId: slug, problem: null };
-  }
-
-  if (!isTitleSlug(slug)) {
-    if (!options.silent) {
-      console.log(chalk.red(`Invalid problem ID or name: ${idOrName}`));
-      console.log(chalk.gray('Use a problem ID (e.g. 1) or a problem name (e.g. two-sum)'));
-    }
-    return null;
-  }
-
-  const { authorized } = await requireAuth();
-  if (!authorized) return null;
-
-  const spinner = options.silent
-    ? null
-    : ora({ text: `Looking up "${slug}"...`, spinner: 'dots' }).start();
-
-  try {
-    const problem = await leetcodeClient.getProblem(slug);
-    spinner?.succeed(`Found ${problem.questionFrontendId}. ${problem.title}`);
-    return { problemId: problem.questionFrontendId, problem };
-  } catch (error) {
-    // The API returns a null question for an unknown slug, which fails schema validation.
-    const message = error instanceof Error ? error.message : '';
-    const notFound = message.includes('expected object, received null');
-
-    spinner?.fail(notFound ? `Problem "${slug}" not found` : `Failed to look up "${slug}"`);
-
-    if (!options.silent) {
-      if (notFound) {
-        console.log(chalk.gray('Check the problem name, or use the problem ID instead.'));
-      } else if (message) {
-        console.log(chalk.red(message));
-      }
-    }
-    return null;
   }
 }
 

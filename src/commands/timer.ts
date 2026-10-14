@@ -1,10 +1,10 @@
 // Timer command - Interview mode with countdown
 import ora from 'ora';
 import chalk from 'chalk';
-import { leetcodeClient } from '../api/client.js';
 import { timerStorage } from '../storage/timer.js';
 import { pickCommand } from './pick.js';
 import { requireAuth } from '../utils/auth.js';
+import { resolveProblem } from '../utils/problem-resolver.js';
 
 const DEFAULT_TIMES: Record<string, number> = {
   Easy: 20,
@@ -76,21 +76,12 @@ export async function timerCommand(
 
   const spinner = ora('Fetching problem...').start();
 
+  const problem = await resolveProblem(idOrSlug, { spinner });
+  if (!problem) return;
+
+  spinner.stop();
+
   try {
-    let problem;
-    if (/^\d+$/.test(idOrSlug)) {
-      problem = await leetcodeClient.getProblemById(idOrSlug);
-    } else {
-      problem = await leetcodeClient.getProblem(idOrSlug);
-    }
-
-    if (!problem) {
-      spinner.fail(`Problem "${idOrSlug}" not found`);
-      return;
-    }
-
-    spinner.stop();
-
     // Determine timer duration
     const durationMinutes = options.minutes ?? DEFAULT_TIMES[problem.difficulty] ?? 30;
 

@@ -4,7 +4,6 @@ import { existsSync } from 'fs';
 import { join } from 'path';
 import ora from 'ora';
 import chalk from 'chalk';
-import { leetcodeClient } from '../api/client.js';
 import { config } from '../storage/config.js';
 import {
   getCodeTemplate,
@@ -15,6 +14,7 @@ import {
 import { openInEditor } from '../utils/editor.js';
 import { requireAuth } from '../utils/auth.js';
 import { normalizeLanguageInput } from '../utils/languages.js';
+import { resolveProblem } from '../utils/problem-resolver.js';
 
 export interface PickOptions {
   lang?: string;
@@ -27,21 +27,10 @@ export async function pickCommand(idOrSlug: string, options: PickOptions): Promi
 
   const spinner = ora({ text: 'Fetching problem details...', spinner: 'dots' }).start();
 
+  const problem = await resolveProblem(idOrSlug, { spinner });
+  if (!problem) return false;
+
   try {
-    let problem;
-
-    // Check if it's a numeric ID or a title slug
-    if (/^\d+$/.test(idOrSlug)) {
-      problem = await leetcodeClient.getProblemById(idOrSlug);
-    } else {
-      problem = await leetcodeClient.getProblem(idOrSlug);
-    }
-
-    if (!problem) {
-      spinner.fail(`Problem "${idOrSlug}" not found`);
-      return false;
-    }
-
     spinner.text = 'Generating solution file...';
 
     // Determine language
