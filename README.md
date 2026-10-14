@@ -114,7 +114,7 @@ The CLI keeps command semantics the same and applies site-specific GraphQL queri
 | `pick-batch <ids>`  | Pick multiple problems                   |
 | `reset <id>`        | Reset solution file to original stub     |
 | `bookmark <action>` | Manage problem bookmarks                 |
-| `note <id>`         | Manage problem notes                     |
+| `note <id\|name>`   | Manage problem notes                     |
 | `daily`             | Show today's challenge                   |
 | `random`            | Get a random problem                     |
 | `test <id\|file>`   | Test solution against sample cases       |
@@ -191,6 +191,9 @@ Reset an existing local solution file back to the original LeetCode stub. This o
 ```bash
 leetcode reset 1
 leetcode reset two-sum
+
+# Reset for a specific language when multiple solutions exist
+leetcode reset 1 --lang python3
 ```
 
 ### Test & Submit
@@ -201,6 +204,10 @@ All formats work for both `test` and `submit`:
 # Using problem ID (auto-finds the file)
 leetcode test 20
 leetcode submit 20
+
+# Filter by language when multiple solutions exist
+leetcode test 20 --lang python3
+leetcode submit 20 --lang python3
 
 # Using filename
 leetcode test 20.valid-parentheses.java
@@ -262,8 +269,9 @@ leetcode pick-batch 1 2 3 -l python3
 leetcode bookmark add 1
 leetcode bookmark list
 
-# Keep personal notes
+# Keep personal notes (by problem ID or name)
 leetcode note 1 edit
+leetcode note two-sum edit
 ```
 
 ### User Statistics
@@ -360,6 +368,9 @@ leetcode reset two-sum
 # Save current approach
 leetcode snapshot save 1 "brute-force"
 
+# Save for a specific language
+leetcode snapshot save 1 "optimized" --lang python3
+
 # Try a new approach, then save
 leetcode snapshot save 1 "hash-map"
 
@@ -378,6 +389,9 @@ leetcode snapshot restore 1 brute-force
 ```bash
 # Compare with last accepted submission
 leetcode diff 1
+
+# Compare for a specific language
+leetcode diff 1 --lang python3
 
 # Show unified diff (line-by-line changes)
 leetcode diff 1 --unified

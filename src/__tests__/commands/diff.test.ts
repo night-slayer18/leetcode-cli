@@ -38,6 +38,7 @@ vi.mock('../../api/client.js', () => ({
 
 vi.mock('../../storage/config.js', () => ({
   config: {
+    getLanguage: vi.fn(() => 'typescript'),
     getWorkDir: vi.fn(() => '/tmp/leetcode'),
   },
 }));

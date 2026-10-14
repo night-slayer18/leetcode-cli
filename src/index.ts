@@ -71,7 +71,7 @@ program
   .name('leetcode')
   .usage('[command] [options]')
   .description(chalk.bold.cyan('🔥 A modern LeetCode CLI built with TypeScript'))
-  .version('3.5.2', '-v, --version', 'Output the version number')
+  .version('3.6.0', '-v, --version', 'Output the version number')
   .helpOption('-h, --help', 'Display help for command')
   .addHelpText(
     'after',
@@ -266,6 +266,7 @@ program
   .description('Test solution against sample test cases')
   .option('-c, --testcase <testcase>', 'Custom test case')
   .option('-V, --visualize', 'Visual output for data structures (arrays, trees, etc.)')
+  .option('-l, --lang <language>', 'Language to filter solution lookup by problem ID')
   .addHelpText(
     'after',
     `
@@ -285,6 +286,7 @@ ${chalk.gray('Testcases use \\n to separate multiple inputs.')}
 program
   .command('reset <id>')
   .description('Reset solution file to the original LeetCode stub')
+  .option('-l, --lang <language>', 'Language to filter solution lookup')
   .addHelpText(
     'after',
     `
@@ -295,14 +297,15 @@ ${chalk.yellow('Examples:')}
 ${chalk.gray('Overwrites the existing local solution file immediately.')}
 `
   )
-  .action(async (id) => {
-    await resetCommand(id);
+  .action(async (id, options) => {
+    await resetCommand(id, options);
   });
 
 program
   .command('submit <file>')
   .alias('x')
   .description('Submit solution to LeetCode')
+  .option('-l, --lang <language>', 'Language to filter solution lookup by problem ID')
   .addHelpText(
     'after',
     `
@@ -321,6 +324,7 @@ program
   .option('-s, --submission <id>', 'Compare with specific submission ID')
   .option('-f, --file <path>', 'Compare with a local file')
   .option('-u, --unified', 'Show unified diff (line-by-line changes)')
+  .option('-l, --lang <language>', 'Language to filter solution lookup')
   .addHelpText(
     'after',
     `
@@ -414,7 +418,7 @@ ${chalk.yellow('Examples:')}
   .action(bookmarkCommand);
 
 program
-  .command('note <id> [action]')
+  .command('note <id|name> [action]')
   .description('View or edit notes for a problem')
   .addHelpText(
     'after',
@@ -425,8 +429,11 @@ ${chalk.yellow('Actions:')}
 
 ${chalk.yellow('Examples:')}
   ${chalk.cyan('$ leetcode note 1')}                  Edit notes for problem 1
+  ${chalk.cyan('$ leetcode note two-sum')}            Edit notes by problem name
   ${chalk.cyan('$ leetcode note 1 edit')}             Edit notes (explicit)
-  ${chalk.cyan('$ leetcode note 1 view')}             View notes in terminal
+  ${chalk.cyan('$ leetcode note two-sum view')}       View notes in terminal
+
+${chalk.gray('Problem names resolve to the same note file as the problem ID.')}
 `
   )
   .action(notesCommand);
@@ -559,11 +566,16 @@ collabCmd
   .description('Join a collaboration session')
   .action(collabJoinCommand);
 
-collabCmd.command('sync').description('Sync your code with partner').action(collabSyncCommand);
+collabCmd
+  .command('sync')
+  .description('Sync your code with partner')
+  .option('-l, --lang <language>', 'Language to filter solution lookup')
+  .action(collabSyncCommand);
 
 collabCmd
   .command('compare')
   .description('Compare your solution with partner')
+  .option('-l, --lang <language>', 'Language to filter solution lookup')
   .action(collabCompareCommand);
 
 collabCmd
@@ -598,6 +610,7 @@ ${chalk.yellow('Examples:')}
 snapshotCmd
   .command('save <id> [name]')
   .description('Save current solution as a snapshot')
+  .option('-l, --lang <language>', 'Language to filter solution lookup')
   .action(snapshotSaveCommand);
 
 snapshotCmd
@@ -608,6 +621,7 @@ snapshotCmd
 snapshotCmd
   .command('restore <id> <snapshot>')
   .description('Restore a snapshot')
+  .option('-l, --lang <language>', 'Language to filter solution lookup')
   .action(snapshotRestoreCommand);
 
 snapshotCmd

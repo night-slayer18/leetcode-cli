@@ -8,6 +8,7 @@ import { requireAuth } from '../utils/auth.js';
 import { config } from '../storage/config.js';
 import { displaySubmissionsList } from '../utils/display.js';
 import { LANG_SLUG_MAP, LANGUAGE_EXTENSIONS } from '../utils/templates.js';
+import { resolveProblem } from '../utils/problem-resolver.js';
 import type { SupportedLanguage } from '../types.js';
 
 interface SubmissionsOptions {
@@ -25,19 +26,13 @@ export async function submissionsCommand(
 
   const spinner = ora('Fetching problem info...').start();
 
+  const problem = await resolveProblem(idOrSlug, {
+    spinner,
+    failMessage: 'Failed to fetch problem info',
+  });
+  if (!problem) return;
+
   try {
-    let problem;
-    if (/^\d+$/.test(idOrSlug)) {
-      problem = await leetcodeClient.getProblemById(idOrSlug);
-    } else {
-      problem = await leetcodeClient.getProblem(idOrSlug);
-    }
-
-    if (!problem) {
-      spinner.fail(`Problem "${idOrSlug}" not found`);
-      return;
-    }
-
     const slug = problem.titleSlug;
     spinner.text = 'Fetching submissions...';
 

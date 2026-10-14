@@ -10,10 +10,12 @@ import { config } from '../storage/config.js';
 import { displayTestResult } from '../utils/display.js';
 import { findSolutionFile, findFileByName, getLangSlugFromExtension } from '../utils/fileUtils.js';
 import { isProblemId, isFileName, isPathInsideWorkDir } from '../utils/validation.js';
+import { resolveLanguageInput } from '../utils/languages.js';
 
 interface TestOptions {
   testcase?: string;
   visualize?: boolean;
+  lang?: string;
 }
 
 export async function testCommand(fileOrId: string, options: TestOptions): Promise<void> {
@@ -24,7 +26,12 @@ export async function testCommand(fileOrId: string, options: TestOptions): Promi
   const workDir = config.getWorkDir();
 
   if (isProblemId(fileOrId)) {
-    const found = await findSolutionFile(workDir, fileOrId);
+    const { input, language } = resolveLanguageInput(options.lang);
+    if (!language) {
+      console.log(chalk.red(`Unsupported language: ${input}`));
+      return;
+    }
+    const found = await findSolutionFile(workDir, fileOrId, language);
     if (!found) {
       console.log(chalk.red(`No solution file found for problem ${fileOrId}`));
       console.log(chalk.gray(`Looking in: ${workDir}`));

@@ -7,23 +7,20 @@ import { config } from '../storage/config.js';
 import { requireAuth } from '../utils/auth.js';
 import { openInEditor } from '../utils/editor.js';
 import { leetcodeClient } from '../api/client.js';
-import { isProblemId } from '../utils/validation.js';
+import { resolveProblemIdentifier } from '../utils/problem-resolver.js';
+import type { ProblemDetail } from '../types.js';
 
 type NoteAction = 'view' | 'edit';
 
 export async function notesCommand(
-  problemId: string,
+  idOrName: string,
   action?: string,
   options: { silent?: boolean } = {}
 ): Promise<void> {
-  if (!isProblemId(problemId)) {
-    if (!options.silent) {
-      console.log(chalk.red(`Invalid problem ID: ${problemId}`));
-      console.log(chalk.gray('Problem ID must be a positive integer'));
-    }
-    return;
-  }
+  const resolved = await resolveProblemIdentifier(idOrName, options);
+  if (!resolved) return;
 
+  const { problemId, problem } = resolved;
   const noteAction: NoteAction = action === 'view' ? 'view' : 'edit';
 
   const notesDir = join(config.getWorkDir(), '.notes');
@@ -36,7 +33,7 @@ export async function notesCommand(
   if (noteAction === 'view') {
     await viewNote(notePath, problemId);
   } else {
-    await editNote(notePath, problemId, options);
+    await editNote(notePath, problemId, problem, options);
   }
 }
 
@@ -65,10 +62,11 @@ async function viewNote(notePath: string, problemId: string): Promise<void> {
 async function editNote(
   notePath: string,
   problemId: string,
+  problem: ProblemDetail | null,
   options: { silent?: boolean } = {}
 ): Promise<void> {
   if (!existsSync(notePath)) {
-    const template = await generateNoteTemplate(problemId);
+    const template = await generateNoteTemplate(problemId, problem);
     await writeFile(notePath, template, 'utf-8');
     if (!options.silent) console.log(chalk.green(`✓ Created notes file for problem ${problemId}`));
   }
@@ -77,13 +75,16 @@ async function editNote(
   await openInEditor(notePath);
 }
 
-async function generateNoteTemplate(problemId: string): Promise<string> {
+async function generateNoteTemplate(
+  problemId: string,
+  fetchedProblem: ProblemDetail | null = null
+): Promise<string> {
   let header = `# Problem ${problemId} Notes\n\n`;
 
-  const { authorized } = await requireAuth();
+  const { authorized } = fetchedProblem ? { authorized: true } : await requireAuth();
   if (authorized) {
     try {
-      const problem = await leetcodeClient.getProblemById(problemId);
+      const problem = fetchedProblem ?? (await leetcodeClient.getProblemById(problemId));
       if (problem) {
         header = `# ${problemId}. ${problem.title}\n\n`;
         header += `**Difficulty:** ${problem.difficulty}\n`;

@@ -6,6 +6,7 @@ import { detectLanguageFromFile, findSolutionFile } from '../utils/fileUtils.js'
 import { readFile, writeFile } from 'fs/promises';
 import { extname, basename } from 'path';
 import { diffLines } from 'diff';
+import { resolveLanguageInput } from '../utils/languages.js';
 
 function formatTimeAgo(dateStr: string): string {
   const date = new Date(dateStr);
@@ -21,12 +22,22 @@ function formatTimeAgo(dateStr: string): string {
   return `${diffDays}d ago`;
 }
 
-export async function snapshotSaveCommand(problemId: string, name?: string): Promise<void> {
+export async function snapshotSaveCommand(
+  problemId: string,
+  name?: string,
+  options: { lang?: string } = {}
+): Promise<void> {
   const workDir = config.getWorkDir();
 
   try {
+    const { input, language } = resolveLanguageInput(options.lang);
+    if (!language) {
+      console.log(chalk.red(`Unsupported language: ${input}`));
+      return;
+    }
+
     // Find the solution file
-    const filePath = await findSolutionFile(workDir, problemId);
+    const filePath = await findSolutionFile(workDir, problemId, language);
 
     if (!filePath) {
       console.log(chalk.red(`No solution file found for problem ${problemId}`));
@@ -105,7 +116,11 @@ export async function snapshotListCommand(problemId: string): Promise<void> {
   console.log(chalk.gray(`  delete:  leetcode snapshot delete ${problemId} <id|name>`));
 }
 
-export async function snapshotRestoreCommand(problemId: string, idOrName: string): Promise<void> {
+export async function snapshotRestoreCommand(
+  problemId: string,
+  idOrName: string,
+  options: { lang?: string } = {}
+): Promise<void> {
   const workDir = config.getWorkDir();
 
   try {
@@ -120,8 +135,14 @@ export async function snapshotRestoreCommand(problemId: string, idOrName: string
       return;
     }
 
+    const { input, language } = resolveLanguageInput(options.lang);
+    if (!language) {
+      console.log(chalk.red(`Unsupported language: ${input}`));
+      return;
+    }
+
     // Find the solution file
-    const filePath = await findSolutionFile(workDir, problemId);
+    const filePath = await findSolutionFile(workDir, problemId, language);
 
     if (!filePath) {
       console.log(chalk.red(`No solution file found for problem ${problemId}`));

@@ -3,37 +3,40 @@ import { readFile, realpath, writeFile } from 'fs/promises';
 import { basename, extname } from 'path';
 import ora from 'ora';
 import chalk from 'chalk';
-import { leetcodeClient } from '../api/client.js';
 import { requireAuth } from '../utils/auth.js';
 import { config } from '../storage/config.js';
 import { snapshotStorage } from '../storage/snapshots.js';
 import { findSolutionFile, detectLanguageFromFile } from '../utils/fileUtils.js';
 import { generateSolutionFile, getPremiumPlaceholderCode } from '../utils/templates.js';
 import { isPathInsideWorkDir } from '../utils/validation.js';
-import { resolveSupportedLanguageFromLeetCodeSlug } from '../utils/languages.js';
+import {
+  resolveLanguageInput,
+  resolveSupportedLanguageFromLeetCodeSlug,
+} from '../utils/languages.js';
+import { resolveProblem } from '../utils/problem-resolver.js';
 
-function isProblemNotFoundError(error: unknown): boolean {
-  if (!(error instanceof Error)) return false;
-
-  return (
-    error.message.includes('expected object, received null') ||
-    /^Problem #.+ not found$/.test(error.message)
-  );
+interface ResetOptions {
+  lang?: string;
 }
 
-export async function resetCommand(idOrSlug: string): Promise<boolean> {
+export async function resetCommand(idOrSlug: string, options: ResetOptions = {}): Promise<boolean> {
   const { authorized } = await requireAuth();
   if (!authorized) return false;
 
   const spinner = ora({ text: 'Fetching problem details...', spinner: 'dots' }).start();
 
+  const problem = await resolveProblem(idOrSlug, { spinner });
+  if (!problem) return false;
+
   try {
-    const problem = /^\d+$/.test(idOrSlug)
-      ? await leetcodeClient.getProblemById(idOrSlug)
-      : await leetcodeClient.getProblem(idOrSlug);
+    const { input, language: lookupLang } = resolveLanguageInput(options.lang);
+    if (!lookupLang) {
+      spinner.fail(`Unsupported language: ${input}`);
+      return false;
+    }
 
     const workDir = config.getWorkDir();
-    const filePath = await findSolutionFile(workDir, problem.questionFrontendId);
+    const filePath = await findSolutionFile(workDir, problem.questionFrontendId, lookupLang);
 
     if (!filePath) {
       spinner.fail(`No solution file found for problem ${problem.questionFrontendId}`);
@@ -113,11 +116,6 @@ export async function resetCommand(idOrSlug: string): Promise<boolean> {
     console.log(chalk.gray(`Backup: ${backup.name}`));
     return true;
   } catch (error) {
-    if (isProblemNotFoundError(error)) {
-      spinner.fail(`Problem "${idOrSlug}" not found`);
-      return false;
-    }
-
     spinner.fail('Failed to reset solution');
     if (error instanceof Error) {
       console.log(chalk.red(error.message));

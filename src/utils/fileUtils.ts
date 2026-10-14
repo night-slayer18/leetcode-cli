@@ -12,6 +12,7 @@ const MAX_SEARCH_DEPTH = 5;
 export async function findSolutionFile(
   dir: string,
   problemId: string,
+  language?: SupportedLanguage | null,
   currentDepth: number = 0
 ): Promise<string | null> {
   if (!existsSync(dir)) return null;
@@ -25,12 +26,13 @@ export async function findSolutionFile(
 
     const fullPath = join(dir, entry.name);
     if (entry.isDirectory()) {
-      const found = await findSolutionFile(fullPath, problemId, currentDepth + 1);
+      const found = await findSolutionFile(fullPath, problemId, language, currentDepth + 1);
       if (found) return found;
     } else if (entry.name.startsWith(`${problemId}.`)) {
       // Check it's a valid code file, not a markdown or other file
       const ext = entry.name.split('.').pop()?.toLowerCase();
       if (ext && ext in EXT_TO_LANG_MAP) {
+        if (language && EXT_TO_LANG_MAP[ext] !== language) continue;
         return fullPath;
       }
     }

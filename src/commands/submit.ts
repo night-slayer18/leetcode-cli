@@ -12,12 +12,17 @@ import { displaySubmissionResult } from '../utils/display.js';
 import { maybeShowStarPrompt } from '../utils/star-prompt.js';
 import { findSolutionFile, findFileByName, getLangSlugFromExtension } from '../utils/fileUtils.js';
 import { isProblemId, isFileName, isPathInsideWorkDir } from '../utils/validation.js';
+import { resolveLanguageInput } from '../utils/languages.js';
+
+interface SubmitOptions {
+  lang?: string;
+}
 
 /**
  * Submit command - submit solution to LeetCode
  * @param fileOrId - Problem ID, filename, or file path
  */
-export async function submitCommand(fileOrId: string): Promise<void> {
+export async function submitCommand(fileOrId: string, options: SubmitOptions = {}): Promise<void> {
   const { authorized } = await requireAuth();
   if (!authorized) return;
 
@@ -27,7 +32,12 @@ export async function submitCommand(fileOrId: string): Promise<void> {
   // Resolve file path based on input type
   if (isProblemId(fileOrId)) {
     // Input is a problem ID - find by ID
-    const found = await findSolutionFile(workDir, fileOrId);
+    const { input, language } = resolveLanguageInput(options.lang);
+    if (!language) {
+      console.log(chalk.red(`Unsupported language: ${input}`));
+      return;
+    }
+    const found = await findSolutionFile(workDir, fileOrId, language);
     if (!found) {
       console.log(chalk.red(`No solution file found for problem ${fileOrId}`));
       console.log(chalk.gray(`Looking in: ${workDir}`));

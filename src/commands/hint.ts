@@ -1,8 +1,8 @@
 // Hint command - display problem hints progressively
 import chalk from 'chalk';
 import ora from 'ora';
-import { leetcodeClient } from '../api/client.js';
 import { requireAuth } from '../utils/auth.js';
+import { resolveProblem } from '../utils/problem-resolver.js';
 import striptags from 'striptags';
 
 export async function hintCommand(idOrSlug: string, options: { all?: boolean }): Promise<void> {
@@ -11,50 +11,35 @@ export async function hintCommand(idOrSlug: string, options: { all?: boolean }):
 
   const spinner = ora('Fetching problem hints...').start();
 
-  try {
-    let problem;
+  const problem = await resolveProblem(idOrSlug, {
+    spinner,
+    failMessage: 'Failed to fetch problem hints',
+  });
+  if (!problem) return;
 
-    // Check if it's a numeric ID or a title slug
-    if (/^\d+$/.test(idOrSlug)) {
-      problem = await leetcodeClient.getProblemById(idOrSlug);
-    } else {
-      problem = await leetcodeClient.getProblem(idOrSlug);
-    }
+  spinner.stop();
 
-    if (!problem) {
-      spinner.fail(`Problem "${idOrSlug}" not found`);
-      return;
-    }
+  // Display problem title
+  console.log();
+  console.log(chalk.bold.cyan(`${problem.questionFrontendId}. ${problem.title}`));
+  console.log();
 
-    spinner.stop();
+  const hints = problem.hints || [];
 
-    // Display problem title
-    console.log();
-    console.log(chalk.bold.cyan(`${problem.questionFrontendId}. ${problem.title}`));
-    console.log();
+  if (hints.length === 0) {
+    console.log(chalk.yellow('⚠ No hints available for this problem.'));
+    console.log(chalk.gray('Try working through the problem description and examples first!'));
+    return;
+  }
 
-    const hints = problem.hints || [];
-
-    if (hints.length === 0) {
-      console.log(chalk.yellow('⚠ No hints available for this problem.'));
-      console.log(chalk.gray('Try working through the problem description and examples first!'));
-      return;
-    }
-
-    if (options.all) {
-      // Show all hints at once
-      hints.forEach((hint, index) => {
-        displayHint(hint, index + 1, hints.length);
-      });
-    } else {
-      // Show hints one at a time with prompts
-      await showHintsProgressively(hints);
-    }
-  } catch (error) {
-    spinner.fail('Failed to fetch problem hints');
-    if (error instanceof Error) {
-      console.log(chalk.red(error.message));
-    }
+  if (options.all) {
+    // Show all hints at once
+    hints.forEach((hint, index) => {
+      displayHint(hint, index + 1, hints.length);
+    });
+  } else {
+    // Show hints one at a time with prompts
+    await showHintsProgressively(hints);
   }
 }
 
