@@ -191,6 +191,9 @@ Reset an existing local solution file back to the original LeetCode stub. This o
 ```bash
 leetcode reset 1
 leetcode reset two-sum
+
+# Reset for a specific language when multiple solutions exist
+leetcode reset 1 --lang python3
 ```
 
 ### Test & Submit
@@ -201,6 +204,10 @@ All formats work for both `test` and `submit`:
 # Using problem ID (auto-finds the file)
 leetcode test 20
 leetcode submit 20
+
+# Filter by language when multiple solutions exist
+leetcode test 20 --lang python3
+leetcode submit 20 --lang python3
 
 # Using filename
 leetcode test 20.valid-parentheses.java
@@ -361,6 +368,9 @@ leetcode reset two-sum
 # Save current approach
 leetcode snapshot save 1 "brute-force"
 
+# Save for a specific language
+leetcode snapshot save 1 "optimized" --lang python3
+
 # Try a new approach, then save
 leetcode snapshot save 1 "hash-map"
 
@@ -379,6 +389,9 @@ leetcode snapshot restore 1 brute-force
 ```bash
 # Compare with last accepted submission
 leetcode diff 1
+
+# Compare for a specific language
+leetcode diff 1 --lang python3
 
 # Show unified diff (line-by-line changes)
 leetcode diff 1 --unified

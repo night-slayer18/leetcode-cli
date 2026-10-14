@@ -1,5 +1,64 @@
 # Release Notes
 
+## v3.6.0
+
+> **Release Date**: 2026-10-14
+> **Focus**: Target Language Option (`--lang`) for Solution Locators, Unified Problem Identifier Resolution, and Dependency Security Fixes
+
+### 🚀 Features
+
+#### Target Language Option for ID-Based Commands ([#56](https://github.com/night-slayer18/leetcode-cli/issues/56))
+
+Added the `-l, --lang <language>` option across all commands that locate solution files by problem ID (`test`, `submit`, `diff`, `snapshot`, `collab`, and `reset`):
+
+- **Multi-language support**: If your workspace contains solutions in multiple languages (e.g. `1.two-sum.ts` and `1.two-sum.py`), `--lang` allows targeting a specific language solution without typing the full relative path.
+- **Language validation**: Verifies user input against supported languages upfront, reporting friendly errors (e.g., `Unsupported language: foo`) before executing file lookups or network requests.
+- **Aliases supported**: Supports standard aliases (e.g. `py` for `python3`, `ts` for `typescript`, `js` for `javascript`, `cpp` for `c++`, `cs` for `csharp`).
+
+```bash
+# Test or submit a specific language implementation
+leetcode test 1 --lang python3
+leetcode submit 1 --lang cpp
+
+# Compare, snapshot, or reset a specific language solution
+leetcode diff 1 --lang java
+leetcode snapshot save 1 "optimized" --lang python3
+leetcode reset 1 --lang typescript
+```
+
+#### Unified Problem Identifier Resolution ([#50](https://github.com/night-slayer18/leetcode-cli/pull/50))
+
+Consolidated problem ID and title slug resolution into shared resolver utilities:
+
+- **Shared resolver**: Extracted `resolveProblem`, `resolveProblemIdentifier`, and `isProblemNotFoundError` in `src/utils/problem-resolver.ts`.
+- **Eliminated raw Zod schema validation errors**: When querying an unknown or mistyped slug, commands previously threw `expected object, received null`. They now report a clean, user-friendly message (`Problem "<slug>" not found`).
+- **Consistent behavior across commands**: Unified across `show`, `hint`, `submissions`, `timer`, `pick`, `notes`, and `reset`.
+
+#### Title Slug Support for Notes Command ([#50](https://github.com/night-slayer18/leetcode-cli/pull/50))
+
+`leetcode notes <idOrName>` now accepts a problem name (slug) in addition to numeric IDs:
+
+- Resolves the problem slug through the LeetCode API to associate the note with the problem's frontend ID.
+- Avoids redundant API calls by passing the fetched problem details directly to note templates.
+
+```bash
+leetcode notes two-sum
+leetcode notes two-sum edit
+```
+
+### 🔒 Security
+
+- **Automated dependency audit fix**: Resolved two high-severity vulnerabilities (`http-cache-semantics` [GHSA-ch52-4w7c-c8xp](https://github.com/advisories/GHSA-ch52-4w7c-c8xp) and `source-map-js` [GHSA-68fv-2mgg-jv7q](https://github.com/advisories/GHSA-68fv-2mgg-jv7q)).
+
+### 🧪 Testing
+
+- Added unit tests for shared problem resolver in `src/__tests__/utils/problem-resolver.test.ts` (17 tests).
+- Added unit tests for solution file lookup with language filter in `src/__tests__/utils/file-utils.test.ts`.
+- Added regression tests for `--lang` support in `src/__tests__/commands/diff.test.ts`, `src/__tests__/commands/snapshot.test.ts`, and `src/__tests__/commands/reset.test.ts`.
+- All 385 tests passing across 40 test suites.
+
+---
+
 ## v3.5.2
 
 > **Release Date**: 2026-09-07

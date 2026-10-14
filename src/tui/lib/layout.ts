@@ -20,7 +20,7 @@ export function truncate(str: string, maxLen: number): string {
   let result = '';
   let visible = 0;
 
-  for (let i = 0; i < str.length && visible < target; ) {
+  for (let i = 0; i < str.length && visible < target;) {
     if (str[i] === '\x1b') {
       const match = str.slice(i).match(/^\x1B\[[0-9;]*[a-zA-Z]/);
       if (match) {
