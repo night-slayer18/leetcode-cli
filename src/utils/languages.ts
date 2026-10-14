@@ -1,4 +1,5 @@
 import type { CodeSnippet, SupportedLanguage } from '../types.js';
+import { config } from '../storage/config.js';
 
 export const SUPPORTED_LANGUAGES: SupportedLanguage[] = [
   'typescript',
@@ -81,6 +82,14 @@ function normalizeSqlDialect(input: string): string | null {
 
 export function normalizeLanguageInput(input: string): SupportedLanguage | null {
   return LANGUAGE_ALIAS_MAP[normalizeKey(input)] ?? null;
+}
+
+export function resolveLanguageInput(langInput?: string): {
+  input: string;
+  language: SupportedLanguage | null;
+} {
+  const input = langInput ?? config.getLanguage();
+  return { input, language: normalizeLanguageInput(input) };
 }
 
 export function resolveSupportedLanguageFromLeetCodeSlug(slug: string): SupportedLanguage | null {

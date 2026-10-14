@@ -7,6 +7,7 @@ import { pickCommand } from './pick.js';
 import { requireAuth } from '../utils/auth.js';
 import { config } from '../storage/config.js';
 import { findSolutionFile } from '../utils/fileUtils.js';
+import { resolveLanguageInput } from '../utils/languages.js';
 
 export async function collabHostCommand(problemId: string): Promise<void> {
   const { authorized, username } = await requireAuth();
@@ -93,7 +94,7 @@ export async function collabJoinCommand(roomCode: string): Promise<void> {
   }
 }
 
-export async function collabSyncCommand(): Promise<void> {
+export async function collabSyncCommand(options: { lang?: string } = {}): Promise<void> {
   const session = collabService.getSession();
 
   if (!session) {
@@ -107,8 +108,14 @@ export async function collabSyncCommand(): Promise<void> {
   const spinner = ora('Syncing your code...').start();
 
   try {
+    const { input, language } = resolveLanguageInput(options.lang);
+    if (!language) {
+      spinner.fail(`Unsupported language: ${input}`);
+      return;
+    }
+
     const workDir = config.getWorkDir();
-    const filePath = await findSolutionFile(workDir, session.problemId);
+    const filePath = await findSolutionFile(workDir, session.problemId, language);
 
     if (!filePath) {
       spinner.fail(`No solution file found for problem ${session.problemId}`);
@@ -132,7 +139,7 @@ export async function collabSyncCommand(): Promise<void> {
   }
 }
 
-export async function collabCompareCommand(): Promise<void> {
+export async function collabCompareCommand(options: { lang?: string } = {}): Promise<void> {
   const session = collabService.getSession();
 
   if (!session) {
@@ -147,8 +154,14 @@ export async function collabCompareCommand(): Promise<void> {
 
   try {
     // Get my code
+    const { input, language } = resolveLanguageInput(options.lang);
+    if (!language) {
+      spinner.fail(`Unsupported language: ${input}`);
+      return;
+    }
+
     const workDir = config.getWorkDir();
-    const filePath = await findSolutionFile(workDir, session.problemId);
+    const filePath = await findSolutionFile(workDir, session.problemId, language);
 
     if (!filePath) {
       spinner.fail(`No solution file found for problem ${session.problemId}`);

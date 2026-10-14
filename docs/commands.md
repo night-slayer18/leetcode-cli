@@ -314,6 +314,10 @@ This command overwrites the existing file immediately. It preserves the existing
 
 - `<id>` - Problem ID or slug
 
+**Options**:
+
+- `-l, --lang <language>` - Only match solution files in this language (default: configured language)
+
 **Examples**:
 
 ```bash
@@ -322,6 +326,9 @@ leetcode reset 1
 
 # By slug
 leetcode reset two-sum
+
+# Reset the Python solution when multiple languages exist
+leetcode reset 1 -l python3
 ```
 
 ---
@@ -338,6 +345,7 @@ Test solution against sample test cases.
 
 - `-c, --testcase <testcase>` - Custom test case input
 - `-V, --visualize` - Visual output for data structures
+- `-l, --lang <language>` - Only match solution files in this language when testing by problem ID (default: configured language)
 
 **Three Ways to Test**:
 
@@ -390,6 +398,10 @@ Submit solution to LeetCode.
 **Arguments**:
 
 - `<file>` - Problem ID, filename, or file path
+
+**Options**:
+
+- `-l, --lang <language>` - Only match solution files in this language when submitting by problem ID (default: configured language)
 
 **Three Ways to Submit**:
 
@@ -664,6 +676,10 @@ Upload your current solution to the collaboration room.
 
 **Usage**: `leetcode collab sync`
 
+**Options**:
+
+- `-l, --lang <language>` - Only match solution files in this language (default: configured language)
+
 Reads your local solution file and syncs it to the cloud so your partner can see it.
 
 ---
@@ -673,6 +689,10 @@ Reads your local solution file and syncs it to the cloud so your partner can see
 Compare your solution with your partner's solution.
 
 **Usage**: `leetcode collab compare`
+
+**Options**:
+
+- `-l, --lang <language>` - Only match solution files in this language (default: configured language)
 
 Displays both solutions sequentially with line numbers for easy comparison.
 
@@ -709,12 +729,17 @@ Save current solution as a snapshot.
 - `<id>` - Problem ID
 - `[name]` - Optional snapshot name (defaults to `snapshot-N`)
 
+**Options**:
+
+- `-l, --lang <language>` - Only match solution files in this language (default: configured language)
+
 **Examples**:
 
 ```bash
 leetcode snapshot save 1 "brute-force"
 leetcode snapshot save 1 "hash-map-approach"
 leetcode snapshot save 1  # auto-named "snapshot-1"
+leetcode snapshot save 1 -l python3
 ```
 
 ---
@@ -746,11 +771,16 @@ Restore a previously saved snapshot. Auto-creates backup of current code.
 - `<id>` - Problem ID
 - `<snapshot>` - Snapshot ID or name
 
+**Options**:
+
+- `-l, --lang <language>` - Only match solution files in this language (default: configured language)
+
 **Examples**:
 
 ```bash
 leetcode snapshot restore 1 1           # By ID
 leetcode snapshot restore 1 brute-force # By name
+leetcode snapshot restore 1 1 -l java
 ```
 
 ---
@@ -806,6 +836,7 @@ Compare your current solution with past submissions or other files.
 - `-s, --submission <id>` - Compare with specific submission ID
 - `-f, --file <path>` - Compare with a local file
 - `-u, --unified` - Show unified diff (line-by-line changes)
+- `-l, --lang <language>` - Only match solution files in this language (default: configured language)
 
 **Default**: Shows both solutions one below the other with line numbers and summary.
 

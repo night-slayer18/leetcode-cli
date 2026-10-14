@@ -6,6 +6,7 @@ import { config } from '../storage/config.js';
 import { findSolutionFile } from '../utils/fileUtils.js';
 import { requireAuth } from '../utils/auth.js';
 import { isPathInsideWorkDir } from '../utils/validation.js';
+import { resolveLanguageInput } from '../utils/languages.js';
 import { readFile } from 'fs/promises';
 import { existsSync } from 'fs';
 import { diffLines } from 'diff';
@@ -14,6 +15,7 @@ interface DiffOptions {
   submission?: string;
   file?: string;
   unified?: boolean;
+  lang?: string;
 }
 
 function showCodeBlock(code: string, label: string): void {
@@ -128,7 +130,12 @@ export async function diffCommand(problemId: string, options: DiffOptions): Prom
 
   try {
     // Find current solution file
-    const filePath = await findSolutionFile(workDir, problemId);
+    const { input, language } = resolveLanguageInput(options.lang);
+    if (!language) {
+      spinner.fail(`Unsupported language: ${input}`);
+      return;
+    }
+    const filePath = await findSolutionFile(workDir, problemId, language);
 
     if (!filePath) {
       spinner.fail(`No solution file found for problem ${problemId}`);

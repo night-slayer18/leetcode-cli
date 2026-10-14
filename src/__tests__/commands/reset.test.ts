@@ -47,6 +47,7 @@ vi.mock('../../storage/config.js', () => ({
       workDir: '/tmp/leetcode',
       site: 'leetcode.com',
     })),
+    getLanguage: vi.fn(() => 'typescript'),
     getWorkDir: vi.fn(() => '/tmp/leetcode'),
     getSite: vi.fn(() => 'leetcode.com'),
   },
@@ -133,7 +134,7 @@ describe('resetCommand', () => {
 
     expect(result).toBe(true);
     expect(leetcodeClient.getProblemById).toHaveBeenCalledWith('1');
-    expect(findSolutionFile).toHaveBeenCalledWith('/tmp/leetcode', '1');
+    expect(findSolutionFile).toHaveBeenCalledWith('/tmp/leetcode', '1', 'typescript');
     expect(snapshotStorage.save).toHaveBeenCalledWith(
       '1',
       'Two Sum',
@@ -153,6 +154,20 @@ describe('resetCommand', () => {
 
     expect(leetcodeClient.getProblem).toHaveBeenCalledWith('two-sum');
     expect(writeFile).toHaveBeenCalled();
+  });
+
+  it('passes the requested language to the solution file lookup', async () => {
+    await resetCommand('1', { lang: 'python3' });
+
+    expect(findSolutionFile).toHaveBeenCalledWith('/tmp/leetcode', '1', 'python3');
+  });
+
+  it('rejects unsupported languages before looking up a file', async () => {
+    const result = await resetCommand('1', { lang: 'brainfuck' });
+
+    expect(result).toBe(false);
+    expect(findSolutionFile).not.toHaveBeenCalled();
+    expect(latestSpinner().fail).toHaveBeenCalledWith('Unsupported language: brainfuck');
   });
 
   it('does not write when no existing solution file is found', async () => {
