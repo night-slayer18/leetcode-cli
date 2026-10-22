@@ -1,5 +1,28 @@
 # Release Notes
 
+## v3.6.1
+
+> **Release Date**: 2026-10-22
+> **Focus**: Persistent `--no-open` configuration setting and security dependency fixes
+
+### 🚀 Features
+
+#### Persistent Auto-Open Configuration ([#59](https://github.com/night-slayer18/leetcode-cli/issues/59))
+
+Added a persistent `--no-open` configuration setting to allow developers working in non-root project directories or external editors to prevent automatically opening files upon `leetcode pick`:
+
+- **Configurable auto-open**: Configure via `leetcode config --no-open` to disable auto-opening solution files after generation, or `leetcode config --open` to re-enable it.
+- **Config display**: `leetcode config` now displays current Auto-open status (`Disabled` / `Enabled`).
+- **CLI flag overrides**: One-off flags `--no-open` and `--open` during `leetcode pick` continue to take precedence over the persistent configuration setting.
+
+### 🔒 Security & Dependencies
+
+- **Audit vulnerability fixes**: Upgraded `vite`, `vitest`, and `@vitest/coverage-v8` to eliminate high- and moderate-severity vulnerabilities (4 vulnerabilities → 0).
+- **TypeScript build stability**: Excluded test mocks from root declaration output generation to prevent vitest internal type leakage (TS2742).
+- **Dependency updates**: Bumped production and dev dependencies including `@supabase/supabase-js`, `zod`, and ESLint/Prettier plugins.
+
+---
+
 ## v3.6.0
 
 > **Release Date**: 2026-10-14

@@ -19,6 +19,7 @@ interface ConfigOptions {
   repo?: string | boolean;
   site?: string;
   theme?: string;
+  noOpen?: boolean;
 }
 
 export async function configCommand(options: ConfigOptions): Promise<void> {
@@ -30,7 +31,8 @@ export async function configCommand(options: ConfigOptions): Promise<void> {
     !options.workdir &&
     !hasRepoOption &&
     !options.site &&
-    !options.theme
+    !options.theme &&
+    options.noOpen === undefined
   ) {
     await showCurrentConfig();
     return;
@@ -115,6 +117,17 @@ export async function configCommand(options: ConfigOptions): Promise<void> {
     }
     config.setTheme(normalizedTheme);
     console.log(chalk.green(`✓ Theme set to ${normalizedTheme}`));
+  }
+
+  if (options.noOpen !== undefined) {
+    config.setNoOpen(options.noOpen);
+    console.log(
+      chalk.green(
+        options.noOpen
+          ? '✓ Auto-open disabled — files will not be opened in editor after pick'
+          : '✓ Auto-open enabled — files will be opened in editor after pick'
+      )
+    );
   }
 }
 
@@ -231,5 +244,9 @@ async function showCurrentConfig(): Promise<void> {
   console.log(chalk.gray('Editor:      '), chalk.white(currentConfig.editor ?? '(not set)'));
   console.log(chalk.gray('Work Dir:    '), chalk.white(currentConfig.workDir));
   console.log(chalk.gray('Repo URL:    '), chalk.white(currentConfig.repo ?? '(not set)'));
+  console.log(
+    chalk.gray('Auto-open:   '),
+    currentConfig.noOpen ? chalk.yellow('disabled') : chalk.green('enabled')
+  );
   console.log(chalk.gray('Logged in:   '), creds ? chalk.green('Yes') : chalk.yellow('No'));
 }

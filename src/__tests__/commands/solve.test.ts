@@ -14,6 +14,7 @@ vi.mock('../../storage/config.js', () => ({
     getLanguage: vi.fn(() => 'typescript'),
     getWorkDir: vi.fn(() => '/tmp/leetcode'),
     getEditor: vi.fn(() => 'code'),
+    getNoOpen: vi.fn(() => false),
   },
 }));
 
@@ -106,8 +107,10 @@ import {
   findFileByName,
   getLangSlugFromExtension,
 } from '../../utils/fileUtils.js';
+import { openInEditor } from '../../utils/editor.js';
 import { writeFile } from 'fs/promises';
 import { existsSync } from 'fs';
+import { config } from '../../storage/config.js';
 
 describe('Solve Commands', () => {
   beforeEach(() => {
@@ -187,6 +190,56 @@ describe('Solve Commands', () => {
 
         expect(result).toBe(false);
         expect(writeFile).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('noOpen config setting', () => {
+      it('should open editor by default when noOpen config is false', async () => {
+        vi.mocked(existsSync).mockReturnValue(false);
+        vi.mocked(config.getNoOpen).mockReturnValue(false);
+
+        // No explicit open option — should use config default (open = true)
+        await pickCommand('1', {});
+
+        expect(openInEditor).toHaveBeenCalled();
+      });
+
+      it('should NOT open editor when noOpen config is true and no explicit flag given', async () => {
+        vi.mocked(existsSync).mockReturnValue(false);
+        vi.mocked(config.getNoOpen).mockReturnValue(true);
+
+        await pickCommand('1', {});
+
+        expect(openInEditor).not.toHaveBeenCalled();
+      });
+
+      it('should open editor when --open is explicitly passed even if noOpen config is true', async () => {
+        vi.mocked(existsSync).mockReturnValue(false);
+        vi.mocked(config.getNoOpen).mockReturnValue(true);
+
+        // Explicit CLI --open overrides config
+        await pickCommand('1', { open: true });
+
+        expect(openInEditor).toHaveBeenCalled();
+      });
+
+      it('should NOT open editor when --no-open flag is passed even if noOpen config is false', async () => {
+        vi.mocked(existsSync).mockReturnValue(false);
+        vi.mocked(config.getNoOpen).mockReturnValue(false);
+
+        // Explicit CLI --no-open overrides config
+        await pickCommand('1', { open: false });
+
+        expect(openInEditor).not.toHaveBeenCalled();
+      });
+
+      it('should respect noOpen config for already-existing files too', async () => {
+        vi.mocked(existsSync).mockReturnValue(true); // File exists
+        vi.mocked(config.getNoOpen).mockReturnValue(true);
+
+        await pickCommand('1', {});
+
+        expect(openInEditor).not.toHaveBeenCalled();
       });
     });
 

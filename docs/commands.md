@@ -592,6 +592,8 @@ View or set configuration.
 - `-w, --workdir <path>` - Set working directory for solutions
 - `-r, --repo [url]` - Set or clear Git repository URL
 - `-t, --theme <theme>` - Set TUI color theme (`dark`, `light`, or `auto`)
+- `--no-open` - Disable auto-opening solution files after pick (persisted to config)
+- `--open` - Re-enable auto-opening solution files after pick
 - `-i, --interactive` - Interactive configuration mode
 
 **Examples**:
@@ -618,6 +620,10 @@ leetcode config --editor zed
 leetcode config --theme light
 leetcode config --theme dark
 leetcode config --theme auto
+
+# Toggle auto-open on pick
+leetcode config --no-open
+leetcode config --open
 
 # Set working directory
 leetcode config -w ~/leetcode

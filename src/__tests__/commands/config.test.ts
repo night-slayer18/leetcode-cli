@@ -11,17 +11,20 @@ vi.mock('../../storage/config.js', () => ({
       editor: 'code',
       repo: undefined,
       site: 'leetcode.com',
+      noOpen: false,
     })),
     getLanguage: vi.fn(() => 'typescript'),
     getWorkDir: vi.fn(() => '/tmp/leetcode'),
     getEditor: vi.fn(() => 'code'),
     getRepo: vi.fn(() => undefined),
     getSite: vi.fn(() => 'leetcode.com'),
+    getNoOpen: vi.fn(() => false),
     setLanguage: vi.fn(),
     setWorkDir: vi.fn(),
     setEditor: vi.fn(),
     setRepo: vi.fn(),
     setSite: vi.fn(),
+    setNoOpen: vi.fn(),
     getPath: vi.fn(() => '/tmp/.leetcode/config.json'),
     getActiveWorkspace: vi.fn(() => 'default'),
   },
@@ -98,6 +101,24 @@ describe('Config Command', () => {
     it('should set site', async () => {
       await configCommand({ site: 'leetcode.cn' });
       expect(config.setSite).toHaveBeenCalledWith('leetcode.cn');
+    });
+
+    it('should disable auto-open (--no-open)', async () => {
+      await configCommand({ noOpen: true });
+
+      expect(config.setNoOpen).toHaveBeenCalledWith(true);
+    });
+
+    it('should re-enable auto-open (--open)', async () => {
+      await configCommand({ noOpen: false });
+
+      expect(config.setNoOpen).toHaveBeenCalledWith(false);
+    });
+
+    it('should show auto-open status in config display', async () => {
+      await configCommand({});
+
+      expect(outputContains('Auto-open:')).toBe(true);
     });
   });
 });
