@@ -12,6 +12,7 @@ export interface WorkspaceConfig {
   syncRepo?: string;
   site?: LeetCodeSite;
   theme?: ThemeName;
+  noOpen?: boolean;
 }
 
 export interface WorkspaceRegistry {

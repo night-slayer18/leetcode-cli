@@ -97,8 +97,9 @@ export async function pickCommand(idOrSlug: string, options: PickOptions): Promi
       spinner.warn(`File already exists: ${fileName}`);
       console.log(chalk.gray(`Path: ${filePath}`));
 
-      // Optionally open existing file
-      if (options.open !== false) {
+      // Optionally open existing file — CLI flag wins, otherwise fall back to saved config
+      const shouldOpen = options.open !== undefined ? options.open : !config.getNoOpen();
+      if (shouldOpen) {
         await openInEditor(filePath);
       }
       return true;
@@ -112,8 +113,9 @@ export async function pickCommand(idOrSlug: string, options: PickOptions): Promi
     console.log(chalk.cyan(`${problem.questionFrontendId}. ${problem.title}`));
     console.log(chalk.gray(`Difficulty: ${problem.difficulty} | Category: ${category}`));
 
-    // Open in editor
-    if (options.open !== false) {
+    // Open in editor — CLI flag wins, otherwise fall back to saved config
+    const shouldOpen = options.open !== undefined ? options.open : !config.getNoOpen();
+    if (shouldOpen) {
       await openInEditor(filePath);
     }
     return true;

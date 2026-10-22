@@ -459,20 +459,24 @@ program
   .option('-w, --workdir <path>', 'Set working directory for solutions')
   .option('-r, --repo [url]', 'Set Git repository URL (omit value to clear)')
   .option('--theme <theme>', 'Set color theme (dark, light, auto)')
+  .option('--no-open', 'Disable auto-open in editor after pick (saves to config)')
+  .option('--open', 'Re-enable auto-open in editor after pick')
   .option('-i, --interactive', 'Interactive configuration')
   .addHelpText(
     'after',
     `
 ${chalk.yellow('Examples:')}
-  ${chalk.cyan('$ leetcode config')}                  View current config
-  ${chalk.cyan('$ leetcode config -l python3')}       Set language to Python
-  ${chalk.cyan('$ leetcode config -s leetcode.cn')}   Use LeetCode China site
-  ${chalk.cyan('$ leetcode config -e "code"')}        Set editor to VS Code
-  ${chalk.cyan('$ leetcode config -w ~/leetcode')}    Set solutions folder
-  ${chalk.cyan('$ leetcode config -r https://...')}   Set git repository
-  ${chalk.cyan('$ leetcode config --repo')}            Clear git repository
-  ${chalk.cyan('$ leetcode config --theme light')}    Use light color theme
-  ${chalk.cyan('$ leetcode config -i')}               Interactive setup
+  ${chalk.cyan('$ leetcode config')}                      View current config
+  ${chalk.cyan('$ leetcode config -l python3')}           Set language to Python
+  ${chalk.cyan('$ leetcode config -s leetcode.cn')}       Use LeetCode China site
+  ${chalk.cyan('$ leetcode config -e "code"')}            Set editor to VS Code
+  ${chalk.cyan('$ leetcode config -w ~/leetcode')}        Set solutions folder
+  ${chalk.cyan('$ leetcode config -r https://...')}       Set git repository
+  ${chalk.cyan('$ leetcode config --repo')}               Clear git repository
+  ${chalk.cyan('$ leetcode config --theme light')}        Use light color theme
+  ${chalk.cyan('$ leetcode config --no-open')}            Disable auto-open after pick
+  ${chalk.cyan('$ leetcode config --open')}               Re-enable auto-open after pick
+  ${chalk.cyan('$ leetcode config -i')}                   Interactive setup
 
 ${chalk.gray(`Supported languages: ${getSupportedLanguagesLabel()}`)}
 `

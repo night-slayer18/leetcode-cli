@@ -16,6 +16,7 @@ export const config = {
       repo: wsConfig.syncRepo,
       site: normalizeLeetCodeSiteInput(wsConfig.site ?? '') ?? DEFAULT_LEETCODE_SITE,
       theme: wsConfig.theme ?? DEFAULT_THEME,
+      noOpen: wsConfig.noOpen ?? false,
     };
   },
 
@@ -73,6 +74,14 @@ export const config = {
 
   getTheme(): ThemeName {
     return workspaceStorage.getConfig().theme ?? DEFAULT_THEME;
+  },
+
+  getNoOpen(): boolean {
+    return workspaceStorage.getConfig().noOpen ?? false;
+  },
+
+  setNoOpen(noOpen: boolean): void {
+    workspaceStorage.setConfig({ noOpen });
   },
 
   getPath(): string {

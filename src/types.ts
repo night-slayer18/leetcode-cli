@@ -184,4 +184,5 @@ export interface UserConfig {
   repo?: string;
   site?: LeetCodeSite;
   theme?: ThemeName;
+  noOpen?: boolean;
 }
