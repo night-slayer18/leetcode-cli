@@ -523,7 +523,7 @@ Workspace config is stored at:
 
 ## Requirements
 
-- Node.js >= 20.0.0
+- Node.js >= 22.0.0
 
 ## Development
 

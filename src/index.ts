@@ -71,7 +71,7 @@ program
   .name('leetcode')
   .usage('[command] [options]')
   .description(chalk.bold.cyan('🔥 A modern LeetCode CLI built with TypeScript'))
-  .version('3.6.1', '-v, --version', 'Output the version number')
+  .version('3.6.2', '-v, --version', 'Output the version number')
   .helpOption('-h, --help', 'Display help for command')
   .addHelpText(
     'after',
@@ -191,6 +191,7 @@ program
   .option('-d, --difficulty <level>', 'Filter by difficulty (easy/medium/hard)')
   .option('-t, --tag <tag>', 'Filter by topic tag')
   .option('--pick', 'Auto-generate solution file')
+  .option('--open', 'Open file in editor')
   .option('--no-open', 'Do not open file in editor')
   .addHelpText(
     'after',
@@ -210,6 +211,7 @@ program
   .alias('p')
   .description('Generate solution file for a problem')
   .option('-l, --lang <language>', 'Programming language for the solution')
+  .option('--open', 'Open file in editor')
   .option('--no-open', 'Do not open file in editor')
   .addHelpText(
     'after',
@@ -247,6 +249,7 @@ program
   .alias('c')
   .description('Browse contests and generate a solution for a contest problem')
   .option('-l, --lang <language>', 'Programming language for the solution')
+  .option('--open', 'Open file in editor')
   .option('--no-open', 'Do not open file in editor')
   .addHelpText(
     'after',
@@ -459,8 +462,8 @@ program
   .option('-w, --workdir <path>', 'Set working directory for solutions')
   .option('-r, --repo [url]', 'Set Git repository URL (omit value to clear)')
   .option('--theme <theme>', 'Set color theme (dark, light, auto)')
-  .option('--no-open', 'Disable auto-open in editor after pick (saves to config)')
   .option('--open', 'Re-enable auto-open in editor after pick')
+  .option('--no-open', 'Disable auto-open in editor after pick (saves to config)')
   .option('-i, --interactive', 'Interactive configuration')
   .addHelpText(
     'after',

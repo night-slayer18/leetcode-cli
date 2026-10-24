@@ -19,11 +19,18 @@ interface ConfigOptions {
   repo?: string | boolean;
   site?: string;
   theme?: string;
+  open?: boolean;
   noOpen?: boolean;
 }
 
 export async function configCommand(options: ConfigOptions): Promise<void> {
   const hasRepoOption = options.repo !== undefined;
+  const resolvedNoOpen =
+    options.open !== undefined
+      ? !options.open
+      : options.noOpen !== undefined
+        ? options.noOpen
+        : undefined;
 
   if (
     !options.lang &&
@@ -32,7 +39,7 @@ export async function configCommand(options: ConfigOptions): Promise<void> {
     !hasRepoOption &&
     !options.site &&
     !options.theme &&
-    options.noOpen === undefined
+    resolvedNoOpen === undefined
   ) {
     await showCurrentConfig();
     return;
@@ -119,11 +126,11 @@ export async function configCommand(options: ConfigOptions): Promise<void> {
     console.log(chalk.green(`✓ Theme set to ${normalizedTheme}`));
   }
 
-  if (options.noOpen !== undefined) {
-    config.setNoOpen(options.noOpen);
+  if (resolvedNoOpen !== undefined) {
+    config.setNoOpen(resolvedNoOpen);
     console.log(
       chalk.green(
-        options.noOpen
+        resolvedNoOpen
           ? '✓ Auto-open disabled — files will not be opened in editor after pick'
           : '✓ Auto-open enabled — files will be opened in editor after pick'
       )

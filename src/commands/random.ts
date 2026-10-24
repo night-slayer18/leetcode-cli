@@ -52,7 +52,7 @@ export async function randomCommand(options: RandomOptions): Promise<void> {
 
     if (options.pick) {
       // Forward to pick command
-      await pickCommand(titleSlug, { open: options.open ?? true });
+      await pickCommand(titleSlug, { open: options.open });
     } else {
       // Forward to show command
       await showCommand(titleSlug);
