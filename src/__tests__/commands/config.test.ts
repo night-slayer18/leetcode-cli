@@ -103,13 +103,25 @@ describe('Config Command', () => {
       expect(config.setSite).toHaveBeenCalledWith('leetcode.cn');
     });
 
-    it('should disable auto-open (--no-open)', async () => {
+    it('should disable auto-open (--no-open parsed by Commander as open: false)', async () => {
+      await configCommand({ open: false });
+
+      expect(config.setNoOpen).toHaveBeenCalledWith(true);
+    });
+
+    it('should re-enable auto-open (--open parsed by Commander as open: true)', async () => {
+      await configCommand({ open: true });
+
+      expect(config.setNoOpen).toHaveBeenCalledWith(false);
+    });
+
+    it('should disable auto-open with programmatic noOpen: true', async () => {
       await configCommand({ noOpen: true });
 
       expect(config.setNoOpen).toHaveBeenCalledWith(true);
     });
 
-    it('should re-enable auto-open (--open)', async () => {
+    it('should re-enable auto-open with programmatic noOpen: false', async () => {
       await configCommand({ noOpen: false });
 
       expect(config.setNoOpen).toHaveBeenCalledWith(false);

@@ -5,7 +5,16 @@ import { config } from '../storage/config.js';
 
 const TERMINAL_EDITORS = ['vim', 'nvim', 'vi', 'nano', 'emacs', 'micro', 'helix'];
 
-const VSCODE_EDITORS = ['code', 'code-insiders', 'cursor', 'codium', 'vscodium'];
+const VSCODE_EDITORS = [
+  'code',
+  'code-insiders',
+  'cursor',
+  'codium',
+  'vscodium',
+  'agy-ide',
+  'antigravity-ide',
+  'agy',
+];
 
 const ZED_EDITORS = ['zed', 'zeditor', 'zed.exe'];
 

@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- **Node.js**: Version 20.0.0 or higher.
+- **Node.js**: Version 22.0.0 or higher.
 
 ## Install via NPM
 

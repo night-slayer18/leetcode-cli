@@ -73,6 +73,26 @@ describe('openInEditor', () => {
     expect(child.unref).toHaveBeenCalledOnce();
   });
 
+  it.each(['agy-ide', 'antigravity-ide', 'agy'])(
+    'launches %s with VS Code arguments',
+    async (editor) => {
+      const child = createChildProcess();
+      editorMock.mockReturnValueOnce(editor);
+      spawnMock.mockReturnValueOnce(child);
+
+      const opening = openInEditor('/tmp/solution.ts', '/tmp/leetcode');
+      child.emit('spawn');
+      await opening;
+
+      expect(spawnMock).toHaveBeenCalledWith(
+        editor,
+        ['-r', '/tmp/leetcode', '-g', '/tmp/solution.ts'],
+        { detached: true, stdio: 'ignore' }
+      );
+      expect(child.unref).toHaveBeenCalledOnce();
+    }
+  );
+
   it('uses the configured editor before EDITOR', async () => {
     const previousEditor = process.env.EDITOR;
     process.env.EDITOR = 'code';

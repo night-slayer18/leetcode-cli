@@ -33,7 +33,7 @@ Thank you for taking the time to contribute! This guide will help you get starte
 
 ## Development Setup
 
-**Requirements**: Node.js ≥ 20 and npm.
+**Requirements**: Node.js ≥ 22 and npm.
 
 ```bash
 # Install dependencies
