@@ -1,5 +1,23 @@
 # Release Notes
 
+## v3.6.2
+
+> **Release Date**: 2026-10-24
+> **Focus**: Fix `--no-open` configuration persistence, Antigravity IDE support, documentation requirements update, and dependency updates
+
+### 🐛 Bug Fixes
+
+#### Fix `--no-open` Flag Parsing & Persistence ([#63](https://github.com/night-slayer18/leetcode-cli/issues/63))
+
+Resolved an issue where `leetcode config --no-open` failed to save the auto-open setting:
+
+- **Commander `--no-*` option handling**: Commander.js parses `--no-open` as `options.open = false` rather than `options.noOpen`. Updated `configCommand` to properly resolve `open: false` to `noOpen: true`.
+- **Option pair registration**: Registered `--open` and `--no-open` as an explicit option pair across `config`, `pick`, `random`, and `contest` commands to prevent Commander from injecting implicit default values (`open: true`) when no flags are supplied.
+
+#### Documentation & Engine Requirements ([#62](https://github.com/night-slayer18/leetcode-cli/issues/62))
+
+- **Node.js 22+ requirement**: Updated `README.md`, `docs/installation.md`, and `CONTRIBUTING.md` to document the minimum supported version as Node.js >= 22.0.0 (required for native `WebSocket` support in `@supabase/realtime-js`).
+
 ## v3.6.1
 
 > **Release Date**: 2026-10-22
