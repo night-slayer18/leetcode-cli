@@ -1,5 +1,27 @@
 # Release Notes
 
+## v3.6.3
+
+> **Release Date**: 2026-11-15
+> **Focus**: Windows keychain fix, security audit clean-up, and improved error guidance
+
+### 🐛 Bug Fixes
+
+#### Fix Windows keychain error mis-classification ([#69](https://github.com/night-slayer18/leetcode-cli/issues/69))
+
+On Windows (PowerShell / CMD), `keytar` wraps the Windows Credential Manager via a native NAPI binding. When the credential store was inaccessible (restricted shell, corporate policy, or DPAPI unavailable), the error was mis-classified as `KEYCHAIN_ERROR`, surfacing the unhelpful _"Failed to access system keychain credentials."_ message with no actionable next steps.
+
+- Extended `classifyKeychainError()` with Windows Credential Manager error strings (`"Access is denied"`, `"The stub received bad data"`, `"Element not found"`, `"Could not load binding"`, `"napi"`, etc.) so they correctly map to `KEYCHAIN_UNAVAILABLE`.
+- Improved the `KEYCHAIN_UNAVAILABLE` message to include instructions for both the env-var and encrypted file-backend fallback paths.
+- Added 10 regression tests covering every Windows error pattern and a negative guard for genuinely unexpected failures.
+
+### 🔒 Security
+
+- **Zero vulnerabilities**: Added `overrides: { minimatch: "^11.0.8" }` to force all transitive consumers (`@typescript-eslint/*`, `eslint`) off the vulnerable `minimatch` range (`7.0.0 – 11.0.0`, [GHSA-g3hv-75wg-m249](https://github.com/advisories/GHSA-g3hv-75wg-m249)). `npm audit` now reports `0` vulnerabilities.
+- Fixed the `auto-audit.yml` workflow step that was spuriously failing when `npm audit fix` exited 1 due to unfixable semver-major vulnerabilities.
+
+---
+
 ## v3.6.2
 
 > **Release Date**: 2026-10-24
