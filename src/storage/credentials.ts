@@ -170,13 +170,28 @@ function classifyKeychainError(error: unknown): CredentialStatusReason {
   const message =
     error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
   const unavailablePatterns = [
+    // Generic / cross-platform
     'not available',
     'unsupported',
+    // Linux headless / D-Bus
     'cannot autolaunch',
     'dbus',
     'secret service',
     'keychain',
     'credential store',
+    // Windows Credential Manager – raised when the store is inaccessible or the
+    // native binding fails (e.g. in restricted shells, CI runners, or when the
+    // Windows Data Protection API is unavailable).
+    'the stub received bad data',
+    'access is denied',
+    'element not found',
+    'the target principal name is incorrect',
+    'no such interface supported',
+    'the system cannot find',
+    'failed to load',
+    'could not load',
+    'napi',
+    'binding',
   ];
   return unavailablePatterns.some((pattern) => message.includes(pattern))
     ? 'KEYCHAIN_UNAVAILABLE'
@@ -188,7 +203,12 @@ function explainReason(reason: CredentialStatusReason): string {
     case 'ENV_PARTIAL':
       return 'Both LEETCODE_SESSION and LEETCODE_CSRF_TOKEN must be set together.';
     case 'KEYCHAIN_UNAVAILABLE':
-      return 'System keychain is unavailable. In headless environments, use LEETCODE_SESSION and LEETCODE_CSRF_TOKEN.';
+      return (
+        'System keychain is unavailable on this platform or environment. ' +
+        'Set LEETCODECLI_CREDENTIAL_BACKEND=file and LEETCODECLI_MASTER_KEY=<secret> to use ' +
+        'encrypted file storage instead, or export LEETCODE_SESSION and LEETCODE_CSRF_TOKEN ' +
+        'directly as environment variables.'
+      );
     case 'KEYCHAIN_ERROR':
       return 'Failed to access system keychain credentials.';
     case 'FILE_MISSING_MASTER_KEY':

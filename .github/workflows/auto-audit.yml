@@ -58,8 +58,14 @@ jobs:
         run: echo "npm audit is clean. Skipping the rest of the workflow."
 
       # ── Run audit fix ──────────────────────────────────────────────────────
+      # `npm audit fix` exits 1 when unfixable (semver-major) vulnerabilities
+      # remain after the fix pass.  Those are reported by the later steps, so
+      # we don't want the job to hard-fail here — the "Check for file changes"
+      # step decides whether to open a PR, and the final `npm audit || true`
+      # emits a visible warning for anything that could not be auto-remediated.
       - name: Run npm audit fix
         if: steps.audit.outputs.found == 'true'
+        continue-on-error: true
         run: npm audit fix
 
       # ── Full CI verification ──────────────────────────────────────────────

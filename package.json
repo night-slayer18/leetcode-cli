@@ -1,6 +1,6 @@
 {
   "name": "@night-slayer18/leetcode-cli",
-  "version": "3.6.2",
+  "version": "3.6.3",
   "description": "A modern LeetCode CLI built with TypeScript",
   "type": "module",
   "main": "dist/index.js",
@@ -41,6 +41,9 @@
   ],
   "author": "night-slayer18",
   "license": "Apache-2.0",
+  "overrides": {
+    "minimatch": "^11.0.8"
+  },
   "dependencies": {
     "@supabase/supabase-js": "^2.90.1",
     "ansi-escapes": "^7.2.0",

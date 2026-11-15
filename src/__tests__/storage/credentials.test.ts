@@ -102,7 +102,7 @@ describe('credentials storage resolver', () => {
     expect(status.mode).toBe('keychain');
   });
 
-  it('should surface KEYCHAIN_UNAVAILABLE when keychain access fails', async () => {
+  it('should surface KEYCHAIN_UNAVAILABLE when keychain access fails (Linux/macOS)', async () => {
     const { credentials } = await loadCredentialsModule();
     keytarMock.getPassword.mockRejectedValueOnce(
       new Error('Cannot autolaunch D-Bus without X11 $DISPLAY')
@@ -110,6 +110,41 @@ describe('credentials storage resolver', () => {
 
     const status = await credentials.status();
     expect(status.reason).toBe('KEYCHAIN_UNAVAILABLE');
+    expect(status.hasCredentials).toBe(false);
+  });
+
+  it.each([
+    // Windows Credential Manager – restricted shell / corporate policy
+    ['Access is denied', 'access is denied'],
+    // Native NAPI binding failed to load (keytar prebuilt missing for the Node version)
+    ['Could not load the "keytar" native module', 'could not load'],
+    ['Failed to load binding', 'failed to load'],
+    // Windows RPC / COM errors surfaced by the credential manager
+    ['The stub received bad data', 'the stub received bad data'],
+    ['No such interface supported', 'no such interface supported'],
+    ['The target principal name is incorrect', 'the target principal name is incorrect'],
+    // Credential entry simply not accessible
+    ['Element not found', 'element not found'],
+    ['The system cannot find the file specified', 'the system cannot find'],
+    // Generic NAPI-level crash
+    ['napi_create_string_utf8 failed', 'napi'],
+  ])('should surface KEYCHAIN_UNAVAILABLE for Windows error: "%s"', async (errorMessage) => {
+    const { credentials } = await loadCredentialsModule();
+    keytarMock.getPassword.mockRejectedValueOnce(new Error(errorMessage));
+
+    const status = await credentials.status();
+    expect(status.reason).toBe('KEYCHAIN_UNAVAILABLE');
+    expect(status.hasCredentials).toBe(false);
+  });
+
+  it('should surface KEYCHAIN_ERROR only for truly unexpected keychain failures', async () => {
+    const { credentials } = await loadCredentialsModule();
+    keytarMock.getPassword.mockRejectedValueOnce(
+      new Error('Something completely unexpected went wrong')
+    );
+
+    const status = await credentials.status();
+    expect(status.reason).toBe('KEYCHAIN_ERROR');
     expect(status.hasCredentials).toBe(false);
   });
 
